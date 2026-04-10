@@ -1,4 +1,5 @@
 import io
+import logging
 import tempfile
 import zipfile
 from pathlib import Path
@@ -6,6 +7,8 @@ from fastapi import FastAPI, File, UploadFile, Form, HTTPException
 from fastapi.responses import Response
 from translator import translate, UnsupportedConsolePair
 from report import generate_report, ReportGenerationError
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Show File Translator Engine", version="1.0.0")
 
@@ -15,6 +18,13 @@ OUTPUT_FILENAMES = {
     "digico_sd": "translated.show",
     "yamaha_cl": "translated.cle",
 }
+
+MAX_UPLOAD_BYTES = 50 * 1024 * 1024  # 50 MB
+
+
+def _safe_header(value: str) -> str:
+    """Strip characters that would break HTTP header integrity."""
+    return value.replace("\r", "").replace("\n", "")
 
 
 @app.get("/health")
@@ -40,11 +50,20 @@ async def translate_file(
         raise HTTPException(status_code=400,
                             detail=f"Unsupported target console: {target_console}")
 
+    if file.size and file.size > MAX_UPLOAD_BYTES:
+        raise HTTPException(status_code=413, detail="Upload exceeds 50 MB limit")
+
     # Save uploaded file to a temp path
     suffix = Path(file.filename).suffix if file.filename else ""
     with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
-        tmp.write(await file.read())
         tmp_path = Path(tmp.name)
+        bytes_written = 0
+        while chunk := await file.read(65536):
+            bytes_written += len(chunk)
+            if bytes_written > MAX_UPLOAD_BYTES:
+                tmp_path.unlink(missing_ok=True)
+                raise HTTPException(status_code=413, detail="Upload exceeds 50 MB limit")
+            tmp.write(chunk)
 
     try:
         result = translate(
@@ -60,10 +79,11 @@ async def translate_file(
     except UnsupportedConsolePair as e:
         raise HTTPException(status_code=400, detail=str(e))
     except ReportGenerationError as e:
-        raise HTTPException(status_code=500, detail=f"Report generation failed: {e}")
+        logger.exception("Report generation failure")
+        raise HTTPException(status_code=500, detail="Report generation failed.")
     except Exception as e:
-        raise HTTPException(status_code=500,
-                            detail=f"Translation failed: {str(e)}")
+        logger.exception("Unexpected translation failure")
+        raise HTTPException(status_code=500, detail="An unexpected error occurred during translation.")
     finally:
         tmp_path.unlink(missing_ok=True)
 
@@ -79,7 +99,7 @@ async def translate_file(
         headers={
             "Content-Disposition": "attachment; filename=translation_bundle.zip",
             "X-Channel-Count": str(result.channel_count),
-            "X-Translated": ",".join(result.translated_parameters),
-            "X-Dropped": ",".join(result.dropped_parameters),
+            "X-Translated": _safe_header(",".join(result.translated_parameters)),
+            "X-Dropped": _safe_header(",".join(result.dropped_parameters)),
         },
     )
