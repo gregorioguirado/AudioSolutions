@@ -1055,7 +1055,7 @@ def write_digico_sd(show: ShowFile) -> bytes:
 cd engine && pytest tests/test_digico_writer.py -v
 ```
 
-Expected: `10 passed`
+Expected: `9 passed`
 
 - [ ] **Step 5: Commit**
 
