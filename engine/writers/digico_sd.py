@@ -91,4 +91,7 @@ def write_digico_sd(show: ShowFile) -> bytes:
     for channel in show.channels:
         channels_elem.append(_write_channel(channel))
 
+    if any(ch.muted for ch in show.channels):
+        show.dropped_parameters.append("muted_state")
+
     return etree.tostring(root, xml_declaration=True, encoding="UTF-8", pretty_print=True)

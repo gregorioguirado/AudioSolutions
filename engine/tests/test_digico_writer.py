@@ -2,7 +2,7 @@ import pytest
 from lxml import etree
 from parsers.yamaha_cl import parse_yamaha_cl
 from writers.digico_sd import write_digico_sd
-from models.universal import ChannelColor, EQBandType
+from models.universal import ChannelColor, EQBandType, ShowFile, Channel
 
 def test_write_returns_bytes(yamaha_cl5_fixture):
     show = parse_yamaha_cl(yamaha_cl5_fixture)
@@ -74,3 +74,33 @@ def test_write_compressor(yamaha_cl5_fixture):
     assert comp.findtext("Enabled") == "1"
     assert float(comp.findtext("Threshold")) == -15.0
     assert float(comp.findtext("MakeUp")) == 3.0
+
+def test_muted_channel_adds_dropped_parameter():
+    """When any channel has muted=True, write_digico_sd records 'muted_state' in dropped_parameters."""
+    muted_channel = Channel(
+        id=1,
+        name="SNARE",
+        color=ChannelColor.RED,
+        input_patch=1,
+        hpf_frequency=80.0,
+        hpf_enabled=False,
+        muted=True,
+    )
+    show = ShowFile(source_console="Yamaha CL5", channels=[muted_channel])
+    write_digico_sd(show)
+    assert "muted_state" in show.dropped_parameters
+
+def test_no_muted_channels_does_not_add_dropped_parameter():
+    """When no channels are muted, 'muted_state' is not added to dropped_parameters."""
+    unmuted_channel = Channel(
+        id=1,
+        name="KICK",
+        color=ChannelColor.BLUE,
+        input_patch=1,
+        hpf_frequency=60.0,
+        hpf_enabled=False,
+        muted=False,
+    )
+    show = ShowFile(source_console="Yamaha CL5", channels=[unmuted_channel])
+    write_digico_sd(show)
+    assert "muted_state" not in show.dropped_parameters
