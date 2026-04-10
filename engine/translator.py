@@ -1,0 +1,84 @@
+from dataclasses import dataclass, field
+from pathlib import Path
+
+from parsers.yamaha_cl import parse_yamaha_cl
+from parsers.digico_sd import parse_digico_sd
+from writers.digico_sd import write_digico_sd
+from writers.yamaha_cl import write_yamaha_cl
+from models.universal import ShowFile
+
+
+class UnsupportedConsolePair(Exception):
+    pass
+
+
+@dataclass
+class TranslationResult:
+    output_bytes: bytes
+    channel_count: int
+    translated_parameters: list[str] = field(default_factory=list)
+    approximated_parameters: list[str] = field(default_factory=list)
+    dropped_parameters: list[str] = field(default_factory=list)
+
+
+PARSERS = {
+    "yamaha_cl": parse_yamaha_cl,
+    "digico_sd": parse_digico_sd,
+}
+
+WRITERS = {
+    "digico_sd": write_digico_sd,
+    "yamaha_cl": write_yamaha_cl,
+}
+
+
+def _collect_translated_parameters(show: ShowFile) -> list[str]:
+    """Return a list of parameter types that were successfully parsed."""
+    params = ["channel_names", "channel_colors", "input_patch", "hpf"]
+    if any(ch.eq_bands for ch in show.channels):
+        params.append("eq_bands")
+    if any(ch.gate for ch in show.channels):
+        params.append("gate")
+    if any(ch.compressor for ch in show.channels):
+        params.append("compressor")
+    if any(ch.mix_bus_assignments for ch in show.channels):
+        params.append("mix_bus_routing")
+    if any(ch.vca_assignments for ch in show.channels):
+        params.append("vca_assignments")
+    return params
+
+
+def translate(
+    source_file: Path,
+    source_console: str,
+    target_console: str,
+) -> TranslationResult:
+    """
+    Parse source_file from source_console format, translate to target_console format.
+    Returns a TranslationResult with output bytes and translation metadata.
+    """
+    if source_console == target_console:
+        raise UnsupportedConsolePair(
+            f"Source and target console cannot be the same: {source_console}"
+        )
+
+    parser = PARSERS.get(source_console)
+    writer = WRITERS.get(target_console)
+
+    if parser is None or writer is None:
+        supported = ", ".join(PARSERS.keys())
+        raise UnsupportedConsolePair(
+            f"Unsupported console pair: {source_console} → {target_console}. "
+            f"Supported consoles: {supported}"
+        )
+
+    show = parser(source_file)
+    output_bytes = writer(show)
+
+    return TranslationResult(
+        output_bytes=output_bytes,
+        channel_count=len(show.channels),
+        translated_parameters=_collect_translated_parameters(show),
+        approximated_parameters=["eq_band_types", "compressor_ratio_mapping"],
+        dropped_parameters=show.dropped_parameters,
+    )
