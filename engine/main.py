@@ -55,6 +55,7 @@ async def translate_file(
 
     # Save uploaded file to a temp path
     suffix = Path(file.filename).suffix if file.filename else ""
+    tmp_path = None
     with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
         tmp_path = Path(tmp.name)
         bytes_written = 0
@@ -85,7 +86,8 @@ async def translate_file(
         logger.exception("Unexpected translation failure")
         raise HTTPException(status_code=500, detail="An unexpected error occurred during translation.")
     finally:
-        tmp_path.unlink(missing_ok=True)
+        if tmp_path is not None:
+            tmp_path.unlink(missing_ok=True)
 
     # Return output file + report as a ZIP bundle
     bundle = io.BytesIO()
