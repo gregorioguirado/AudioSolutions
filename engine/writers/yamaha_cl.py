@@ -39,7 +39,7 @@ def _write_channel(channel: Channel) -> etree._Element:
     _sub(ch_elem, "Name", channel.name)
     _sub(ch_elem, "Color", YAMAHA_COLOR_MAP.get(channel.color, "WHITE"))
     _sub(ch_elem, "Patch", str(channel.input_patch) if channel.input_patch else "0")
-    _sub(ch_elem, "On", "true")
+    _sub(ch_elem, "On", "false" if channel.muted else "true")
 
     hpf = etree.SubElement(ch_elem, "HPF")
     _sub(hpf, "On", "true" if channel.hpf_enabled else "false")
