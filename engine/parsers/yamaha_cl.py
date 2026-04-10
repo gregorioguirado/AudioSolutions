@@ -50,13 +50,22 @@ def _get_bool(element, xpath: str, default: bool = False) -> bool:
     return default
 
 
+def _safe_int(value: str, default: int = 0) -> int:
+    """Convert a string to int, returning default if conversion fails."""
+    try:
+        return int(value)
+    except (ValueError, TypeError):
+        return default
+
+
 def _parse_channel(ch_elem) -> Channel:
-    ch_id = int(ch_elem.get("channelNo", "0"))
+    ch_id = _safe_int(ch_elem.get("channelNo", "0"))
     name = _get_text(ch_elem, "Name")
     color_str = _get_text(ch_elem, "Color", "WHITE").upper()
     color = YAMAHA_COLOR_MAP.get(color_str, ChannelColor.WHITE)
     input_patch_str = _get_text(ch_elem, "Patch")
     input_patch = int(input_patch_str) if input_patch_str.isdigit() else None
+    muted = not _get_bool(ch_elem, "On", True)
 
     hpf_elem = ch_elem.find("HPF")
     hpf_enabled = _get_bool(hpf_elem, "On") if hpf_elem is not None else False
@@ -103,20 +112,21 @@ def _parse_channel(ch_elem) -> Channel:
     if sends_elem is not None:
         for mix_elem in sends_elem.findall("Mix"):
             if _get_bool(mix_elem, "On", False):
-                mix_buses.append(int(mix_elem.get("num", "0")))
+                mix_buses.append(_safe_int(mix_elem.get("num", "0")))
 
     vcas: list[int] = []
     vca_elem = ch_elem.find("VCA")
     if vca_elem is not None:
         for assign_elem in vca_elem.findall("Assign"):
             if (assign_elem.text or "").strip().lower() == "true":
-                vcas.append(int(assign_elem.get("num", "0")))
+                vcas.append(_safe_int(assign_elem.get("num", "0")))
 
     return Channel(
         id=ch_id,
         name=name,
         color=color,
         input_patch=input_patch,
+        muted=muted,
         hpf_frequency=hpf_frequency,
         hpf_enabled=hpf_enabled,
         eq_bands=eq_bands,

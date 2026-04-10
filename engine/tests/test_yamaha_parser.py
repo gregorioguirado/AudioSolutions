@@ -71,3 +71,9 @@ def test_parse_vca_assignments(yamaha_cl5_fixture):
     result = parse_yamaha_cl(yamaha_cl5_fixture)
     kick = result.channels[0]
     assert 1 in kick.vca_assignments
+
+def test_parse_muted(yamaha_cl5_fixture):
+    result = parse_yamaha_cl(yamaha_cl5_fixture)
+    # Both channels have <On>true</On>, meaning active (not muted)
+    assert result.channels[0].muted is False
+    assert result.channels[1].muted is False
