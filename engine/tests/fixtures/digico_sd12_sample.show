@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Show ConsoleType="SD12" SoftwareVersion="B179">
+  <Channels>
+    <Channel Number="1">
+      <Name>KICK</Name>
+      <Colour>1</Colour>
+      <Input>1</Input>
+      <HPF>
+        <Enabled>1</Enabled>
+        <Frequency>80.0</Frequency>
+      </HPF>
+      <EQ>
+        <Band Number="1">
+          <Type>PEQ</Type>
+          <Frequency>100.0</Frequency>
+          <Gain>3.0</Gain>
+          <Q>1.4</Q>
+          <Enabled>1</Enabled>
+        </Band>
+        <Band Number="2">
+          <Type>PEQ</Type>
+          <Frequency>5000.0</Frequency>
+          <Gain>-2.0</Gain>
+          <Q>2.0</Q>
+          <Enabled>1</Enabled>
+        </Band>
+      </EQ>
+      <Gate>
+        <Enabled>1</Enabled>
+        <Threshold>-40.0</Threshold>
+        <Attack>5.0</Attack>
+        <Hold>50.0</Hold>
+        <Release>200.0</Release>
+      </Gate>
+      <Compressor>
+        <Enabled>1</Enabled>
+        <Threshold>-15.0</Threshold>
+        <Ratio>4.0</Ratio>
+        <Attack>5.0</Attack>
+        <Release>100.0</Release>
+        <MakeUp>3.0</MakeUp>
+      </Compressor>
+      <Busses>
+        <Bus Number="1" Enabled="1"/>
+        <Bus Number="2" Enabled="0"/>
+      </Busses>
+      <VCAs>
+        <VCA Number="1" Enabled="1"/>
+      </VCAs>
+    </Channel>
+    <Channel Number="2">
+      <Name>SNARE</Name>
+      <Colour>2</Colour>
+      <Input>2</Input>
+      <HPF>
+        <Enabled>1</Enabled>
+        <Frequency>120.0</Frequency>
+      </HPF>
+      <EQ/>
+      <Gate>
+        <Enabled>0</Enabled>
+        <Threshold>-40.0</Threshold>
+        <Attack>5.0</Attack>
+        <Hold>50.0</Hold>
+        <Release>200.0</Release>
+      </Gate>
+      <Compressor>
+        <Enabled>0</Enabled>
+        <Threshold>-10.0</Threshold>
+        <Ratio>2.0</Ratio>
+        <Attack>5.0</Attack>
+        <Release>100.0</Release>
+        <MakeUp>0.0</MakeUp>
+      </Compressor>
+      <Busses>
+        <Bus Number="1" Enabled="1"/>
+      </Busses>
+      <VCAs/>
+    </Channel>
+  </Channels>
+</Show>
