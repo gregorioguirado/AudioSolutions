@@ -64,7 +64,7 @@ def _parse_channel(ch_elem) -> Channel:
     color_str = _get_text(ch_elem, "Color", "WHITE").upper()
     color = YAMAHA_COLOR_MAP.get(color_str, ChannelColor.WHITE)
     input_patch_str = _get_text(ch_elem, "Patch")
-    input_patch = int(input_patch_str) if input_patch_str.isdigit() else None
+    input_patch = int(input_patch_str) if input_patch_str.isdigit() and input_patch_str != "0" else None
     muted = not _get_bool(ch_elem, "On", True)
 
     hpf_elem = ch_elem.find("HPF")
