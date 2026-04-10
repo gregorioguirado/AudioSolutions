@@ -1,8 +1,11 @@
 import pytest
+from pathlib import Path
 from lxml import etree
 from parsers.yamaha_cl import parse_yamaha_cl
 from writers.digico_sd import write_digico_sd
+from writers.yamaha_cl import write_yamaha_cl
 from models.universal import ChannelColor, EQBandType, ShowFile, Channel
+from translator import translate
 
 def test_write_returns_bytes(yamaha_cl5_fixture):
     show = parse_yamaha_cl(yamaha_cl5_fixture)
@@ -75,8 +78,8 @@ def test_write_compressor(yamaha_cl5_fixture):
     assert float(comp.findtext("Threshold")) == -15.0
     assert float(comp.findtext("MakeUp")) == 3.0
 
-def test_muted_channel_adds_dropped_parameter():
-    """When any channel has muted=True, write_digico_sd records 'muted_state' in dropped_parameters."""
+def test_muted_channel_adds_dropped_parameter(tmp_path):
+    """When any channel has muted=True, translate() records 'muted_state' in dropped_parameters for digico_sd target."""
     muted_channel = Channel(
         id=1,
         name="SNARE",
@@ -87,10 +90,16 @@ def test_muted_channel_adds_dropped_parameter():
         muted=True,
     )
     show = ShowFile(source_console="Yamaha CL5", channels=[muted_channel])
-    write_digico_sd(show)
-    assert "muted_state" in show.dropped_parameters
+    source_file = tmp_path / "muted.cle"
+    source_file.write_bytes(write_yamaha_cl(show))
+    result = translate(
+        source_file=source_file,
+        source_console="yamaha_cl",
+        target_console="digico_sd",
+    )
+    assert "muted_state" in result.dropped_parameters
 
-def test_no_muted_channels_does_not_add_dropped_parameter():
+def test_no_muted_channels_does_not_add_dropped_parameter(tmp_path):
     """When no channels are muted, 'muted_state' is not added to dropped_parameters."""
     unmuted_channel = Channel(
         id=1,
@@ -102,5 +111,11 @@ def test_no_muted_channels_does_not_add_dropped_parameter():
         muted=False,
     )
     show = ShowFile(source_console="Yamaha CL5", channels=[unmuted_channel])
-    write_digico_sd(show)
-    assert "muted_state" not in show.dropped_parameters
+    source_file = tmp_path / "unmuted.cle"
+    source_file.write_bytes(write_yamaha_cl(show))
+    result = translate(
+        source_file=source_file,
+        source_console="yamaha_cl",
+        target_console="digico_sd",
+    )
+    assert "muted_state" not in result.dropped_parameters

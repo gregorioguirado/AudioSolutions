@@ -34,12 +34,14 @@ WRITERS = {
 
 def _collect_translated_parameters(show: ShowFile) -> list[str]:
     """Return a list of parameter types that were successfully parsed."""
-    params = ["channel_names", "channel_colors", "input_patch", "hpf"]
+    params = ["channel_names", "channel_colors", "hpf"]
+    if any(ch.input_patch is not None for ch in show.channels):
+        params.append("input_patch")
     if any(ch.eq_bands for ch in show.channels):
         params.append("eq_bands")
-    if any(ch.gate for ch in show.channels):
+    if any(ch.gate and ch.gate.enabled for ch in show.channels):
         params.append("gate")
-    if any(ch.compressor for ch in show.channels):
+    if any(ch.compressor and ch.compressor.enabled for ch in show.channels):
         params.append("compressor")
     if any(ch.mix_bus_assignments for ch in show.channels):
         params.append("mix_bus_routing")
@@ -75,10 +77,20 @@ def translate(
     show = parser(source_file)
     output_bytes = writer(show)
 
+    # DiGiCo format cannot represent channel mute state
+    if target_console == "digico_sd" and any(ch.muted for ch in show.channels):
+        show.dropped_parameters.append("muted_state")
+
+    approximated = []
+    if any(ch.eq_bands for ch in show.channels):
+        approximated.append("eq_band_types")
+    if any(ch.compressor and ch.compressor.enabled for ch in show.channels):
+        approximated.append("compressor_ratio_mapping")
+
     return TranslationResult(
         output_bytes=output_bytes,
         channel_count=len(show.channels),
         translated_parameters=_collect_translated_parameters(show),
-        approximated_parameters=["eq_band_types", "compressor_ratio_mapping"],
+        approximated_parameters=approximated,
         dropped_parameters=show.dropped_parameters,
     )
