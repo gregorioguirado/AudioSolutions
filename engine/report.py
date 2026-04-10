@@ -6,6 +6,24 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, Tabl
 from reportlab.lib.units import cm
 from translator import TranslationResult
 
+
+class ReportGenerationError(Exception):
+    pass
+
+
+_ACRONYMS = {"EQ", "HPF", "LPF", "VCA", "DSP", "MCA", "LCA", "RTA", "RMS", "PFL"}
+
+
+def _format_parameter_name(s: str) -> str:
+    """Format a parameter name string for display.
+
+    Replaces underscores with spaces and title-cases each word,
+    except known audio acronyms which are rendered in full uppercase.
+    """
+    words = s.replace("_", " ").split()
+    return " ".join(w.upper() if w.upper() in _ACRONYMS else w.title() for w in words)
+
+
 CONSOLE_DISPLAY_NAMES = {
     "yamaha_cl": "Yamaha CL/QL",
     "digico_sd": "DiGiCo SD/Quantum",
@@ -59,12 +77,15 @@ def generate_report(
             story.append(Paragraph("None", styles["Normal"]))
         else:
             for item in items:
-                story.append(Paragraph(f"- {item.replace('_', ' ').title()}", styles["Normal"]))
+                story.append(Paragraph(f"- {_format_parameter_name(item)}", styles["Normal"]))
         story.append(Spacer(1, 0.3*cm))
 
     section("Successfully Translated", result.translated_parameters)
     section("Approximated (verify on desk)", result.approximated_parameters)
     section("Dropped (not available on target)", result.dropped_parameters)
 
-    doc.build(story)
+    try:
+        doc.build(story)
+    except Exception as e:
+        raise ReportGenerationError(f"Failed to build PDF report: {e}") from e
     return buf.getvalue()

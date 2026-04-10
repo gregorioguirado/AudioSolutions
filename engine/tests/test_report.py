@@ -30,3 +30,36 @@ def test_generate_report_is_pdf():
     )
     # PDF files start with %PDF
     assert pdf_bytes[:4] == b"%PDF"
+
+
+def test_generate_report_with_empty_sections():
+    result = TranslationResult(
+        output_bytes=b"fake",
+        channel_count=2,
+        translated_parameters=["channel_names"],
+        approximated_parameters=[],
+        dropped_parameters=[],
+    )
+    pdf_bytes = generate_report(
+        result=result,
+        source_console="yamaha_cl",
+        target_console="digico_sd",
+    )
+    assert pdf_bytes[:4] == b"%PDF"
+
+
+def test_generate_report_with_unknown_console():
+    result = TranslationResult(
+        output_bytes=b"fake",
+        channel_count=1,
+        translated_parameters=[],
+        approximated_parameters=[],
+        dropped_parameters=[],
+    )
+    # Should not raise; falls back to raw key string
+    pdf_bytes = generate_report(
+        result=result,
+        source_console="ssl_live",
+        target_console="allen_heath_dlive",
+    )
+    assert pdf_bytes[:4] == b"%PDF"
