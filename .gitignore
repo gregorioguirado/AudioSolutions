@@ -1,0 +1,20 @@
+# Brainstorm working files
+.superpowers/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+
+# Temp / local
+.tmp/
+.env
+.env.local
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db
