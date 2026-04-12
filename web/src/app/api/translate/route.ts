@@ -33,18 +33,24 @@ export async function POST(request: Request) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("free_used")
-      .eq("id", user.id)
-      .single();
+  const adminEmails = (process.env.ADMIN_EMAILS ?? "").split(",").map(e => e.trim().toLowerCase());
+  const isAdmin = user ? adminEmails.includes(user.email?.toLowerCase() ?? "") : false;
 
-    if (profile?.free_used) {
-      return NextResponse.json(
-        { error: "payments_required", message: "Coming soon — payments launching soon." },
-        { status: 402 }
-      );
+  if (user) {
+
+    if (!isAdmin) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("free_used")
+        .eq("id", user.id)
+        .single();
+
+      if (profile?.free_used) {
+        return NextResponse.json(
+          { error: "payments_required", message: "Coming soon — payments launching soon." },
+          { status: 402 }
+        );
+      }
     }
   }
 
@@ -92,7 +98,9 @@ export async function POST(request: Request) {
       status: "complete",
     });
 
-    await supabase.from("profiles").update({ free_used: true }).eq("id", user.id);
+    if (!isAdmin) {
+      await supabase.from("profiles").update({ free_used: true }).eq("id", user.id);
+    }
 
     return NextResponse.json({
       translationId,
