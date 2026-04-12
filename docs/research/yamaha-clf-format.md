@@ -145,7 +145,28 @@ EQ frequency verified across all 4 bands (125→200, 1000→800, 4000→3000, 10
 |---|---|---|
 | +0x09C6 | Pan | 1B/ch, signed: -63 = hard L, 0 = center, +63 = hard R |
 | +0x0A26 | Fader level | 2B/ch big-endian, 0 = -inf, 959 (0x03BF) = 0dB |
-| +0x53FE | Channel OFF flag | 1B/ch (0=on, 1=off) — exact stride TBD |
+| +0x53FE | Channel OFF flag | 1B/ch (0=on, 1=off) |
+
+### Delay
+
+| Offset | Parameter | Encoding |
+|---|---|---|
+| +0x0AE6 | Delay enable | 1B/ch, 0=off, 1=on |
+| +0x0B02 | Delay time | 2B/ch big-endian, `time_ms = value / 100` |
+
+Verified: 996 / 100 = 9.96 ms.
+
+### HA / D.GAIN / 48V / Phase / Direct Out
+
+| Offset | Parameter | Encoding |
+|---|---|---|
+| +0x0822 | Enable flag | 1B/ch (0=off, 1=on) — related to direct out or HA state |
+| +0x082E | Bitfield | 1B/ch, possibly `bit0 = 48V, bit1 = phase` (val=3 = both ON) |
+| +0x094E | Direct out enable | 1B/ch (0=off, 1=on) |
+| +0x0C8D | D.GAIN | 1B/ch, `gain_dB = value / 10` (val 100 = +10.0 dB) |
+| +0x7B14 | HA analog gain | 1B/ch, `gain_dB = value - 6` (val 26 = +20 dB, default 0 = -6 dB) |
+| +0x7D34 | Enable flag | 1B/ch (TBD — related to direct out post/pre) |
+| +0x7D74 | HA gain (duplicate?) | 1B/ch, same value as +0x7B14 |
 
 ### DCA Assignments
 
@@ -155,6 +176,32 @@ EQ frequency verified across all 4 bands (125→200, 1000→800, 4000→3000, 10
 
 DCA 1 at +0x2720, DCA 2 at +0x272C, DCA 3 at +0x2738, etc. (stride = 12 bytes).
 Value 0 = not assigned, 1 = assigned.
+
+### Mute Groups
+
+| Offset | Parameter | Encoding |
+|---|---|---|
+| +0x26C0 | Mute Group 1-8 assignments | 12-byte stride per group, 1B per channel |
+
+MG1 at +0x26C0, MG2 at +0x26CC, MG3 at +0x26D8, etc. (stride = 12 bytes).
+Value 0 = not assigned, 1 = assigned.
+
+### Mix Bus Sends (24 mixes)
+
+Each mix bus = 216 bytes (0xD8):
+- **Bytes 0-11:** Other flags/data
+- **Bytes 12-23:** PRE/POST bitfield (12 bytes = 96 bits, 1 per channel; bit=1=PRE, bit=0=POST)
+- **Bytes 24-215:** Send levels (96 × 2 bytes big-endian, Yamaha level curve: 0=-inf, 823=0dB)
+
+| | |
+|---|---|
+| Mix 1 sends start | scene +0x28F4 |
+| Mix 1 PRE/POST | scene +0x28E8 (12 bytes) |
+| Stride per mix | 216 bytes |
+| Total mixes | 24 (Mix 1-24) |
+| Total block size | 5184 bytes |
+
+Ch1 = bit 0 of the first PRE/POST byte. Ch1 send level = first 2 bytes of the send table.
 
 ---
 
@@ -182,6 +229,16 @@ Value 0 = not assigned, 1 = assigned.
 | Gate/Comp attack | Direct value in ms |
 | Gate hold | `2.33 × 2^((val - 200) / 3.60)` ms |
 | Comp release | `46.5 × 2^(val / 16.1)` ms |
+| Channel delay | 2B BE, `time_ms = value / 100` |
+
+### Other scales
+
+| Context | Formula |
+|---|---|
+| HA analog gain | `gain_dB = value - 6` (default 0 = -6 dB) |
+| D.GAIN | `gain_dB = value / 10` |
+| Comp ratio | Approximately `ratio = 2^(val / 4.4)` |
+| Pan | Signed byte: -63 = hard L, 0 = center, +63 = hard R |
 
 ---
 
@@ -193,3 +250,23 @@ Tested against real show files (Example 1/2 = Brazilian theater production, 44 s
 - Gate enable: 2/72 channels ✓
 - Channel names: "1 anna", "3 breno", "10 grego", "41 viola", "43 banjo" ✓
 - Scene names: "Sesc pinlheiros", "master FLAT", "Manifesto", "baile cobras" ✓
+
+---
+
+## Remaining Gaps
+
+### Minor (won't block parser)
+- EQ Q values for bands 3 and 4 (bands 1-2 mapped at +0x95F8 and +0x9658)
+- EQ band type/enable flags (table 0 of each band)
+- Channel color full palette mapping (index→color name)
+- Gate decay exact encoding formula (log scale, values known)
+- Gate range exact encoding formula (values known)
+- +0x7B14 vs +0x7D74: determine which is HA gain vs duplicate/other param
+- +0x082E bitfield: confirm bit assignments for 48V and phase
+- Recall safe and mute safe flags (not yet investigated)
+
+### Not investigated
+- Output patching (Dante/OMNI routing beyond input patch)
+- Insert assignments
+- Stereo/Mono channel linking
+- Scene recall safe filters
