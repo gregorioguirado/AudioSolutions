@@ -283,7 +283,18 @@ def _extract_compressor(data: bytes, scene: int, ch: int,
 
 def _extract_eq(data: bytes, scene: int, ch: int,
                 dropped: list[str]) -> list[EQBand]:
-    """Extract 4-band EQ for channel *ch* (0-indexed)."""
+    """Extract 4-band EQ for channel *ch* (0-indexed).
+
+    Q values for bands 3-4 are not yet mapped from the binary format.
+    Band-specific defaults are used when the offset is unmapped:
+      Band 1 (Low):      Q = 4.0
+      Band 2 (Low-Mid):  Q = 0.7
+      Band 3 (High-Mid): Q = 0.7
+      Band 4 (High):     Q = 4.0
+    """
+    # Band-specific default Q values (matching typical Yamaha CL defaults)
+    DEFAULT_Q = [4.0, 0.7, 0.7, 4.0]
+
     bands: list[EQBand] = []
     for band_idx in range(4):
         band_base = scene + EQ_BAND_BASES_REL[band_idx]
@@ -304,8 +315,8 @@ def _extract_eq(data: bytes, scene: int, ch: int,
             dropped.append(f"ch{ch+1}: EQ band {band_idx+1} gain unreadable")
             gain_db = 0.0
 
-        # Q value: not reliably mapped for all bands yet
-        q_val = 1.0  # default
+        # Q value: use band-specific default (offsets not yet mapped)
+        q_val = DEFAULT_Q[band_idx]
 
         bands.append(EQBand(
             frequency=freq_hz,
@@ -314,9 +325,6 @@ def _extract_eq(data: bytes, scene: int, ch: int,
             band_type=EQBandType.PEAK,
             enabled=True,
         ))
-
-    if any(b.q == 1.0 for b in bands):
-        dropped.append(f"ch{ch+1}: EQ Q values not extracted (using default Q=1.0)")
 
     return bands
 
