@@ -1,9 +1,19 @@
+import HeroDropZone from "@/components/HeroDropZone";
+import HowItWorks from "@/components/HowItWorks";
+import WhatTranslates from "@/components/WhatTranslates";
+import PricingTeaser from "@/components/PricingTeaser";
+import FAQ from "@/components/FAQ";
+import Footer from "@/components/Footer";
+
 export default function Home() {
   return (
-    <main className="flex min-h-screen items-center justify-center">
-      <h1 className="text-4xl font-bold uppercase tracking-tight">
-        ★ Showfier
-      </h1>
+    <main>
+      <HeroDropZone />
+      <HowItWorks />
+      <WhatTranslates />
+      <PricingTeaser />
+      <FAQ />
+      <Footer />
     </main>
   );
 }
