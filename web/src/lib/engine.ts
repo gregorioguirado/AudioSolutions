@@ -26,7 +26,7 @@ export async function callEngine(
   if (!engineUrl) throw new Error("ENGINE_URL not configured");
 
   const formData = new FormData();
-  formData.append("file", new Blob([file]), filename);
+  formData.append("file", new Blob([new Uint8Array(file)]), filename);
   formData.append("source_console", sourceConsole);
   formData.append("target_console", targetConsole);
 
