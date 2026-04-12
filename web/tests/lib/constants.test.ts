@@ -10,6 +10,10 @@ describe("detectConsole", () => {
     expect(detectConsole("my_show.CLE")).toBe("yamaha_cl");
   });
 
+  it("detects .clf as yamaha_cl", () => {
+    expect(detectConsole("DOMCAS11.4.CLF")).toBe("yamaha_cl");
+  });
+
   it("detects .show as digico_sd", () => {
     expect(detectConsole("festival.show")).toBe("digico_sd");
   });

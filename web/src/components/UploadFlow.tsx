@@ -126,7 +126,7 @@ export default function UploadFlow() {
             <p className="mt-1 text-xs text-muted">or click to browse</p>
             <input
               type="file"
-              accept=".cle,.show"
+              accept=".cle,.clf,.show"
               onChange={handleFileInput}
               className="absolute inset-0 cursor-pointer opacity-0"
             />

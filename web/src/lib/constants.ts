@@ -7,6 +7,7 @@ export type ConsoleId = (typeof CONSOLES)[number]["id"];
 
 const EXTENSION_MAP: Record<string, ConsoleId> = {
   ".cle": "yamaha_cl",
+  ".clf": "yamaha_cl",
   ".show": "digico_sd",
 };
 

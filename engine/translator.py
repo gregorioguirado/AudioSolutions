@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from parsers.yamaha_cl import parse_yamaha_cl
+from parsers.yamaha_cl_binary import parse_yamaha_cl_binary
 from parsers.digico_sd import parse_digico_sd
 from writers.digico_sd import write_digico_sd
 from writers.yamaha_cl import write_yamaha_cl
@@ -21,8 +22,26 @@ class TranslationResult:
     dropped_parameters: list[str] = field(default_factory=list)
 
 
+def _parse_yamaha_auto(filepath: Path) -> ShowFile:
+    """Auto-detect Yamaha file format and use the right parser.
+
+    .CLF/.CLE (binary) = real console/editor files -> binary parser
+    .cle (ZIP+XML) = synthetic test fixtures -> XML parser
+    """
+    with open(filepath, "rb") as f:
+        header = f.read(16)
+
+    # Binary CLF: starts with 01 00 00 00
+    # Binary CLE: starts with 00 00 00 03 (UTF-16-ish text header)
+    # ZIP (synthetic .cle): starts with PK (50 4B)
+    if header[:2] == b"PK":
+        return parse_yamaha_cl(filepath)
+    else:
+        return parse_yamaha_cl_binary(filepath)
+
+
 PARSERS = {
-    "yamaha_cl": parse_yamaha_cl,
+    "yamaha_cl": _parse_yamaha_auto,
     "digico_sd": parse_digico_sd,
 }
 
