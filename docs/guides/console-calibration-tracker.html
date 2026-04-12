@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Showfier - Console Calibration Tracker</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0a0a0a;
+    color: #e0e0e0;
+    font-family: 'Courier New', Courier, monospace;
+    padding: 24px;
+    min-height: 100vh;
+  }
+
+  h1 {
+    color: #ffde00;
+    font-size: 1.6rem;
+    margin-bottom: 4px;
+    letter-spacing: 1px;
+  }
+
+  .subtitle {
+    color: #888;
+    font-size: 0.85rem;
+    margin-bottom: 24px;
+  }
+
+  /* Overall progress */
+  .overall-progress {
+    background: #141414;
+    border: 1px solid #222;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 28px;
+  }
+
+  .overall-progress .label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+  }
+
+  .overall-progress .label span:first-child { color: #ffde00; }
+  .overall-progress .label span:last-child { color: #aaa; }
+
+  .progress-bar-outer {
+    background: #1a1a1a;
+    border-radius: 6px;
+    height: 18px;
+    overflow: hidden;
+    border: 1px solid #333;
+  }
+
+  .progress-bar-inner {
+    background: #ffde00;
+    height: 100%;
+    border-radius: 5px;
+    transition: width 0.3s ease;
+    min-width: 0;
+  }
+
+  /* Grid of cards */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+    gap: 20px;
+  }
+
+  .card {
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 10px;
+    padding: 20px;
+    transition: border-color 0.2s;
+  }
+
+  .card:hover { border-color: #ffde00; }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+
+  .card-header h2 {
+    color: #ffde00;
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+
+  .card-header .count {
+    color: #888;
+    font-size: 0.8rem;
+  }
+
+  .card .progress-bar-outer {
+    height: 10px;
+    margin-bottom: 16px;
+  }
+
+  /* Checklist */
+  .checklist { list-style: none; }
+
+  .checklist li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 0;
+    font-size: 0.85rem;
+    border-bottom: 1px solid #1a1a1a;
+  }
+
+  .checklist li:last-child { border-bottom: none; }
+
+  .checklist input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    border: 2px solid #444;
+    border-radius: 3px;
+    background: transparent;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .checklist input[type="checkbox"]:checked {
+    background: #ffde00;
+    border-color: #ffde00;
+  }
+
+  .checklist input[type="checkbox"]:checked::after {
+    content: '\2713';
+    position: absolute;
+    top: -2px;
+    left: 1px;
+    font-size: 13px;
+    color: #0a0a0a;
+    font-weight: bold;
+  }
+
+  .checklist label { cursor: pointer; flex: 1; }
+  .checklist li.checked label { color: #666; text-decoration: line-through; }
+
+  /* Analysis result field */
+  .analysis-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 0;
+    font-size: 0.85rem;
+    border-bottom: 1px solid #1a1a1a;
+  }
+
+  .analysis-row label { min-width: 120px; color: #aaa; }
+
+  .analysis-row select {
+    background: #1a1a1a;
+    color: #e0e0e0;
+    border: 1px solid #333;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-family: inherit;
+    font-size: 0.8rem;
+    flex: 1;
+    cursor: pointer;
+  }
+
+  .analysis-row select:focus { outline: 1px solid #ffde00; border-color: #ffde00; }
+
+  .analysis-row input[type="text"] {
+    background: #1a1a1a;
+    color: #e0e0e0;
+    border: 1px solid #333;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-family: inherit;
+    font-size: 0.8rem;
+    flex: 1;
+  }
+
+  .analysis-row input[type="text"]:focus { outline: 1px solid #ffde00; border-color: #ffde00; }
+
+  /* Notes textarea */
+  .notes-label {
+    display: block;
+    color: #888;
+    font-size: 0.8rem;
+    margin-top: 14px;
+    margin-bottom: 4px;
+  }
+
+  .notes-area {
+    width: 100%;
+    min-height: 60px;
+    background: #1a1a1a;
+    color: #e0e0e0;
+    border: 1px solid #333;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-family: inherit;
+    font-size: 0.8rem;
+    resize: vertical;
+  }
+
+  .notes-area:focus { outline: 1px solid #ffde00; border-color: #ffde00; }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    color: #444;
+    font-size: 0.7rem;
+    margin-top: 32px;
+    padding-top: 16px;
+    border-top: 1px solid #1a1a1a;
+  }
+
+  .reset-btn {
+    background: transparent;
+    color: #666;
+    border: 1px solid #333;
+    border-radius: 4px;
+    padding: 4px 12px;
+    font-family: inherit;
+    font-size: 0.75rem;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+
+  .reset-btn:hover { color: #ff4444; border-color: #ff4444; }
+</style>
+</head>
+<body>
+
+<h1>SHOWFIER // Console Calibration Tracker</h1>
+<p class="subtitle">Track progress across all console families for the Show File Universal Translator</p>
+
+<div class="overall-progress" id="overall-progress">
+  <div class="label">
+    <span>Overall Progress</span>
+    <span id="overall-count">0 / 72</span>
+  </div>
+  <div class="progress-bar-outer">
+    <div class="progress-bar-inner" id="overall-bar" style="width: 0%"></div>
+  </div>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div class="footer">
+  Showfier Console Calibration Tracker -- data saved in localStorage
+  <br>
+  <button class="reset-btn" onclick="resetAll()">Reset All Progress</button>
+</div>
+
+<script>
+const CONSOLES = [
+  { id: 'yamaha-clql', name: 'Yamaha CL/QL', defaults: {
+    'step-0': true, 'step-1': true, 'step-3': true, 'step-4': true,
+    'step-5': true, 'step-6': true, 'step-7': true, 'step-8': true,
+    'step-9': true, 'step-10': true,
+    'analysis-result': 'readable',
+    'notes': 'Reference implementation. CL Editor .CLE / console .CLF format fully mapped. Q values stored far from EQ data. Frequencies use semitone scale.'
+  }},
+  { id: 'yamaha-tf', name: 'Yamaha TF' },
+  { id: 'yamaha-dm7', name: 'Yamaha DM7' },
+  { id: 'yamaha-rivage', name: 'Yamaha RIVAGE PM' },
+  { id: 'digico-sd', name: 'DiGiCo SD/Quantum' },
+  { id: 'ah-dlive', name: 'A&H dLive/Avantis' },
+];
+
+const STEPS = [
+  { key: 'step-0', label: 'Empty baseline uploaded' },
+  { key: 'step-1', label: 'File analyzed by agent' },
+  { key: 'step-analysis', label: null, type: 'analysis' },
+  { key: 'step-3', label: 'Calibration: HPF + EQ' },
+  { key: 'step-4', label: 'Calibration: Dynamics' },
+  { key: 'step-5', label: 'Calibration: Fader/Pan/Mute/DCA' },
+  { key: 'step-6', label: 'Calibration: Mix Sends' },
+  { key: 'step-7', label: 'Calibration: Mute Groups + Delay' },
+  { key: 'step-8', label: 'Calibration: Preamp' },
+  { key: 'step-9', label: 'Parser built' },
+  { key: 'step-10', label: 'Parser tested against real show file' },
+  { key: 'step-11', label: 'Writer built' },
+];
+
+const TOTAL_CHECKBOXES = STEPS.filter(s => s.type !== 'analysis').length;
+const STORAGE_KEY = 'showfier-calibration-tracker';
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch { return {}; }
+}
+
+function saveState(state) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function getConsoleState(state, consoleId) {
+  if (!state[consoleId]) state[consoleId] = {};
+  return state[consoleId];
+}
+
+function countChecked(cState) {
+  let count = 0;
+  STEPS.forEach(step => {
+    if (step.type === 'analysis') return;
+    if (cState[step.key]) count++;
+  });
+  return count;
+}
+
+function updateOverall(state) {
+  let total = 0;
+  CONSOLES.forEach(c => {
+    const cs = state[c.id] || {};
+    total += countChecked(cs);
+  });
+  const max = CONSOLES.length * TOTAL_CHECKBOXES;
+  document.getElementById('overall-count').textContent = total + ' / ' + max;
+  document.getElementById('overall-bar').style.width = (max > 0 ? (total / max * 100) : 0) + '%';
+}
+
+function updateCardProgress(consoleId, state) {
+  const cs = state[consoleId] || {};
+  const checked = countChecked(cs);
+  const countEl = document.getElementById('count-' + consoleId);
+  const barEl = document.getElementById('bar-' + consoleId);
+  if (countEl) countEl.textContent = checked + ' / ' + TOTAL_CHECKBOXES;
+  if (barEl) barEl.style.width = (TOTAL_CHECKBOXES > 0 ? (checked / TOTAL_CHECKBOXES * 100) : 0) + '%';
+}
+
+function buildCards() {
+  const grid = document.getElementById('grid');
+  let state = loadState();
+
+  CONSOLES.forEach(console => {
+    // Apply defaults for consoles that have them (first load only)
+    if (console.defaults && !state[console.id]) {
+      state[console.id] = { ...console.defaults };
+      saveState(state);
+    }
+
+    const cs = getConsoleState(state, console.id);
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    const checked = countChecked(cs);
+
+    let html = `
+      <div class="card-header">
+        <h2>${console.name}</h2>
+        <span class="count" id="count-${console.id}">${checked} / ${TOTAL_CHECKBOXES}</span>
+      </div>
+      <div class="progress-bar-outer">
+        <div class="progress-bar-inner" id="bar-${console.id}" style="width: ${TOTAL_CHECKBOXES > 0 ? (checked / TOTAL_CHECKBOXES * 100) : 0}%"></div>
+      </div>
+      <ul class="checklist">
+    `;
+
+    STEPS.forEach(step => {
+      if (step.type === 'analysis') {
+        const resultVal = cs['analysis-result'] || '';
+        const sharesVal = cs['analysis-shares'] || '';
+        html += `
+          <li>
+            <div class="analysis-row" style="width:100%; border-bottom: none; padding: 2px 0;">
+              <label>Analysis result:</label>
+              <select id="analysis-${console.id}" onchange="onAnalysisChange('${console.id}', this.value)">
+                <option value=""${resultVal === '' ? ' selected' : ''}>-- not analyzed --</option>
+                <option value="readable"${resultVal === 'readable' ? ' selected' : ''}>Readable</option>
+                <option value="needs-calibration"${resultVal === 'needs-calibration' ? ' selected' : ''}>Needs calibration</option>
+                <option value="shares-format"${resultVal === 'shares-format' ? ' selected' : ''}>Shares format with...</option>
+              </select>
+            </div>
+          </li>
+          <li id="shares-row-${console.id}" style="display: ${resultVal === 'shares-format' ? 'flex' : 'none'}">
+            <div class="analysis-row" style="width:100%; border-bottom: none; padding: 2px 0;">
+              <label>Shares with:</label>
+              <input type="text" id="shares-${console.id}" value="${sharesVal}" placeholder="e.g. Yamaha CL/QL"
+                onchange="onSharesChange('${console.id}', this.value)" />
+            </div>
+          </li>
+        `;
+      } else {
+        const isChecked = !!cs[step.key];
+        const liClass = isChecked ? ' class="checked"' : '';
+        html += `
+          <li${liClass} id="li-${console.id}-${step.key}">
+            <input type="checkbox" id="cb-${console.id}-${step.key}"
+              ${isChecked ? 'checked' : ''}
+              onchange="onCheck('${console.id}', '${step.key}', this.checked)" />
+            <label for="cb-${console.id}-${step.key}">${step.label}</label>
+          </li>
+        `;
+      }
+    });
+
+    html += '</ul>';
+
+    const notesVal = (cs['notes'] || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    html += `
+      <label class="notes-label">Notes</label>
+      <textarea class="notes-area" id="notes-${console.id}"
+        placeholder="Quirks, findings, approximated values..."
+        onchange="onNotes('${console.id}', this.value)">${cs['notes'] || ''}</textarea>
+    `;
+
+    card.innerHTML = html;
+    grid.appendChild(card);
+  });
+
+  updateOverall(state);
+}
+
+function onCheck(consoleId, stepKey, checked) {
+  const state = loadState();
+  const cs = getConsoleState(state, consoleId);
+  cs[stepKey] = checked;
+  saveState(state);
+
+  const li = document.getElementById('li-' + consoleId + '-' + stepKey);
+  if (li) {
+    if (checked) li.classList.add('checked');
+    else li.classList.remove('checked');
+  }
+
+  updateCardProgress(consoleId, state);
+  updateOverall(state);
+}
+
+function onAnalysisChange(consoleId, value) {
+  const state = loadState();
+  const cs = getConsoleState(state, consoleId);
+  cs['analysis-result'] = value;
+  saveState(state);
+
+  const sharesRow = document.getElementById('shares-row-' + consoleId);
+  if (sharesRow) {
+    sharesRow.style.display = value === 'shares-format' ? 'flex' : 'none';
+  }
+}
+
+function onSharesChange(consoleId, value) {
+  const state = loadState();
+  const cs = getConsoleState(state, consoleId);
+  cs['analysis-shares'] = value;
+  saveState(state);
+}
+
+function onNotes(consoleId, value) {
+  const state = loadState();
+  const cs = getConsoleState(state, consoleId);
+  cs['notes'] = value;
+  saveState(state);
+}
+
+function resetAll() {
+  if (confirm('Reset ALL progress? This cannot be undone.')) {
+    localStorage.removeItem(STORAGE_KEY);
+    document.getElementById('grid').innerHTML = '';
+    buildCards();
+  }
+}
+
+buildCards();
+</script>
+</body>
+</html>

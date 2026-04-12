@@ -24,13 +24,44 @@ Follow these every time, regardless of console brand:
 
 4. **Save in the console's native format.** Use the editor software's normal "Save" or "Save As" function. If the console itself saves to USB, save from the console. If the editor software saves to a file on your computer, use that. We want the exact format the console/editor produces -- don't export, don't convert, just save.
 
-5. **Name files consistently.** Use the naming convention in Part 5 below so we can keep everything organized across consoles.
+5. **Name files consistently.** Use the naming convention in Part 6 below so we can keep everything organized across consoles.
 
 6. **One empty baseline per console.** This is the most important file -- it's what we compare everything against.
 
 ---
 
-## Part 3: Parameter Sets
+## Part 3: File Analysis First
+
+Before creating all 7 calibration files for a console, **upload just the empty baseline file first**. We analyze it before doing anything else because the full calibration set might be unnecessary -- or we might only need a fraction of it.
+
+### Why analyze first?
+
+- **The file might be readable as-is.** Some console formats are plain XML, JSON, or structured text. If we can read the parameters directly, calibration files are unnecessary -- we skip straight to building the parser.
+- **The file might share a known format.** The Yamaha DM7, TF, and RIVAGE PM all share the `#YAMAHA MBDFProjectFile` header. DiGiCo `.show` files might be plain XML. Allen & Heath might use a database format. If we recognize the format family, we already have a head start.
+- **We might only need targeted calibration files.** Even with a binary format, some parameters might be immediately identifiable while others need binary diffing. Instead of creating all 7 files upfront, we find out which ones we actually need.
+
+### Steps
+
+1. **Create ONLY the empty baseline file.** Launch the editor, create a blank show at factory defaults, save it in the console's native format. That's it -- don't create any calibration files yet.
+
+2. **Drop it in `samples/` and tell the agent: "analyze this file."**
+
+3. **Wait for the analysis results.** The agent will report:
+   - File type (XML, ZIP+XML, binary, structured text, MBDF, database, etc.)
+   - Whether it matches a known format family (e.g., MBDF like the other Yamaha consoles)
+   - What's immediately readable vs. what needs calibration files to decode
+
+4. **If most parameters are readable** -- we may only need 1-2 targeted calibration files to pin down any ambiguous encodings. The agent will tell you exactly which ones.
+
+5. **If it's an unknown binary format** -- proceed with the full 7-file calibration set from Part 4.
+
+### Why this matters
+
+Looking at a baseline file takes 5 minutes. Creating 7 calibration files per console takes significantly longer. For 6 console families, that's the difference between a quick check and hours of methodical work in editor software -- work that might turn out to be unnecessary if the format is already human-readable. Always look first.
+
+---
+
+## Part 4: Parameter Sets
 
 For each console, create these 7 files. Every change described below happens **on channel 1 only**. Everything else stays at factory defaults.
 
@@ -165,7 +196,7 @@ Notes:
 
 ---
 
-## Part 4: Console-Specific Notes
+## Part 5: Console-Specific Notes
 
 ### Yamaha CL/QL Series (DONE -- Reference Example)
 
@@ -281,7 +312,7 @@ Key things to know:
 
 ---
 
-## Part 5: File Naming Convention
+## Part 6: File Naming Convention
 
 Use this exact pattern for every calibration file:
 
