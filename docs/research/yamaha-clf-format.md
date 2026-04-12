@@ -1,7 +1,7 @@
-# Yamaha CL/QL .CLF/.CLE Binary Format — Research Notes
+# Yamaha CL/QL .CLF/.CLE Binary Format — Complete Parameter Map
 
-**Status:** Core parameters mapped. Ready for parser implementation.
-**Sources:** calibration files (empty, HPF+EQ+gate+comp, gate-only), Example 1/2 CL5, DOMCAS11.4
+**Status:** Ready for parser implementation
+**Sources:** 9 calibration/sample files (empty, EQ-all-bands, dynamics-full, fader-pan-mute, gate-only, full-calibration, Example 1/2, DOMCAS11.4)
 **Key finding:** CLE and CLF share identical binary data after their headers. Parse one = parse both.
 
 ---
@@ -17,176 +17,179 @@ Post-MEMAPI data is byte-for-byte identical between CLF and CLE for the same sho
 
 ---
 
-## File Structure Overview
+## File Structure
 
-### CLF Header (0x00 - 0x2F)
+### Header
 ```
 0x00: 01 00 00 00    — format version
 0x04: 00 00 00 28    — header size (40 bytes)
 0x08: 01 70 05 c0    — format identifier (CL5)
+0x30+: Section table — entries: [4-byte offset] [2-byte section_id] [2-byte pad]
 ```
 
-### Section Table (0x30+)
-Each entry: `[4-byte offset] [2-byte section_id] [2-byte pad]`
-
-Key sections:
-- **0x0052** at offset 0x0158 — Channel setup (names, colors, patch)
-- **0x0012** at offset 0x4D58 — Scene data (MEMAPI blocks with all mix parameters)
+### Key Sections
+- **0x0052** — Channel setup (names, colors, patch) — global, not per-scene
+- **0x0012** — Scene data (MEMAPI blocks with all mix parameters)
 
 ---
 
 ## Channel Setup (Global, Not Per-Scene)
 
 ### Channel Names
-Two tables of 96 × 4 bytes = 8-character names.
+Two consecutive tables of 96 entries × 4 bytes, combining into 8-character names.
 
 | Table | Offset (CLF) | Content |
 |---|---|---|
-| First 4 chars | 0x22D5C | `"1 an"`, `"2 ba"`, ... |
-| Last 4 chars | 0x22EDC | `"na"`, `"co"`, ... |
+| First 4 chars | 0x22D5C | Short name part 1 |
+| Last 4 chars | 0x22EDC | Short name part 2 |
 
 Full name = `Table1[i] + Table2[i]`, stripped of nulls.
+96 entries: ch1-72 inputs, ch73-88 returns/ST, ch89-96 additional.
 
 ### Channel Colors
-96 × 1 byte at offset 0x2305C.
+96 × 1 byte at offset **0x2305C**.
 - `0x16` (22) = default input channel color
 - `0x1D` (29) = return channel color
-- Full palette mapping TBD (need file with varied colors)
+- Full palette mapping TBD
 
 ### Input Patch
-96 × 1 byte at offset ~0x22C4F. 1-indexed physical input numbers.
+96 × 1 byte at offset **~0x22C4F**. 1-indexed physical input numbers.
 
 ---
 
-## Scene Data (MEMAPI Blocks)
+## Scene Data
 
-Each scene marked by `MEMAPI` (6 bytes) + header:
+Each scene marked by `MEMAPI` (6 bytes):
 ```
 +0x00: "MEMAPI" (6 bytes)
 +0x06: 00 00 (padding)
-+0x08: marker (2 bytes)
++0x08: marker (2 bytes, e.g., 0x189A)
 +0x0A: 00 00 (padding)
 +0x0C: scene name (20 bytes, null-padded ASCII)
 ```
 
-Scene block size: ~0xAE68 (44,648 bytes).
+Scene block size: ~0xAE68 (44,648 bytes). All offsets below are relative to MEMAPI.
 
 ---
 
-## Per-Channel Parameter Map (offsets relative to MEMAPI)
+## Per-Channel Parameter Map
 
-All confirmed by calibration file comparison (ch1 modified vs empty default).
+### Enable Flags (1 byte per channel, 0=off, 1=on)
 
-### Boolean Enable Flags (1 byte per channel, 0=off, 1=on)
-
-| Offset | Parameter |
-|---|---|
-| +0x0E84 | **Gate enable** |
-| +0x1460 | **Compressor enable** |
-| +0x1A30 | **HPF enable** |
-
-### HPF Frequency (1 byte per channel)
-
-**Offset:** +0x1A3C
-
-**Encoding:** Logarithmic scale.
-```
-frequency_hz = 20 × 2^((index - 28) / 4.8)
-```
-
-| Index | Frequency |
-|---|---|
-| 28 | 20 Hz (default) |
-| 33 | 40 Hz |
-| 38 | 80 Hz |
-| 40 | 113 Hz |
-| 44 | 200 Hz |
-| 50 | 500 Hz |
-| 56 | 1140 Hz |
-
-### Gate Threshold (2-byte stride table)
-
-**Offset:** +0x1335
-
-**Layout:** `[threshold_byte] [0xFE]` repeating, 2 bytes per channel.
-
-**Encoding:** Reconstruct 16-bit big-endian as `0xFE00 | threshold_byte`, interpret as signed, divide by 10.
-```
-threshold_dB = (int16_be(0xFE, byte) - 65536) / 10
-```
-
-| Byte | 16-bit | Threshold |
+| Offset | Parameter | Confirmed by |
 |---|---|---|
-| 0xFC | 0xFEFC = -260 | -26.0 dB (default) |
-| 0xD4 | 0xFED4 = -300 | -30.0 dB |
-| 0xB0 | 0xFEB0 = -336 | -33.6 dB |
+| +0x0E84 | Gate enable | gate-only calibration |
+| +0x1460 | Compressor enable | full calibration |
+| +0x1A30 | HPF enable | full calibration |
 
-### Compressor Threshold (2-byte stride table)
+### HPF
 
-**Offset:** +0x1911
-
-**Layout:** `[threshold_byte] [0xFF]` repeating, 2 bytes per channel.
-
-**Encoding:** Same as gate but with 0xFF padding: `0xFF00 | threshold_byte`, signed, /10.
-```
-threshold_dB = (int16_be(0xFF, byte) - 65536) / 10
-```
-
-| Byte | 16-bit | Threshold |
+| Offset | Parameter | Encoding |
 |---|---|---|
-| 0xB0 | 0xFFB0 = -80 | -8.0 dB (default) |
-| 0x38 | 0xFF38 = -200 | -20.0 dB |
+| +0x1A3C | Frequency | 1B/ch, logarithmic: `freq_hz = 20 × 2^((val - 28) / 4.8)` |
 
-### EQ Band 1 (Low) Gain (1 byte per channel)
+Verified: index 28 = 20 Hz, index 44 = 200 Hz.
 
-**Offset:** +0x1C64
+### Gate
 
-**Encoding:** Linear, 6 units per dB, centered at 36 = 0 dB.
-```
-gain_dB = (value - 36) / 6
-```
+| Offset | Parameter | Encoding |
+|---|---|---|
+| +0x1094 | Attack | 1B/ch, `attack_ms = value` (default 0 = 0ms) |
+| +0x10F4 | Hold | 1B/ch, logarithmic: `hold_ms = 2.33 × 2^((val - 200) / 3.60)` |
+| +0x1154 | Decay | 1B/ch, logarithmic (inverse — higher value = shorter time) |
+| +0x11B4 | Range | 1B/ch (default 44 = -56dB, val 35 = -40dB) |
+| +0x1335 | Threshold | 2B stride `[val][0xFE]`, reconstruct as `0xFE00 | val`, signed16 / 10 = dB |
 
-| Value | Gain |
+Default gate: threshold -26dB, range -56dB, decay 304ms, attack 0ms, hold 2.33ms.
+
+### Compressor
+
+| Offset | Parameter | Encoding |
+|---|---|---|
+| +0x1670 | Attack | 1B/ch, `attack_ms = value` (default 30 = 30ms) |
+| +0x1790 | Release | 1B/ch, logarithmic: `release_ms = 46.5 × 2^(val / 16.1)` |
+| +0x17F0 | Ratio | 1B/ch, approximately `ratio = 2^(val / 4.4)` (default 6 = 2.5:1) |
+| +0x1850 | Makeup gain | 1B/ch, `gain_dB = value / 10` (default 0 = 0dB) |
+| +0x18B0 | Knee | 1B/ch, direct value (default 2) |
+| +0x1911 | Threshold | 2B stride `[val][0xFF]`, reconstruct as `0xFF00 | val`, signed16 / 10 = dB |
+
+Default compressor: threshold -8dB, ratio 2.5:1, attack 30ms, release 229ms, knee 2, makeup 0dB.
+
+### EQ (4 Bands)
+
+4 bands, each stored as 4 consecutive tables of 96 bytes (384 bytes per band, 1536 total).
+
+| Band | Base offset | Default freq | Freq index |
+|---|---|---|---|
+| Band 1 (Low) | +0x1C00 | 125 Hz | 36 |
+| Band 2 (Low-Mid) | +0x1D80 | 1000 Hz | 72 |
+| Band 3 (High-Mid) | +0x1F00 | 4000 Hz | 96 |
+| Band 4 (High) | +0x2080 | 10000 Hz | 112 |
+
+Within each band (tables at base+0, base+96, base+192, base+288):
+- **Table 0 (+0):** Band type/enable flags
+- **Table 1 (+96):** Frequency — 1B/ch, semitone scale: `freq_hz = 20 × 2^((val - 4) / 12)`
+- **Table 2 (+192):** Gain — 2B signed big-endian per channel, `gain_dB = signed_value / 10`
+- **Table 3 (+288):** Reserved/unused
+
+EQ frequency verified across all 4 bands (125→200, 1000→800, 4000→3000, 10000→8000 Hz), all within 2.4% accuracy. 12 steps per octave = semitone scale.
+
+**Q values** stored separately:
+- Band 1 Q: +0x95F8 (1B/ch, default 30 = Q 4.0, val 39 = Q 2.0)
+- Band 2 Q: +0x9658 (1B/ch, default 30 = Q 0.7, val 35 = Q 1.6)
+- Band 3/4 Q: TBD (not yet located — different band has different Q defaults at same index)
+
+### Fader / Pan / Mute
+
+| Offset | Parameter | Encoding |
+|---|---|---|
+| +0x09C6 | Pan | 1B/ch, signed: -63 = hard L, 0 = center, +63 = hard R |
+| +0x0A26 | Fader level | 2B/ch big-endian, 0 = -inf, 959 (0x03BF) = 0dB |
+| +0x53FE | Channel OFF flag | 1B/ch (0=on, 1=off) — exact stride TBD |
+
+### DCA Assignments
+
+| Offset | Parameter | Encoding |
+|---|---|---|
+| +0x2720 | DCA 1-8 assignments | 12-byte stride per DCA, 1B per channel within each DCA block |
+
+DCA 1 at +0x2720, DCA 2 at +0x272C, DCA 3 at +0x2738, etc. (stride = 12 bytes).
+Value 0 = not assigned, 1 = assigned.
+
+---
+
+## Encoding Reference
+
+### Frequency scales
+
+| Context | Formula | Verified range |
+|---|---|---|
+| HPF frequency | `20 × 2^((val - 28) / 4.8)` | 20 Hz – 2000+ Hz |
+| EQ frequency | `20 × 2^((val - 4) / 12)` | 20 Hz – 20 kHz (semitone scale) |
+
+### Gain/threshold scales
+
+| Context | Formula |
 |---|---|
-| 0 | -6.0 dB |
-| 36 | 0.0 dB (default/flat) |
-| 72 | +6.0 dB |
+| Gate/Comp threshold | Reconstruct 16-bit signed, divide by 10 = dB |
+| EQ band gain | 2B signed big-endian, divide by 10 = dB |
+| Comp makeup gain | 1B unsigned, divide by 10 = dB |
 
-### EQ Band 1 Unknown Parameter
+### Time scales
 
-**Offset:** +0x1CC5
-
-Changed from 0x00 (default) to 0x3C (60) in calibration file where EQ low = +6 dB. Possibly EQ frequency offset, Q value, or band type. Needs further investigation with isolated EQ changes.
-
----
-
-## Validated Against Real Show Files
-
-Tested against "Example 2 CL5" (theater production, 44 scenes, ~64 channels):
-- **HPF enable:** 61/72 channels enabled ✓ (theater: HPF on almost everything)
-- **Compressor enable:** 60/72 channels enabled ✓ (ch13-72 = all actor/instrument channels)
-- **Gate enable:** 2/72 channels enabled ✓ (gates rarely used on theater shows)
-- **Gate thresholds:** non-default values found on channels with different gate settings ✓
+| Context | Formula |
+|---|---|
+| Gate/Comp attack | Direct value in ms |
+| Gate hold | `2.33 × 2^((val - 200) / 3.60)` ms |
+| Comp release | `46.5 × 2^(val / 16.1)` ms |
 
 ---
 
-## Parameters Still To Map
+## Validation
 
-- EQ bands 2-4 (High-Mid, Low-Mid, High) — gain, frequency, Q, type
-- EQ band 1 frequency and Q
-- Gate attack, hold, decay, range
-- Compressor ratio, attack, release, knee, makeup gain
-- Channel fader level
-- Channel mute/on state
-- Pan position
-- Mix bus send levels
-- VCA/DCA assignments
-- Channel color palette (full mapping)
-
----
-
-## Next Steps
-
-1. Build CLF parser with confirmed parameters (names, HPF, gate on/off + threshold, comp on/off + threshold, EQ band 1 gain)
-2. Create additional calibration files to map remaining EQ parameters
-3. Map the MBDF format (.dm7f, .tff, .RIVAGEPM) — shares `#YAMAHA MBDFProjectFile` header
+Tested against real show files (Example 1/2 = Brazilian theater production, 44 scenes, 64 channels):
+- HPF enable: 61/72 channels ✓
+- Compressor enable: 60/72 channels (ch13-72 = vocals/instruments) ✓
+- Gate enable: 2/72 channels ✓
+- Channel names: "1 anna", "3 breno", "10 grego", "41 viola", "43 banjo" ✓
+- Scene names: "Sesc pinlheiros", "master FLAT", "Manifesto", "baile cobras" ✓
