@@ -20,6 +20,7 @@ class TranslationResult:
     translated_parameters: list[str] = field(default_factory=list)
     approximated_parameters: list[str] = field(default_factory=list)
     dropped_parameters: list[str] = field(default_factory=list)
+    channels: list = field(default_factory=list)  # list[Channel] for report generation
 
 
 def _parse_yamaha_auto(filepath: Path) -> ShowFile:
@@ -112,4 +113,5 @@ def translate(
         translated_parameters=_collect_translated_parameters(show),
         approximated_parameters=approximated,
         dropped_parameters=show.dropped_parameters,
+        channels=show.channels,
     )

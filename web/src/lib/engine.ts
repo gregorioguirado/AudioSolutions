@@ -20,7 +20,8 @@ export async function callEngine(
   file: Buffer,
   filename: string,
   sourceConsole: ConsoleId,
-  targetConsole: ConsoleId
+  targetConsole: ConsoleId,
+  userEmail?: string
 ): Promise<TranslationResult> {
   const engineUrl = process.env.ENGINE_URL;
   if (!engineUrl) throw new Error("ENGINE_URL not configured");
@@ -29,6 +30,7 @@ export async function callEngine(
   formData.append("file", new Blob([new Uint8Array(file)]), filename);
   formData.append("source_console", sourceConsole);
   formData.append("target_console", targetConsole);
+  if (userEmail) formData.append("user_email", userEmail);
 
   const res = await fetch(`${engineUrl}/translate`, {
     method: "POST",

@@ -3,6 +3,7 @@ import logging
 import tempfile
 import zipfile
 from pathlib import Path
+from typing import Optional
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException
 from fastapi.responses import Response
 from translator import translate, UnsupportedConsolePair
@@ -42,6 +43,7 @@ async def translate_file(
     file: UploadFile = File(...),
     source_console: str = Form(...),
     target_console: str = Form(...),
+    user_email: Optional[str] = Form(None),
 ):
     if source_console not in SUPPORTED_CONSOLES:
         raise HTTPException(status_code=400,
@@ -72,10 +74,13 @@ async def translate_file(
             source_console=source_console,
             target_console=target_console,
         )
+        source_filename = file.filename or "unknown"
         report_pdf = generate_report(
             result=result,
             source_console=source_console,
             target_console=target_console,
+            source_filename=source_filename,
+            user_email=user_email or "",
         )
     except UnsupportedConsolePair as e:
         raise HTTPException(status_code=400, detail=str(e))

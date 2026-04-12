@@ -1,6 +1,28 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getPresignedUrl } from "@/lib/r2";
+import path from "path";
+
+const TARGET_EXT: Record<string, string> = {
+  digico_sd: ".show",
+  yamaha_cl: ".cle",
+};
+
+function deriveFilename(
+  fileType: string,
+  sourceFilename: string,
+  targetConsole: string
+): string {
+  const stem = path.basename(sourceFilename, path.extname(sourceFilename));
+  if (fileType === "output") {
+    const ext = TARGET_EXT[targetConsole] ?? ".out";
+    return `${stem}_showfier${ext}`;
+  }
+  if (fileType === "report") {
+    return `${stem}_showfier_report.pdf`;
+  }
+  return path.basename(sourceFilename);
+}
 
 export async function GET(
   request: Request,
@@ -49,6 +71,32 @@ export async function GET(
     source: process.env.R2_BUCKET_SOURCES!,
   };
 
-  const url = await getPresignedUrl(bucketMap[fileType], r2Key);
-  return NextResponse.redirect(url);
+  const downloadFilename = deriveFilename(
+    fileType,
+    translation.source_filename ?? "translation",
+    translation.target_console ?? ""
+  );
+
+  // Fetch from R2 server-side and proxy with proper Content-Disposition so the
+  // browser downloads the file without navigating away from the app.
+  const presignedUrl = await getPresignedUrl(bucketMap[fileType], r2Key, 60);
+  const r2Response = await fetch(presignedUrl);
+
+  if (!r2Response.ok) {
+    return NextResponse.json({ error: "Failed to retrieve file" }, { status: 502 });
+  }
+
+  const contentType =
+    fileType === "report"
+      ? "application/pdf"
+      : "application/octet-stream";
+
+  return new NextResponse(r2Response.body, {
+    status: 200,
+    headers: {
+      "Content-Type": contentType,
+      "Content-Disposition": `attachment; filename="${downloadFilename}"`,
+      "Cache-Control": "private, no-store",
+    },
+  });
 }

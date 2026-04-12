@@ -28,11 +28,22 @@ export async function uploadToR2(bucket: string, key: string, body: Buffer, cont
   );
 }
 
-export async function getPresignedUrl(bucket: string, key: string, expiresIn = 600): Promise<string> {
+export async function getPresignedUrl(
+  bucket: string,
+  key: string,
+  expiresIn = 600,
+  downloadFilename?: string
+): Promise<string> {
   const client = getR2Client();
   return getSignedUrl(
     client,
-    new GetObjectCommand({ Bucket: bucket, Key: key }),
+    new GetObjectCommand({
+      Bucket: bucket,
+      Key: key,
+      ...(downloadFilename && {
+        ResponseContentDisposition: `attachment; filename="${downloadFilename.replace(/"/g, "")}"`,
+      }),
+    }),
     { expiresIn }
   );
 }

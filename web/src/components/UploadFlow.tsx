@@ -161,10 +161,34 @@ export default function UploadFlow() {
             droppedParams={preview.droppedParams}
             channels={[]}
           />
-          <button type="button" onClick={handleDownload}
-            className="bg-accent px-6 py-3 text-sm font-extrabold uppercase tracking-wider text-black hover:bg-yellow-300">
-            Download translated file
-          </button>
+          {preview.authenticated ? (
+            <div className="flex flex-col gap-3">
+              <a
+                href={`/api/download/${preview.translationId}?type=output`}
+                className="flex items-center justify-center bg-accent px-6 py-3 text-sm font-extrabold uppercase tracking-wider text-black no-underline hover:bg-yellow-300"
+              >
+                Download translated file
+              </a>
+              <a
+                href={`/api/download/${preview.translationId}?type=report`}
+                className="flex items-center justify-center border border-accent px-6 py-3 text-sm font-extrabold uppercase tracking-wider text-accent no-underline hover:bg-accent/10"
+              >
+                Download translation report (PDF)
+              </a>
+              <button
+                type="button"
+                onClick={() => router.push(`/translations/${preview.translationId}`)}
+                className="text-xs text-muted hover:text-white"
+              >
+                View full details
+              </button>
+            </div>
+          ) : (
+            <button type="button" onClick={handleDownload}
+              className="bg-accent px-6 py-3 text-sm font-extrabold uppercase tracking-wider text-black hover:bg-yellow-300">
+              Download translated file
+            </button>
+          )}
           <button type="button" onClick={handleReset} className="text-xs text-muted hover:text-white">
             Translate another file
           </button>

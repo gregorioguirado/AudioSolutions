@@ -57,7 +57,7 @@ export async function POST(request: Request) {
   const fileBuffer = Buffer.from(await file.arrayBuffer());
   let result;
   try {
-    result = await callEngine(fileBuffer, file.name, sourceConsole as ConsoleId, targetConsole as ConsoleId);
+    result = await callEngine(fileBuffer, file.name, sourceConsole as ConsoleId, targetConsole as ConsoleId, user?.email ?? undefined);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Translation failed";
     const status = message.includes("Unsupported") ? 400 : 500;
