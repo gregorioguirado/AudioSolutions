@@ -176,7 +176,7 @@ function Panel({
             );
           })}
           {filtered.length === 0 && (
-            <p className="text-[11px] text-muted">No models match "{query}".</p>
+            <p className="text-[11px] text-muted">No models match &ldquo;{query}&rdquo;.</p>
           )}
         </div>
       </div>
