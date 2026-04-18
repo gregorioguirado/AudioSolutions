@@ -17,9 +17,11 @@
 - All file paths are relative to the repo root (`c:/Users/grego/Documents/Jobing/Claude Code/AudioSolutions/`).
 - Run commands from **inside `web/`** unless otherwise noted.
 - Tests live in `web/tests/components/` (not colocated). Follow that existing convention.
+- `web/package.json` has no `test` script. Use `npx vitest run [path]` directly.
 - The Showfier brand tokens are defined in `web/tailwind.config.ts`: `bg`, `surface`, `border`, `accent`, `success`, `warning`, `error`, `muted`. Use them, don't inline hex values.
 - Channel names are not yet returned by the translation engine. This plan persists a `channel_names text[]` column with graceful empty-state handling; the engine-side change is a future plan.
 - The backend engine still only understands the two legacy console IDs (`yamaha_cl`, `digico_sd`). The new design stores **both** the brand-level engine ID (existing `source_console` / `target_console` columns) **and** the specific model ID (new `source_model` / `target_model` columns). Translation routing uses the brand-level ID.
+- **HIDE model-catalog channel/bus numbers from the UI.** `maxChannels` and `mixBuses` on `ConsoleModel` are kept in the data structure (they feed no UI in this plan) but are not rendered anywhere yet — the catalog's numbers are not trustworthy enough to display. The `channel_count` *from the engine output* on `translations` rows IS trustworthy and continues to render (on history rows and in the report pane subtitle). Any task below that referenced these model-level numbers in the UI has been adjusted. **Task 6 (CompatBar) is cancelled** for this reason — the component would have been pure channel-number math.
 
 ---
 
@@ -460,7 +462,7 @@ git commit -m "feat(web): add Timecode component with relative + absolute local 
 
 ## Task 5: DetailCard component
 
-Renders a model summary card: heading, series subtitle, rows (max channels, mix buses, file format), and a footer status line. Used in the console selector and the report pane.
+Renders a model summary card: heading, series subtitle, file-format row, and a footer status line. Used in the console selector. (Max channels / Mix buses rows intentionally removed — see plan note on hiding catalog numbers.)
 
 **Files:**
 - Create: `web/src/components/DetailCard.tsx`
@@ -482,7 +484,7 @@ describe("DetailCard", () => {
     render(<DetailCard model={cl5} role="source" />);
     expect(screen.getByText("CL5")).toBeInTheDocument();
     expect(screen.getByText(/CL Series/i)).toBeInTheDocument();
-    expect(screen.getByText("72")).toBeInTheDocument();
+    expect(screen.getByText(".clf")).toBeInTheDocument();
     expect(screen.getByText(/Detected from file/i)).toBeInTheDocument();
   });
 
@@ -493,10 +495,11 @@ describe("DetailCard", () => {
     expect(screen.getByText(/Supported/i)).toBeInTheDocument();
   });
 
-  it("renders warning state when warningMessage is provided", () => {
-    const sd9 = getModelById("digico-sd9")!;
-    render(<DetailCard model={sd9} role="target" warningMessage="24 channels will be dropped" />);
-    expect(screen.getByText(/24 channels will be dropped/i)).toBeInTheDocument();
+  it("does NOT render maxChannels or mixBuses numeric rows", () => {
+    const cl5 = getModelById("yamaha-cl5")!;
+    render(<DetailCard model={cl5} role="source" />);
+    expect(screen.queryByText(/Max channels/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Mix buses/i)).not.toBeInTheDocument();
   });
 
   it("renders placeholder when no model selected", () => {
@@ -524,10 +527,9 @@ import type { ConsoleModel } from "@/lib/constants";
 interface Props {
   model: ConsoleModel | undefined;
   role: "source" | "target";
-  warningMessage?: string;
 }
 
-export default function DetailCard({ model, role, warningMessage }: Props) {
+export default function DetailCard({ model, role }: Props) {
   if (!model) {
     return (
       <div className="border border-border bg-surface px-4 py-6 text-center">
@@ -538,51 +540,23 @@ export default function DetailCard({ model, role, warningMessage }: Props) {
     );
   }
 
-  const isWarning = Boolean(warningMessage);
-  const borderClass = isWarning ? "border-error/40" : "border-border";
-
   return (
-    <div className={`border bg-surface px-4 py-4 ${borderClass}`}>
-      <div className="flex items-start justify-between">
-        <div>
-          <h4 className="text-sm font-extrabold text-white">{model.model}</h4>
-          <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-muted">
-            {model.series} · {role === "source" ? "Source" : "Target"}
-          </p>
-        </div>
-        {isWarning && (
-          <span className="border border-error/40 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-error">
-            ⚠ Too small
-          </span>
-        )}
+    <div className="border border-border bg-surface px-4 py-4">
+      <div>
+        <h4 className="text-sm font-extrabold text-white">{model.model}</h4>
+        <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-muted">
+          {model.series} · {role === "source" ? "Source" : "Target"}
+        </p>
       </div>
 
-      <div className="mt-3 flex flex-col gap-1.5">
-        <Row label="Max channels" value={String(model.maxChannels)} warn={isWarning} />
-        <Row label="Mix buses" value={String(model.mixBuses)} />
-        <Row label="File format" value={model.fileFormat} />
+      <div className="mt-3 flex items-center justify-between">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-muted">File format</span>
+        <span className="text-xs font-bold text-white">{model.fileFormat}</span>
       </div>
 
-      <p
-        className={`mt-3 border-t border-border pt-2 text-[10px] font-extrabold uppercase tracking-wider ${
-          isWarning ? "text-error" : "text-success"
-        }`}
-      >
-        {isWarning
-          ? `⚠ ${warningMessage}`
-          : role === "source"
-          ? "✓ Detected from file"
-          : "✓ Supported"}
+      <p className="mt-3 border-t border-border pt-2 text-[10px] font-extrabold uppercase tracking-wider text-success">
+        {role === "source" ? "✓ Detected from file" : "✓ Supported"}
       </p>
-    </div>
-  );
-}
-
-function Row({ label, value, warn = false }: { label: string; value: string; warn?: boolean }) {
-  return (
-    <div className="flex items-center justify-between">
-      <span className="text-[10px] font-bold uppercase tracking-wider text-muted">{label}</span>
-      <span className={`text-xs font-bold ${warn ? "text-error" : "text-white"}`}>{value}</span>
     </div>
   );
 }
@@ -605,115 +579,15 @@ git commit -m "feat(web): add DetailCard component for console model summary"
 
 ---
 
-## Task 6: CompatBar component
+## Task 6: (cancelled) CompatBar
 
-Full-width horizontal note shown under the console selector, green or red based on source/target channel counts.
-
-**Files:**
-- Create: `web/src/components/CompatBar.tsx`
-- Create: `web/tests/components/CompatBar.test.tsx`
-
-- [ ] **Step 1: Write failing test**
-
-Create `web/tests/components/CompatBar.test.tsx`:
-
-```tsx
-import { render, screen } from "@testing-library/react";
-import { describe, it, expect } from "vitest";
-import CompatBar from "@/components/CompatBar";
-
-describe("CompatBar", () => {
-  it("renders success message when target fits source", () => {
-    render(<CompatBar sourceChannels={72} targetChannels={96} targetLabel="DiGiCo SD12" />);
-    expect(screen.getByText(/fits/i)).toBeInTheDocument();
-    expect(screen.getByText(/nothing will be dropped/i)).toBeInTheDocument();
-  });
-
-  it("renders warning when target is smaller than source", () => {
-    render(<CompatBar sourceChannels={72} targetChannels={48} targetLabel="DiGiCo SD9" />);
-    expect(screen.getByText(/49–72 will be dropped/)).toBeInTheDocument();
-  });
-
-  it("is a no-op when either value is missing", () => {
-    const { container } = render(<CompatBar sourceChannels={undefined} targetChannels={96} targetLabel="X" />);
-    expect(container.firstChild).toBeNull();
-  });
-});
-```
-
-- [ ] **Step 2: Run test — expect failure**
-
-```bash
-cd web && npm run test -- tests/components/CompatBar.test.tsx
-```
-
-Expected: fails (component doesn't exist).
-
-- [ ] **Step 3: Implement the component**
-
-Create `web/src/components/CompatBar.tsx`:
-
-```tsx
-interface Props {
-  sourceChannels: number | undefined;
-  targetChannels: number | undefined;
-  targetLabel: string;
-}
-
-export default function CompatBar({ sourceChannels, targetChannels, targetLabel }: Props) {
-  if (sourceChannels == null || targetChannels == null) return null;
-
-  const fits = targetChannels >= sourceChannels;
-
-  if (fits) {
-    return (
-      <div className="flex items-start gap-2 border border-success/30 bg-success/[0.06] px-4 py-3 text-xs text-success">
-        <span>✓</span>
-        <span>
-          Source has <strong className="text-white">{sourceChannels} channels</strong> — {targetLabel}{" "}
-          supports up to <strong className="text-white">{targetChannels}</strong>. Full translation, nothing will be
-          dropped.
-        </span>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex items-start gap-2 border border-error/30 bg-error/[0.06] px-4 py-3 text-xs text-error">
-      <span>⚠</span>
-      <span>
-        {targetLabel} supports only <strong className="text-white">{targetChannels} channels</strong> but your file
-        has <strong className="text-white">{sourceChannels}</strong> — channels{" "}
-        <strong className="text-white">
-          {targetChannels + 1}–{sourceChannels}
-        </strong>{" "}
-        will be dropped.
-      </span>
-    </div>
-  );
-}
-```
-
-- [ ] **Step 4: Run test — expect pass**
-
-```bash
-cd web && npm run test -- tests/components/CompatBar.test.tsx
-```
-
-Expected: all three tests pass.
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add web/src/components/CompatBar.tsx web/tests/components/CompatBar.test.tsx
-git commit -m "feat(web): add CompatBar component for source/target channel comparison"
-```
+**Status: SKIP this task entirely.** CompatBar was going to display channel-math warnings based on model-catalog numbers that are not yet trustworthy. Per the plan note above, we hide all catalog-level channel/bus values from the UI for now. There is nothing to implement in this task — advance directly to Task 7.
 
 ---
 
 ## Task 7: Rewrite ConsoleSelector
 
-Replace the two-flat-dropdown selector with the brand-sidebar + model-search-and-chips design, integrating DetailCard and CompatBar.
+Replace the two-flat-dropdown selector with the brand-sidebar + model-search-and-chips design, integrating DetailCard. (CompatBar removed per plan note — do not import or render it.)
 
 **Files:**
 - Modify: `web/src/components/ConsoleSelector.tsx` (full rewrite)
@@ -794,18 +668,20 @@ describe("ConsoleSelector (new)", () => {
     expect(onTargetChange).toHaveBeenCalledWith("digico-quantum-338");
   });
 
-  it("shows a warning compat bar when target is smaller than source", () => {
-    // CL5 = 72 ch, SD9 = 48 ch
+  it("chips show only the model name — no channel number", () => {
     render(
       <ConsoleSelector
         sourceModelId="yamaha-cl5"
         sourceDetected
-        targetModelId="digico-sd9"
+        targetModelId="digico-sd12"
         onSourceChange={vi.fn()}
         onTargetChange={vi.fn()}
       />,
     );
-    expect(screen.getByText(/49–72 will be dropped/)).toBeInTheDocument();
+    // The chip text for SD12 should NOT contain "96 ch" or similar.
+    const sd12 = screen.getByText("SD12");
+    const chip = sd12.closest("button");
+    expect(chip?.textContent).not.toMatch(/ch\b/i);
   });
 
   it("detail cards appear under each panel", () => {
@@ -839,10 +715,9 @@ Replace full contents of `web/src/components/ConsoleSelector.tsx`:
 ```tsx
 "use client";
 
-import { useState, useMemo } from "react";
-import { CONSOLE_BRANDS, getModelById, type ConsoleModel } from "@/lib/constants";
+import { useState } from "react";
+import { CONSOLE_BRANDS, getModelById } from "@/lib/constants";
 import DetailCard from "./DetailCard";
-import CompatBar from "./CompatBar";
 
 interface Props {
   sourceModelId: string | undefined;
@@ -871,14 +746,6 @@ export default function ConsoleSelector({
   // Override state — if true, the source side shows the brand-sidebar + search (just like target).
   const [overriding, setOverriding] = useState(false);
   const showSourceOverride = overriding || !sourceDetected;
-
-  // Warning logic for the target detail card.
-  const warningMessage = useMemo(() => {
-    if (!sourceModel || !targetModel) return undefined;
-    if (targetModel.maxChannels >= sourceModel.maxChannels) return undefined;
-    const dropped = sourceModel.maxChannels - targetModel.maxChannels;
-    return `${dropped} channels will be dropped`;
-  }, [sourceModel, targetModel]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -924,17 +791,9 @@ export default function ConsoleSelector({
           <DetailCard model={sourceModel} role="source" />
         </div>
         <div className="col-start-3 row-start-3 mt-2">
-          <DetailCard model={targetModel} role="target" warningMessage={warningMessage} />
+          <DetailCard model={targetModel} role="target" />
         </div>
       </div>
-
-      {sourceModel && targetModel && (
-        <CompatBar
-          sourceChannels={sourceModel.maxChannels}
-          targetChannels={targetModel.maxChannels}
-          targetLabel={`${targetModel.brand} ${targetModel.model}`}
-        />
-      )}
     </div>
   );
 }
@@ -1021,14 +880,13 @@ function Panel({
                 type="button"
                 disabled={disabled}
                 onClick={() => onModelClick(m.id)}
-                className={`inline-flex items-center gap-1 border px-3 py-1.5 text-xs font-semibold disabled:opacity-50 ${
+                className={`inline-flex items-center border px-3 py-1.5 text-xs font-semibold disabled:opacity-50 ${
                   selected
                     ? "bg-accent/10 border-accent text-accent"
                     : "border-border bg-surface text-white/80 hover:border-muted"
                 }`}
               >
-                <span>{m.model}</span>
-                <span className="text-[10px] text-muted">{m.maxChannels} ch</span>
+                {m.model}
               </button>
             );
           })}
@@ -1359,8 +1217,7 @@ export default function UploadFlow() {
               <p className="text-sm font-bold text-white">{file.name}</p>
               {sourceDetected && sourceModel && (
                 <p className="mt-0.5 text-xs text-success">
-                  ✓ Detected: {sourceModel.brand} {sourceModel.model} — {sourceModel.maxChannels}{" "}
-                  input channels, {sourceModel.mixBuses} mix buses
+                  ✓ Detected: {sourceModel.brand} {sourceModel.model}
                 </p>
               )}
               {!sourceDetected && (
