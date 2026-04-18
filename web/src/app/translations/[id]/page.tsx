@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { consoleLabel } from "@/lib/constants";
 import TranslationPreview from "@/components/TranslationPreview";
 import VerifyBanner from "@/components/VerifyBanner";
+import Timecode from "@/components/Timecode";
 
 export default async function TranslationDetailPage({
   params,
@@ -33,9 +34,12 @@ export default async function TranslationDetailPage({
       <div className="mx-auto max-w-2xl px-6">
         <p className="text-xs font-bold uppercase tracking-[3px] text-accent">★ Showfier</p>
         <h1 className="mt-3 text-2xl font-extrabold uppercase tracking-tight">{translation.source_filename}</h1>
-        <p className="mt-1 text-sm text-muted">
-          {consoleLabel(translation.source_console)} → {consoleLabel(translation.target_console)} · {new Date(translation.created_at).toLocaleDateString()}
-        </p>
+        <div className="mt-1 flex items-center gap-3 text-sm text-muted">
+          <span>
+            {consoleLabel(translation.source_console)} → {consoleLabel(translation.target_console)}
+          </span>
+          <Timecode iso={translation.created_at} />
+        </div>
 
         <div className="mt-6"><VerifyBanner /></div>
 
