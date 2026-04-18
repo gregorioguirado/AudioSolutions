@@ -13,6 +13,8 @@ export async function POST(request: Request) {
   const file = formData.get("file") as File | null;
   const sourceConsole = formData.get("source_console") as string | null;
   const targetConsole = formData.get("target_console") as string | null;
+  const sourceModel = formData.get("source_model") as string | null;
+  const targetModel = formData.get("target_model") as string | null;
 
   if (!file || !sourceConsole || !targetConsole) {
     return NextResponse.json({ error: "Missing file, source_console, or target_console" }, { status: 400 });
@@ -87,6 +89,9 @@ export async function POST(request: Request) {
       user_id: user.id,
       source_console: sourceConsole,
       target_console: targetConsole,
+      source_model: sourceModel,
+      target_model: targetModel,
+      channel_names: [],
       source_filename: file.name,
       source_r2_key: sourceKey,
       output_r2_key: outputKey,
@@ -124,6 +129,9 @@ export async function POST(request: Request) {
     await supabase.from("anonymous_previews").insert({
       id: translationId,
       session_token: sessionToken,
+      source_model: sourceModel,
+      target_model: targetModel,
+      channel_names: [],
       source_r2_key: sourceKey,
       output_r2_key: outputKey,
       report_r2_key: reportKey,
