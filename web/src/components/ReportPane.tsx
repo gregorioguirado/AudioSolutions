@@ -30,7 +30,7 @@ export default function ReportPane({ translation: t, onClose }: Props) {
   // Channel names have their own dedicated section below, so avoid listing
   // "channel_names" again inside the Translated params list.
   const translatedParams = t.translated_params.filter((p) => p !== "channel_names");
-  const tx = t.translated_params.length;
+  const tx = translatedParams.length;
   const ap = t.approximated_params.length;
   const dr = t.dropped_params.length;
 
