@@ -5,6 +5,7 @@ from pathlib import Path
 from parsers.yamaha_cl import parse_yamaha_cl
 from parsers.yamaha_cl_binary import parse_yamaha_cl_binary
 from parsers.digico_sd import parse_digico_sd
+from parsers import yamaha_dm7 as _dm7_parser
 from writers.digico_sd import write_digico_sd
 from writers.yamaha_cl import write_yamaha_cl
 from writers.yamaha_cl_binary import write_yamaha_cl_binary
@@ -45,8 +46,13 @@ def _parse_yamaha_auto(filepath: Path) -> ShowFile:
         return parse_yamaha_cl_binary(filepath)
 
 
+def _parse_yamaha_dm7(filepath: Path) -> ShowFile:
+    return _dm7_parser.parse(filepath.read_bytes())
+
+
 PARSERS = {
     "yamaha_cl": _parse_yamaha_auto,
+    "yamaha_dm7": _parse_yamaha_dm7,
     "digico_sd": parse_digico_sd,
 }
 
