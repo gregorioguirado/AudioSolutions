@@ -7,7 +7,8 @@ export default function Footer() {
         </p>
         <div className="flex gap-6">
           <a href="#" className="text-muted hover:text-white no-underline">Privacy</a>
-          <a href="#" className="text-muted hover:text-white no-underline">Terms</a>
+          <a href="/legal/terms-of-service" className="text-muted hover:text-white no-underline">Terms</a>
+          <a href="/legal/translation-accuracy-disclaimer" className="text-muted hover:text-white no-underline">Disclaimer</a>
           <a href="#" className="text-muted hover:text-white no-underline">Contact</a>
         </div>
       </div>

@@ -3,7 +3,6 @@ import HowItWorks from "@/components/HowItWorks";
 import WhatTranslates from "@/components/WhatTranslates";
 import PricingTeaser from "@/components/PricingTeaser";
 import FAQ from "@/components/FAQ";
-import Footer from "@/components/Footer";
 
 export default function Home() {
   return (
@@ -13,7 +12,6 @@ export default function Home() {
       <WhatTranslates />
       <PricingTeaser />
       <FAQ />
-      <Footer />
     </main>
   );
 }
