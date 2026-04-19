@@ -16,6 +16,9 @@ __pycache__/
 .venv/
 venv/
 
+# Supabase CLI local state (link info, etc.)
+web/supabase/.temp/
+
 # Node
 node_modules/
 .next/
