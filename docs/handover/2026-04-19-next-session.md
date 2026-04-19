@@ -10,27 +10,27 @@ The big thing that just happened: **Yamaha DM7 MBDF parser is done and live** (`
 
 ## DM7 parser — what's done and what's missing
 
-**Done (committed, tested):**
+**Done (committed, tested — 128 tests green):**
 - 120-channel name extraction (64-byte null-padded strings)
-- HPF: frequency (÷10 for Hz, range 20–2000 Hz) + On/Off flag at offset 134
+- HPF: frequency (÷10 for Hz) + On/Off flag at offset 134
 - Color → ChannelColor enum
 - DCA assignments (24-bit bitmask)
 - Phase bit
+- **EQ bands** — fully implemented. All offsets analytically derived from `mms_Mixing.xml` and verified against `dm7_empty.dm7f` defaults + `Bertoleza Sesi Campinas.dm7f` real values. 4 bands per channel; Band 1 = Low Shelf, Band 4 = High Shelf (controlled by LowShelving.On / HighShelving.On bits within the active PEQ bank). Freq ÷10 = Hz, Gain ÷100 = dB, Q ÷1000.
+- **Dynamics** — type detection (GATE, Classic Comp, PM Comp, etc.) and threshold parsing. Threshold = Param[0] ÷ 100 dB (verified empirically). Gate and Compressor `.enabled` flags are correct.
 
-**Still needed (TODOs in the parser):**
-- **EQ bands** — PEQ collection at record offset ~186. Needs calibration files with known EQ values set in DM7 Editor. The descriptor XML at `mms_Mixing.xml` shows the structure but we need empirical verification.
-- **Gate & compressor** — Dynamics collection at ~481. Same — calibration files needed.
+**Still needed:**
+- **Dynamics time constants** — attack/hold/release for Gate and attack/release for Compressor. Param scaling is type-dependent and unverified. Requires calibration file with known time values set. Currently set to 0.0 with a note in `dropped_parameters`.
+- **Compressor ratio** — same issue; Param[1] scaling unclear (could be ÷10 for direct ratio). Needs calibration.
 - **Mix bus sends** — ToMix collection (offset TBD).
-- **DM7 writer** — To translate CL → DM7. The tricky part is recompressing the inner blob + potentially updating the file checksum (the 32-char hex strings in the MBDF headers may or may not be content hashes — needs testing).
+- **DM7 writer** — To translate CL → DM7. Requires recompressing the inner blob; the 32-char hex strings in MBDF headers may or may not be content hashes (needs testing).
 
-**To generate DM7 EQ/dynamics calibration files:**
-Open DM7 Editor (`C:\Program Files\YAMAHA\DM7\dm7_editor.exe`), load `samples/dm7_empty.dm7f`, set channel 1 with:
-- HPF ON, 200 Hz
-- EQ band 1: Bell, 1kHz, +6dB, Q=1.0
-- Gate: Threshold -30dB, on
-- Compressor: 4:1 ratio, -20dB threshold, on
+**To calibrate dynamics time constants/ratio (optional but good to have):**
+Open DM7 Editor, load `samples/dm7_empty.dm7f`, set channel 1 with:
+- Gate: Threshold -30dB, Attack 5ms, Hold 100ms, Release 200ms, ON
+- Compressor: Classic Comp, Threshold -20dB, Ratio 4:1, Attack 10ms, Release 100ms, ON
 
-Save as `samples/dm7_eq_dynamics_calibration.dm7f`. Then I can map those offsets.
+Save as `samples/dm7_dyn_calibration.dm7f`. Then run `python tools/dm7_offset_probe.py samples/dm7_dyn_calibration.dm7f 1` to see the raw Param values and back-calculate scaling.
 
 ---
 
@@ -51,7 +51,7 @@ Both RIVAGE and TF share the MBDF container. Their descriptor XMLs would be in t
 | Yamaha CL/QL (XML .cle) | ✅ | ✅ | Full |
 | Yamaha CL/QL (binary .clf/.cle) | ✅ | ✅ | Full |
 | DiGiCo SD/Quantum | ✅ | ✅ | XML-based |
-| Yamaha DM7 (.dm7f) | ✅ partial | ❌ | Names + HPF done; EQ/dynamics TODO |
+| Yamaha DM7 (.dm7f) | ✅ partial | ❌ | Names + HPF + EQ + dyn threshold done; dyn time constants/ratio TODO |
 | Yamaha TF (.tff) | ❌ | ❌ | MBDF, sample file exists |
 | RIVAGE PM (.RIVAGEPM) | ❌ | ❌ | MBDF, sample file exists |
 
