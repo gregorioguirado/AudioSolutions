@@ -11,7 +11,7 @@ const TIERS: readonly Tier[] = [
   {
     name: "Free",
     price: "$0",
-    desc: "1 lifetime translation",
+    desc: "1 free translation",
     note: "Try it",
     highlighted: false,
   },

@@ -10,9 +10,9 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Showfier — Stop Rebuilding Your Shows",
+  title: "Showfier — Switch console brands in 30 seconds, not 8 hours",
   description:
-    "Upload a Yamaha CL/QL show file, download a DiGiCo SD/Quantum translation. 30 seconds.",
+    "Upload your show file from one mixing console, download it ready for another. First translation free.",
 };
 
 export default function RootLayout({

@@ -28,13 +28,13 @@ describe("PricingTeaser", () => {
     expect(tierLabels).toHaveLength(3);
   });
 
-  it("includes the new tier copy: $19/mo Pro, Contact us Team, 1 lifetime translation Free", () => {
+  it("includes the new tier copy: $19/mo Pro, Contact us Team, 1 free translation Free", () => {
     const { container } = render(<PricingTeaser />);
 
     expect(container.textContent).toMatch(/\$0/);
     expect(container.textContent).toMatch(/\$19\/mo/);
     expect(container.textContent).toMatch(/contact us/i);
-    expect(container.textContent).toMatch(/1 lifetime translation/i);
+    expect(container.textContent).toMatch(/1 free translation/i);
     expect(container.textContent).toMatch(/unlimited translations/i);
     expect(container.textContent).toMatch(/multi-seat/i);
   });
