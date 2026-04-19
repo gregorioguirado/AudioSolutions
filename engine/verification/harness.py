@@ -85,6 +85,9 @@ def _parser_for(target_format: str) -> Callable[[Path], ShowFile]:
         # Use the same auto-detect logic as the translator.
         from translator import _parse_yamaha_auto
         return _parse_yamaha_auto
+    if target_format == "yamaha_cl_binary":
+        from parsers.yamaha_cl_binary import parse_yamaha_cl_binary
+        return parse_yamaha_cl_binary
     raise ValueError(f"No verification parser registered for target format: {target_format!r}")
 
 
@@ -199,7 +202,12 @@ def verify_translation(
 
         if isinstance(output, (bytes, bytearray)):
             # Pick a writable suffix the target parser will accept.
-            suffix = ".show" if target_format == "digico_sd" else ".cle"
+            if target_format == "digico_sd":
+                suffix = ".show"
+            elif target_format == "yamaha_cl_binary":
+                suffix = ".CLF"
+            else:
+                suffix = ".cle"
             fd, name = tempfile.mkstemp(suffix=suffix, prefix="verify_")
             os.close(fd)
             tmp_path = Path(name)

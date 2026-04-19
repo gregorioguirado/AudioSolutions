@@ -7,6 +7,7 @@ from parsers.yamaha_cl_binary import parse_yamaha_cl_binary
 from parsers.digico_sd import parse_digico_sd
 from writers.digico_sd import write_digico_sd
 from writers.yamaha_cl import write_yamaha_cl
+from writers.yamaha_cl_binary import write_yamaha_cl_binary
 from models.universal import ShowFile
 
 logger = logging.getLogger("engine.verification")
@@ -52,6 +53,7 @@ PARSERS = {
 WRITERS = {
     "digico_sd": write_digico_sd,
     "yamaha_cl": write_yamaha_cl,
+    "yamaha_cl_binary": write_yamaha_cl_binary,
 }
 
 
