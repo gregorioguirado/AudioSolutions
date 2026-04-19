@@ -4,7 +4,7 @@ import { consoleLabel } from "@/lib/constants";
 import TranslationPreview from "@/components/TranslationPreview";
 import VerifyBanner from "@/components/VerifyBanner";
 import Timecode from "@/components/Timecode";
-import DownloadAcknowledgement from "@/components/DownloadAcknowledgement";
+import DownloadButtonsWithVerify from "@/components/DownloadButtonsWithVerify";
 
 export default async function TranslationDetailPage({
   params,
@@ -55,7 +55,7 @@ export default async function TranslationDetailPage({
         </div>
 
         <div className="mt-8">
-          <DownloadAcknowledgement
+          <DownloadButtonsWithVerify
             links={[
               {
                 href: `/api/download/${translation.id}?type=output`,

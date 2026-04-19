@@ -6,7 +6,7 @@ import ConsoleSelector from "./ConsoleSelector";
 import TranslationPreview from "./TranslationPreview";
 import VerifyBanner from "./VerifyBanner";
 import SignupWall from "./SignupWall";
-import DownloadAcknowledgement from "./DownloadAcknowledgement";
+import DownloadButtonsWithVerify from "./DownloadButtonsWithVerify";
 import {
   detectModelFromFilename,
   getModelById,
@@ -244,7 +244,7 @@ export default function UploadFlow() {
           />
           {preview.authenticated ? (
             <div className="flex flex-col gap-3">
-              <DownloadAcknowledgement
+              <DownloadButtonsWithVerify
                 links={[
                   {
                     href: `/api/download/${preview.translationId}?type=output`,
