@@ -6,6 +6,8 @@ Covers:
   - HPF frequency and slope parsing
   - Color mapping
   - DCA / mute group bitmask extraction
+  - EQ band parsing (frequency, gain, Q, shelf detection)
+  - Dynamics parsing (gate/compressor On flag, threshold, type detection)
   - Error handling (bad magic, truncated data)
 """
 from __future__ import annotations
@@ -15,7 +17,7 @@ from pathlib import Path
 import pytest
 
 from parsers.yamaha_dm7 import parse
-from models.universal import ChannelColor, ShowFile
+from models.universal import ChannelColor, EQBandType, ShowFile
 
 SAMPLES = Path(__file__).parent.parent.parent / "samples"
 EMPTY   = SAMPLES / "dm7_empty.dm7f"
@@ -140,6 +142,87 @@ def test_real_file_hpf_slope_valid(show_real):
     for i in range(20):
         slope = inner[data_start + i * 1785 + 139]
         assert slope in (0, 6, 12, 18, 24), f"Ch {i+1} unexpected slope byte {slope}"
+
+
+# ---------------------------------------------------------------------------
+# EQ parsing (verified from dm7_empty.dm7f defaults and Bertoleza real file)
+# ---------------------------------------------------------------------------
+
+def test_empty_file_eq_band_count(show_empty):
+    assert len(show_empty.channels[0].eq_bands) == 4
+
+
+def test_empty_file_eq_default_band_types(show_empty):
+    # DM7 defaults: Band 1 = Low Shelf, Bands 2-3 = Peak, Band 4 = High Shelf
+    bands = show_empty.channels[0].eq_bands
+    assert bands[0].band_type == EQBandType.LOW_SHELF
+    assert bands[1].band_type == EQBandType.PEAK
+    assert bands[2].band_type == EQBandType.PEAK
+    assert bands[3].band_type == EQBandType.HIGH_SHELF
+
+
+def test_empty_file_eq_default_frequencies(show_empty):
+    # DM7 empty file defaults (from mms_Mixing.xml + empirical verification)
+    freqs = [b.frequency for b in show_empty.channels[0].eq_bands]
+    assert freqs[0] == pytest.approx(125.0)
+    assert freqs[1] == pytest.approx(355.0)
+    assert freqs[2] == pytest.approx(3550.0)
+    assert freqs[3] == pytest.approx(6300.0)
+
+
+def test_empty_file_eq_default_gains_zero(show_empty):
+    for band in show_empty.channels[0].eq_bands:
+        assert band.gain == pytest.approx(0.0)
+
+
+def test_empty_file_eq_bands_enabled(show_empty):
+    for band in show_empty.channels[0].eq_bands:
+        assert band.enabled is True
+
+
+def test_real_file_eq_ch1_band1_cut(show_real):
+    # Ch 1 (LUANA) has a significant low-mid cut — real engineering data
+    band1 = show_real.channels[0].eq_bands[0]
+    assert band1.frequency == pytest.approx(280.0)
+    assert band1.gain == pytest.approx(-7.9, abs=0.01)
+    assert band1.q == pytest.approx(2.8, abs=0.001)
+
+
+def test_real_file_eq_all_channels_have_4_bands(show_real):
+    for ch in show_real.channels[:20]:
+        assert len(ch.eq_bands) == 4, f"{ch.name} has {len(ch.eq_bands)} bands"
+
+
+def test_real_file_eq_frequencies_in_audio_range(show_real):
+    for ch in show_real.channels[:20]:
+        for b in ch.eq_bands:
+            assert 20.0 <= b.frequency <= 20000.0, (
+                f"{ch.name} band freq {b.frequency} Hz out of range"
+            )
+
+
+# ---------------------------------------------------------------------------
+# Dynamics parsing
+# ---------------------------------------------------------------------------
+
+def test_empty_file_dynamics_off(show_empty):
+    ch = show_empty.channels[0]
+    # Both dynamics units are off by default
+    assert ch.gate is None or ch.gate.enabled is False
+    assert ch.compressor is None or ch.compressor.enabled is False
+
+
+def test_real_file_ch1_has_compressor(show_real):
+    # LUANA has PM Comp on
+    ch = show_real.channels[0]
+    assert ch.compressor is not None
+    assert ch.compressor.enabled is True
+
+
+def test_real_file_ch1_compressor_threshold(show_real):
+    # PM Comp threshold = -25 dB (Param[0]=-2500, ÷100)
+    ch = show_real.channels[0]
+    assert ch.compressor.threshold == pytest.approx(-25.0, abs=0.01)
 
 
 # ---------------------------------------------------------------------------

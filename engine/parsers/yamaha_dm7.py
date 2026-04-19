@@ -16,6 +16,22 @@ Offset map derived from:
 All offsets are within a 1785-byte InputChannel record.
 GainGang and DelayGang (bit type) are packed into 1 byte, making all
 subsequent offsets 1 byte less than the descriptor's cumulative sum.
+
+InputChannel layout:
+  +0    GainGang+DelayGang packed (1 byte)
+  +1    Signal (9 bytes)
+  +10   Label (84 bytes: Name str64 + Color str8 + Icon str12)
+  +94   InPatch (9 bytes)
+  +103  VirtualSC (5 bytes)
+  +108  Input (3 bytes: Phase bit + Gain int16)
+  +111  Insert (18 bytes)
+  +129  DirectOut (5 bytes)
+  +134  HPF[4] (24 bytes: 4 × On:bit + Freq:uint32 + Slope:uint8)
+  +158  LPF[4] (24 bytes: same)
+  +182  PEQ (294 bytes): Select + ActorSelect + 4×Bank(73 bytes each)
+  +476  Proc (1 byte)
+  +477  Dynamics[0] Gate/Comp1 (422 bytes): Select + ActorSelect + 4×Bank(74 bytes)
+  +899  Dynamics[1] Comp2 (422 bytes): same layout
 """
 from __future__ import annotations
 
@@ -63,9 +79,38 @@ MUTE_GRP_OFFSET  = 1770  # MuteGroup.Assign — 2 bytes, 12-bit mask
 NAME_LEN  = 64
 COLOR_LEN = 8
 
-# TODO: EQ band offsets need calibration files with known EQ values
-# PEQ.Bank starts at ~186 within record; each bank is ~295 bytes
-# TODO: Dynamics (gate/comp) offsets need further calibration
+# PEQ layout (offsets within InputChannel record)
+# Verified: dm7_empty.dm7f defaults, Bertoleza Sesi Campinas.dm7f real values
+PEQ_OFFSET       = 182
+PEQ_ACTOR_OFFSET = PEQ_OFFSET + 1  # uint8_t: active bank index 0-3
+PEQ_BANK_0       = PEQ_OFFSET + 2  # first bank
+PEQ_BANK_SIZE    = 73
+
+# Within each PEQ bank (relative to bank start)
+_PB_ON          = 0   # bit
+_PB_TYPE        = 1   # string(12)
+_PB_ATT         = 13  # int16_t, ÷100 → dB
+_PB_BAND_FIRST  = 15  # start of 4 × Band(9 bytes)
+_PB_BAND_SIZE   = 9
+_PB_LOWSHELF    = 51  # bit: Band 1 is Low Shelf when set
+_PB_HIGHSHELF   = 54  # bit: Band 4 is High Shelf when set
+# Within each Band (relative to band start)
+_BD_BYPASS      = 0   # bit
+_BD_FREQ        = 1   # uint32_t, ÷10 → Hz
+_BD_GAIN        = 5   # int16_t, ÷100 → dB
+_BD_Q           = 7   # uint16_t, ÷1000
+
+# Dynamics layout (offsets within InputChannel record)
+# Two Dynamics units: [0] typically Gate, [1] typically Compressor
+# Parameter[0] = threshold (÷100 → dB, verified from defaults and real files).
+# Parameter[1..9] scaling is type-dependent and not yet calibrated.
+DYN_OFFSET    = 477
+DYN_SIZE      = 422
+DYN_BANK_SIZE = 74
+# Within each Dynamics bank (relative to bank start)
+_DB_ON    = 0   # bit
+_DB_TYPE  = 1   # string(16): "GATE", "Classic Comp", "PM Comp", "DE-ESSER", etc.
+_DB_PARAM = 18  # 10 × int32_t; [0]=threshold ÷100 dB, rest type-dependent
 
 # ---------------------------------------------------------------------------
 # Color mapping
@@ -123,6 +168,91 @@ def _read_str(data: bytes, offset: int, max_len: int) -> str:
     return raw.split(b"\x00")[0].decode("utf-8", errors="replace").strip()
 
 
+def _parse_eq(rec: bytes) -> list[EQBand]:
+    """Extract 4 PEQ bands from the active bank of a 1785-byte channel record."""
+    actor = rec[PEQ_ACTOR_OFFSET]
+    bank = PEQ_BANK_0 + actor * PEQ_BANK_SIZE
+
+    low_shelf  = bool(rec[bank + _PB_LOWSHELF]  & 0x01)
+    high_shelf = bool(rec[bank + _PB_HIGHSHELF] & 0x01)
+    band_types = [
+        EQBandType.LOW_SHELF  if low_shelf  else EQBandType.PEAK,
+        EQBandType.PEAK,
+        EQBandType.PEAK,
+        EQBandType.HIGH_SHELF if high_shelf else EQBandType.PEAK,
+    ]
+
+    bands: list[EQBand] = []
+    for i in range(4):
+        bd = band_types[i]
+        off = bank + _PB_BAND_FIRST + i * _PB_BAND_SIZE
+        bypass  = bool(rec[off + _BD_BYPASS] & 0x01)
+        freq_hz = struct.unpack_from("<I", rec, off + _BD_FREQ)[0] / 10.0
+        gain_db = struct.unpack_from("<h", rec, off + _BD_GAIN)[0] / 100.0
+        q       = struct.unpack_from("<H", rec, off + _BD_Q)[0]   / 1000.0
+        bands.append(EQBand(
+            frequency=freq_hz,
+            gain=gain_db,
+            q=q,
+            band_type=bd,
+            enabled=not bypass,
+        ))
+    return bands
+
+
+# Dynamics types that map to Gate in the universal model
+_GATE_TYPES = {"GATE", "EXP.1:2", "EXP.1:4", "DUCKER", "FREQ.DUCK"}
+# Types that map to Compressor
+_COMP_TYPES = {"Classic Comp", "PM Comp", "COMPANDER H", "COMPANDER S", "VCA Comp"}
+
+
+def _parse_dynamics(rec: bytes, dropped: list[str], ch_name: str) -> tuple[Optional[Gate], Optional[Compressor]]:
+    """Extract gate and compressor from the two Dynamics units.
+
+    Parameter[0] ÷ 100 = threshold dB (verified against defaults and real files).
+    Other parameter scaling is type-dependent and not yet calibrated — time
+    constants and ratio are omitted rather than fabricated.
+    """
+    gate: Optional[Gate] = None
+    comp: Optional[Compressor] = None
+
+    for d in range(2):
+        dyn_base = DYN_OFFSET + d * DYN_SIZE
+        actor    = rec[dyn_base + 1]
+        bank     = dyn_base + 2 + actor * DYN_BANK_SIZE
+        on       = bool(rec[bank + _DB_ON] & 0x01)
+        dyn_type = _read_str(rec, bank + _DB_TYPE, 16)
+        threshold_db = struct.unpack_from("<i", rec, bank + _DB_PARAM)[0] / 100.0
+
+        if dyn_type in _GATE_TYPES and gate is None:
+            gate = Gate(
+                threshold=threshold_db,
+                attack=0.0,    # scaling unverified — needs calibration file
+                hold=0.0,
+                release=0.0,
+                enabled=on,
+            )
+            if on:
+                dropped.append(f"{ch_name}: Gate attack/hold/release not calibrated for DM7 — set to 0")
+        elif dyn_type in _COMP_TYPES and comp is None:
+            comp = Compressor(
+                threshold=threshold_db,
+                ratio=0.0,     # scaling unverified — needs calibration file
+                attack=0.0,
+                release=0.0,
+                makeup_gain=0.0,
+                enabled=on,
+            )
+            if on:
+                dropped.append(f"{ch_name}: Comp ratio/attack/release not calibrated for DM7 — set to 0")
+        elif dyn_type not in {"", "DE-ESSER"}:
+            # DE-ESSER and empty type have no universal equivalent
+            if on:
+                dropped.append(f"{ch_name}: DM7 dynamics type '{dyn_type}' has no universal equivalent — dropped")
+
+    return gate, comp
+
+
 # ---------------------------------------------------------------------------
 # Public parse entry point
 # ---------------------------------------------------------------------------
@@ -167,6 +297,10 @@ def parse(data: bytes) -> ShowFile:
         mg_mask   = int.from_bytes(mg_bytes, "little")
         mute_grps = [g + 1 for g in range(12) if mg_mask & (1 << g)]
 
+        record = inner[rec : rec + RECORD_SIZE]
+        eq_bands        = _parse_eq(record)
+        gate, compressor = _parse_dynamics(record, dropped, name)
+
         ch = Channel(
             id=i + 1,
             name=name,
@@ -174,12 +308,12 @@ def parse(data: bytes) -> ShowFile:
             input_patch=None,
             hpf_frequency=hpf_hz,
             hpf_enabled=hpf_on,
-            eq_bands=[],        # TODO: calibrate PEQ offsets
-            gate=None,          # TODO: calibrate Dynamics offsets
-            compressor=None,    # TODO: calibrate Dynamics offsets
+            eq_bands=eq_bands,
+            gate=gate,
+            compressor=compressor,
             mix_bus_assignments=[],  # TODO: ToMix offset map
             vca_assignments=dcas,
-            muted=False,        # TODO: On/Off channel flag offset
+            muted=False,             # TODO: On/Off channel flag offset
         )
         channels.append(ch)
 
