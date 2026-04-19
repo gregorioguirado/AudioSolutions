@@ -6,6 +6,7 @@ import ConsoleSelector from "./ConsoleSelector";
 import TranslationPreview from "./TranslationPreview";
 import VerifyBanner from "./VerifyBanner";
 import SignupWall from "./SignupWall";
+import DownloadButtonsWithVerify from "./DownloadButtonsWithVerify";
 import {
   detectModelFromFilename,
   getModelById,
@@ -243,18 +244,20 @@ export default function UploadFlow() {
           />
           {preview.authenticated ? (
             <div className="flex flex-col gap-3">
-              <a
-                href={`/api/download/${preview.translationId}?type=output`}
-                className="flex items-center justify-center bg-accent px-6 py-3 text-sm font-extrabold uppercase tracking-wider text-black no-underline hover:bg-yellow-300"
-              >
-                Download translated file
-              </a>
-              <a
-                href={`/api/download/${preview.translationId}?type=report`}
-                className="flex items-center justify-center border border-accent px-6 py-3 text-sm font-extrabold uppercase tracking-wider text-accent no-underline hover:bg-accent/10"
-              >
-                Download translation report (PDF)
-              </a>
+              <DownloadButtonsWithVerify
+                links={[
+                  {
+                    href: `/api/download/${preview.translationId}?type=output`,
+                    label: "Download translated file",
+                    variant: "primary",
+                  },
+                  {
+                    href: `/api/download/${preview.translationId}?type=report`,
+                    label: "Download translation report (PDF)",
+                    variant: "secondary",
+                  },
+                ]}
+              />
               <button
                 type="button"
                 onClick={() => router.push(`/translations/${preview.translationId}`)}

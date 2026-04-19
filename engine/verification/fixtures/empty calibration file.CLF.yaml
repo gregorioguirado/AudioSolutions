@@ -1,0 +1,91 @@
+# Golden fixture for samples/empty calibration file.CLF
+#
+# This file demonstrates the fixture-golden pattern used by the verification
+# harness. The harness loads this YAML, then compares the parsed ShowFile
+# against the values listed below — fields not listed are skipped, so the
+# fixture can be grown incrementally as more parameters are validated.
+#
+# More fixtures (one per calibration file) and more fields per fixture will
+# be added per parameter class as the harness matures. Today's coverage
+# intentionally stays minimal: channel count and channel names for the empty
+# calibration baseline. Future additions will cover hpf/eq/gate/comp values
+# from the dynamics, eq, and fader/pan/mute calibration files.
+#
+# Channel names below reflect the actual factory-default Yamaha CL5 naming
+# observed when parsing this empty calibration file with the binary parser
+# (note the single space between "ch" and the digit for ch 1-9).
+
+channel_count: 72
+channel_names:
+  - "ch 1"
+  - "ch 2"
+  - "ch 3"
+  - "ch 4"
+  - "ch 5"
+  - "ch 6"
+  - "ch 7"
+  - "ch 8"
+  - "ch 9"
+  - "ch10"
+  - "ch11"
+  - "ch12"
+  - "ch13"
+  - "ch14"
+  - "ch15"
+  - "ch16"
+  - "ch17"
+  - "ch18"
+  - "ch19"
+  - "ch20"
+  - "ch21"
+  - "ch22"
+  - "ch23"
+  - "ch24"
+  - "ch25"
+  - "ch26"
+  - "ch27"
+  - "ch28"
+  - "ch29"
+  - "ch30"
+  - "ch31"
+  - "ch32"
+  - "ch33"
+  - "ch34"
+  - "ch35"
+  - "ch36"
+  - "ch37"
+  - "ch38"
+  - "ch39"
+  - "ch40"
+  - "ch41"
+  - "ch42"
+  - "ch43"
+  - "ch44"
+  - "ch45"
+  - "ch46"
+  - "ch47"
+  - "ch48"
+  - "ch49"
+  - "ch50"
+  - "ch51"
+  - "ch52"
+  - "ch53"
+  - "ch54"
+  - "ch55"
+  - "ch56"
+  - "ch57"
+  - "ch58"
+  - "ch59"
+  - "ch60"
+  - "ch61"
+  - "ch62"
+  - "ch63"
+  - "ch64"
+  - "ch65"
+  - "ch66"
+  - "ch67"
+  - "ch68"
+  - "ch69"
+  - "ch70"
+  - "ch71"
+  - "ch72"

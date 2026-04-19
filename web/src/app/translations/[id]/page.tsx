@@ -4,6 +4,7 @@ import { consoleLabel } from "@/lib/constants";
 import TranslationPreview from "@/components/TranslationPreview";
 import VerifyBanner from "@/components/VerifyBanner";
 import Timecode from "@/components/Timecode";
+import DownloadButtonsWithVerify from "@/components/DownloadButtonsWithVerify";
 
 export default async function TranslationDetailPage({
   params,
@@ -53,15 +54,21 @@ export default async function TranslationDetailPage({
           />
         </div>
 
-        <div className="mt-8 flex flex-col gap-3">
-          <a href={`/api/download/${translation.id}?type=output`}
-            className="flex items-center justify-center bg-accent px-6 py-3 text-sm font-extrabold uppercase tracking-wider text-black no-underline hover:bg-yellow-300">
-            Download translated file
-          </a>
-          <a href={`/api/download/${translation.id}?type=report`}
-            className="flex items-center justify-center border border-accent px-6 py-3 text-sm font-extrabold uppercase tracking-wider text-accent no-underline hover:bg-accent/10">
-            Download translation report (PDF)
-          </a>
+        <div className="mt-8">
+          <DownloadButtonsWithVerify
+            links={[
+              {
+                href: `/api/download/${translation.id}?type=output`,
+                label: "Download translated file",
+                variant: "primary",
+              },
+              {
+                href: `/api/download/${translation.id}?type=report`,
+                label: "Download translation report (PDF)",
+                variant: "secondary",
+              },
+            ]}
+          />
         </div>
       </div>
     </main>

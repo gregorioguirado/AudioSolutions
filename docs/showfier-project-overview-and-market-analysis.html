@@ -1,0 +1,1647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SHOWFIER — Deep Project Overview & Market Analysis</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1a1a2e;
+    --border: #2a2a3e;
+    --text: #e0e0e8;
+    --text-muted: #8888a0;
+    --accent: #6c5ce7;
+    --accent2: #a29bfe;
+    --green: #00cec9;
+    --green-dim: #00b89420;
+    --yellow: #fdcb6e;
+    --yellow-dim: #fdcb6e20;
+    --red: #ff6b6b;
+    --red-dim: #ff6b6b20;
+    --blue: #74b9ff;
+    --blue-dim: #74b9ff20;
+    --orange: #e17055;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 15px;
+  }
+
+  /* Header */
+  .hero {
+    background: linear-gradient(135deg, #0a0a1a 0%, #1a1035 40%, #0f1a2e 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 80px 40px 60px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(ellipse at 30% 50%, rgba(108,92,231,0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 50%, rgba(0,206,201,0.06) 0%, transparent 50%);
+    animation: drift 20s ease-in-out infinite;
+  }
+  @keyframes drift {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(-30px, 20px); }
+  }
+  .hero > * { position: relative; z-index: 1; }
+  .hero .badge {
+    display: inline-block;
+    background: var(--accent);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 20px;
+    margin-bottom: 24px;
+  }
+  .hero h1 {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 800;
+    letter-spacing: -1px;
+    background: linear-gradient(135deg, #fff 0%, var(--accent2) 50%, var(--green) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+  }
+  .hero .subtitle {
+    font-size: 1.15rem;
+    color: var(--text-muted);
+    max-width: 700px;
+    margin: 0 auto 32px;
+  }
+  .hero-meta {
+    display: flex;
+    gap: 32px;
+    justify-content: center;
+    flex-wrap: wrap;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .hero-meta span { display: flex; align-items: center; gap: 6px; }
+  .hero-meta .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+
+  /* Navigation */
+  .toc {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 40px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+    overflow-x: auto;
+  }
+  .toc-inner {
+    display: flex;
+    gap: 8px;
+    max-width: 1200px;
+    margin: 0 auto;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .toc a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 6px;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .toc a:hover { color: var(--accent2); background: var(--accent)15; }
+
+  /* Main */
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+
+  /* Sections */
+  section {
+    padding: 60px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  section:last-child { border-bottom: none; }
+
+  h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  h2 .num {
+    font-size: 0.7em;
+    color: var(--accent);
+    font-weight: 800;
+  }
+  .section-subtitle {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin-bottom: 32px;
+  }
+
+  h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--accent2);
+    margin: 32px 0 16px;
+  }
+  h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    margin: 20px 0 10px;
+  }
+
+  p { margin-bottom: 16px; color: var(--text); }
+
+  /* Stats Grid */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin: 24px 0;
+  }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+  }
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent2), var(--green));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .stat-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* Tables */
+  .table-wrap {
+    overflow-x: auto;
+    margin: 16px 0 24px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+  }
+  thead { background: var(--surface2); }
+  th {
+    text-align: left;
+    padding: 12px 16px;
+    font-weight: 600;
+    color: var(--accent2);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(108,92,231,0.04); }
+  tbody tr:nth-child(even) td { background: rgba(255,255,255,0.015); }
+
+  /* Cards */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+    margin: 20px 0;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    transition: border-color 0.2s;
+  }
+  .card:hover { border-color: var(--accent); }
+  .card-title {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 8px;
+    color: #fff;
+  }
+  .card p { font-size: 0.88rem; color: var(--text-muted); margin: 0; }
+
+  /* Tags */
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .tag-green { background: var(--green-dim); color: var(--green); }
+  .tag-yellow { background: var(--yellow-dim); color: var(--yellow); }
+  .tag-red { background: var(--red-dim); color: var(--red); }
+  .tag-blue { background: var(--blue-dim); color: var(--blue); }
+
+  /* Callouts */
+  .callout {
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin: 20px 0;
+    font-size: 0.92rem;
+  }
+  .callout-accent {
+    background: linear-gradient(135deg, rgba(108,92,231,0.1), rgba(108,92,231,0.03));
+    border-left: 3px solid var(--accent);
+  }
+  .callout-green {
+    background: linear-gradient(135deg, rgba(0,206,201,0.1), rgba(0,206,201,0.03));
+    border-left: 3px solid var(--green);
+  }
+  .callout-yellow {
+    background: linear-gradient(135deg, rgba(253,203,110,0.1), rgba(253,203,110,0.03));
+    border-left: 3px solid var(--yellow);
+  }
+  .callout-red {
+    background: linear-gradient(135deg, rgba(255,107,107,0.1), rgba(255,107,107,0.03));
+    border-left: 3px solid var(--red);
+  }
+  .callout strong { color: #fff; }
+  blockquote {
+    border-left: 3px solid var(--accent);
+    padding: 16px 24px;
+    margin: 20px 0;
+    background: var(--surface);
+    border-radius: 0 12px 12px 0;
+    font-style: italic;
+    color: var(--text-muted);
+  }
+
+  /* Risk matrix */
+  .risk-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .risk-fill {
+    height: 8px;
+    border-radius: 4px;
+    min-width: 10px;
+  }
+
+  /* Scenario cards */
+  .scenario {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    margin: 16px 0;
+  }
+  .scenario-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .scenario-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+  }
+
+  /* Timeline */
+  .timeline {
+    position: relative;
+    padding-left: 32px;
+    margin: 24px 0;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--accent), var(--green));
+    border-radius: 1px;
+  }
+  .timeline-item {
+    position: relative;
+    margin-bottom: 24px;
+    padding: 16px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -28px;
+    top: 20px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--bg);
+  }
+  .timeline-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--accent2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .timeline-title {
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+  .timeline-desc {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  /* Platform diagram */
+  .diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 40px;
+    margin: 24px 0;
+    text-align: center;
+  }
+  .diagram-core {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--accent), #4834d4);
+    color: white;
+    font-weight: 700;
+    padding: 16px 32px;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    margin-bottom: 24px;
+  }
+  .diagram-branches {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .diagram-node {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  /* Footer */
+  .footer {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 40px;
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .hero { padding: 50px 20px 40px; }
+    .container { padding: 0 20px; }
+    section { padding: 40px 0; }
+    .hero-meta { gap: 16px; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .toc { padding: 12px 20px; }
+    .diagram { padding: 24px 16px; }
+  }
+  @media (max-width: 480px) {
+    .stats { grid-template-columns: 1fr; }
+    .card-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Projection charts (CSS-only bar charts) */
+  .bar-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    height: 180px;
+    margin: 20px 0 8px;
+    padding: 0 4px;
+  }
+  .bar-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    height: 100%;
+    justify-content: flex-end;
+  }
+  .bar {
+    width: 100%;
+    max-width: 60px;
+    border-radius: 6px 6px 2px 2px;
+    transition: height 0.5s ease;
+    position: relative;
+  }
+  .bar-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 4px;
+  }
+  .bar-value {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #fff;
+    text-align: center;
+    position: absolute;
+    top: -18px;
+    width: 100%;
+  }
+
+  /* Chart legend */
+  .chart-legend {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+  }
+
+  /* Console priority list */
+  .console-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 12px;
+    margin: 20px 0;
+  }
+  .console-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+  }
+  .console-rank {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--accent);
+    min-width: 30px;
+    text-align: center;
+  }
+  .console-info { flex: 1; }
+  .console-name { font-weight: 600; color: #fff; font-size: 0.95rem; }
+  .console-detail { font-size: 0.78rem; color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="badge">AudioSolutions &middot; April 2026</div>
+  <h1>SHOWFIER</h1>
+  <p class="subtitle">Deep Project Overview & Market Analysis &mdash; The Universal Translator for Mixing Console Show Files</p>
+  <div class="hero-meta">
+    <span><span class="dot" style="background:var(--green)"></span> MVP Deployed</span>
+    <span><span class="dot" style="background:var(--accent)"></span> Yamaha CL/QL &harr; DiGiCo SD</span>
+    <span><span class="dot" style="background:var(--yellow)"></span> Blue Ocean Market</span>
+    <span><span class="dot" style="background:var(--blue)"></span> 96%+ Gross Margin</span>
+  </div>
+</div>
+
+<!-- TOC -->
+<nav class="toc">
+  <div class="toc-inner">
+    <a href="#exec">Executive Summary</a>
+    <a href="#problem">The Problem</a>
+    <a href="#solution">The Solution</a>
+    <a href="#market">Market</a>
+    <a href="#competition">Competition</a>
+    <a href="#business">Business Model</a>
+    <a href="#revenue">Revenue</a>
+    <a href="#gtm">Go-to-Market</a>
+    <a href="#roadmap">Roadmap</a>
+    <a href="#consoles">Console Priority</a>
+    <a href="#platform">Platform Vision</a>
+    <a href="#risks">Risks</a>
+    <a href="#legal">Legal & IP</a>
+    <a href="#policies">Policies</a>
+    <a href="#metrics">Metrics</a>
+    <a href="#strategy">Strategy</a>
+  </div>
+</nav>
+
+<div class="container">
+
+<!-- EXECUTIVE SUMMARY -->
+<section id="exec">
+  <h2><span class="num">01</span> Executive Summary</h2>
+  <p class="section-subtitle">The Babel Fish for mixing consoles &mdash; a cloud SaaS that translates proprietary show files between brands.</p>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">$12B+</div>
+      <div class="stat-label">Global Pro Audio Market</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">$1B</div>
+      <div class="stat-label">Live Mixer Segment</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">~0</div>
+      <div class="stat-label">Cross-Brand Competitors</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">96%+</div>
+      <div class="stat-label">Gross Margin</div>
+    </div>
+  </div>
+
+  <div class="callout callout-green">
+    <strong>The opportunity:</strong> 20,000&ndash;40,000 touring engineers regularly encounter incompatible consoles. No cross-brand solution exists. Console manufacturers have zero incentive to build one. Showfier is the first product to solve this with a universal translation engine.
+  </div>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">Market</div>
+      <p>Genuine blue ocean. One active competitor (A&H-only, $15/conversion). One prior attempt (2012) died. No manufacturer will build cross-brand tools.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Economics</div>
+      <p>Infrastructure cost ~$0.03/translation. Break-even with &lt;5 paying customers. LTV:CAC ratios of 4:1 to 24:1 across all tiers.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Projections</div>
+      <p>Conservative 3yr: ~$96K ARR. Moderate: ~$660K. Optimistic: $3.8M. All scenarios viable for bootstrapped micro-SaaS.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Top Risk</div>
+      <p>Solo founder burnout (score: 20/25). Mitigated by sustainable pacing, parallel income, and hiring support at $200K+ ARR.</p>
+    </div>
+  </div>
+</section>
+
+<!-- THE PROBLEM -->
+<section id="problem">
+  <h2><span class="num">02</span> The Problem</h2>
+  <p class="section-subtitle">Engineers carry show files worth 4&ndash;20+ hours of work. When the console brand doesn't match, they rebuild from scratch.</p>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">2&ndash;8h</div>
+      <div class="stat-label">Manual Rebuild Time</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">$200&ndash;$800</div>
+      <div class="stat-label">Cost Per Rebuild</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">5+</div>
+      <div class="stat-label">Incompatible Brands</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">0</div>
+      <div class="stat-label">Existing Solutions</div>
+    </div>
+  </div>
+
+  <blockquote>"There's currently no way to transfer a show file from the console of one manufacturer to another, and you might even struggle to transfer a file between consoles from the same manufacturer." &mdash; Andy Coules, ProSoundWeb</blockquote>
+
+  <h3>Who feels this pain?</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Scenario</th><th>Frequency</th><th>Severity</th></tr></thead>
+      <tbody>
+        <tr><td>Festival engineers (provided console differs from rider)</td><td>Nearly every gig</td><td><span class="tag tag-red">Critical</span></td></tr>
+        <tr><td>B/C-tier touring (can't demand specific console)</td><td>Frequently</td><td><span class="tag tag-red">Critical</span></td></tr>
+        <tr><td>Freelance engineers (whatever's available)</td><td>Regularly</td><td><span class="tag tag-yellow">High</span></td></tr>
+        <tr><td>A-list touring (fly dates, festivals, international)</td><td>Occasionally</td><td><span class="tag tag-yellow">High</span></td></tr>
+        <tr><td>Venue system upgrades</td><td>1&ndash;2x per lifecycle</td><td><span class="tag tag-blue">Medium</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- THE SOLUTION -->
+<section id="solution">
+  <h2><span class="num">03</span> The Solution</h2>
+  <p class="section-subtitle">Upload &rarr; Auto-detect &rarr; Translate &rarr; Review &rarr; Download &rarr; Verify. 30 seconds instead of 4 hours.</p>
+
+  <h3>Translation Fidelity</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Tier</th><th>Parameters</th><th>Quality</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="tag tag-green">Translated</span></td>
+          <td>Channel names, colors, input patch, HPF, fader, pan, mute, DCA/mute groups</td>
+          <td>Mathematically precise</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-yellow">Approximated</span></td>
+          <td>EQ bands, gate/compressor, mix bus sends, delay</td>
+          <td>Nearest equivalent, documented</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-red">Dropped</span></td>
+          <td>Brand-specific DSP, plugins, proprietary routing</td>
+          <td>Explicitly flagged in report</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Tech Stack</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Layer</th><th>Technology</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Frontend</td><td>Next.js 14, React 18, TypeScript, Tailwind</td><td><span class="tag tag-green">Deployed (Vercel)</span></td></tr>
+        <tr><td>Backend</td><td>Python 3.12, FastAPI, uvicorn</td><td><span class="tag tag-green">Deployed (Railway)</span></td></tr>
+        <tr><td>Database</td><td>Supabase (Postgres + GoTrue)</td><td><span class="tag tag-green">Active</span></td></tr>
+        <tr><td>Storage</td><td>Cloudflare R2 (S3-compatible)</td><td><span class="tag tag-green">Active</span></td></tr>
+        <tr><td>Payments</td><td>Paddle</td><td><span class="tag tag-yellow">Planned</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- MARKET ANALYSIS -->
+<section id="market">
+  <h2><span class="num">04</span> Market Analysis</h2>
+  <p class="section-subtitle">TAM, SAM, SOM &mdash; from the $12B pro audio market down to the 10K&ndash;25K engineers who need this.</p>
+
+  <h3>Market Sizing</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Metric</th><th>Value</th><th>Source</th></tr></thead>
+      <tbody>
+        <tr><td>Global professional audio market (2025)</td><td><strong>$11.7B&ndash;$12.5B</strong></td><td>Mordor Intelligence</td></tr>
+        <tr><td>Live sound mixer market (2026)</td><td><strong>~$1.02B</strong>, CAGR 7.97%</td><td>Future Market Insights</td></tr>
+        <tr><td>Professional large-format consoles shipped/yr</td><td>Est. <strong>15,000&ndash;30,000</strong> units</td><td>Derived estimate</td></tr>
+        <tr><td>Active professional live sound engineers</td><td><strong>80,000&ndash;150,000</strong></td><td>BLS + IATSE extrapolation</td></tr>
+        <tr><td>Touring-level FOH/monitor engineers</td><td><strong>20,000&ndash;40,000</strong></td><td>Estimated subset</td></tr>
+        <tr><td>Top 100 global tours gross revenue (2024)</td><td><strong>$9.5B</strong> (record)</td><td>Statista</td></tr>
+        <tr><td>Music festivals tracked (2024)</td><td><strong>2,840</strong></td><td>JamBase</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>TAM &rarr; SAM &rarr; SOM Funnel</h3>
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">80K&ndash;150K</div>
+      <div class="stat-label">TAM (All Engineers)</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">10K&ndash;25K</div>
+      <div class="stat-label">SAM (Multi-Brand)</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">500&ndash;1.5K</div>
+      <div class="stat-label">SOM (Year 3 Paying)</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">$5M&ndash;$15M</div>
+      <div class="stat-label">SAM Revenue Potential</div>
+    </div>
+  </div>
+
+  <h3>Console Brand Market Share</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Brand</th><th>Touring A-list</th><th>Festivals</th><th>Corporate</th><th>Worship</th><th>Trend</th></tr></thead>
+      <tbody>
+        <tr><td><strong>DiGiCo</strong></td><td>Dominant</td><td>Strong</td><td>Moderate</td><td>Low</td><td><span class="tag tag-green">Leader</span></td></tr>
+        <tr><td><strong>Yamaha CL/QL</strong></td><td>Moderate</td><td>Strong</td><td>Dominant</td><td>Strong</td><td><span class="tag tag-green">Largest base</span></td></tr>
+        <tr><td><strong>Allen & Heath</strong></td><td>Growing</td><td>Strong</td><td>Moderate</td><td>Growing</td><td><span class="tag tag-blue">Fastest growing</span></td></tr>
+        <tr><td><strong>Avid VENUE</strong></td><td>Strong</td><td>Strong</td><td>Low</td><td>Low</td><td><span class="tag tag-yellow">Stable</span></td></tr>
+        <tr><td><strong>Midas PRO</strong></td><td>Declining</td><td>Moderate</td><td>Low</td><td>Low</td><td><span class="tag tag-red">Legacy</span></td></tr>
+        <tr><td><strong>SSL Live</strong></td><td>Niche</td><td>Low</td><td>Low</td><td>Low</td><td><span class="tag tag-blue">Growing</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-accent">
+    <strong>Key insight:</strong> The market is <em>fragmenting</em>, not consolidating. Five major brands with incompatible formats and no interoperability = a structural, growing problem. This fragmentation IS the opportunity.
+  </div>
+
+  <h3>Industry Trends</h3>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title" style="color:var(--green)">Favorable</div>
+      <p>Live events exceeding pre-pandemic levels. Top tours: $9.5B gross (2024 record). Attendance up 20%. Console market fragmenting. Digital transformation accelerating.</p>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--yellow)">Cautionary</div>
+      <p>Subscription fatigue is real in pro audio. Waves faced massive backlash on subscription-only pricing. Hybrid model (credits + subscription) is essential.</p>
+    </div>
+  </div>
+</section>
+
+<!-- COMPETITIVE LANDSCAPE -->
+<section id="competition">
+  <h2><span class="num">05</span> Competitive Landscape</h2>
+  <p class="section-subtitle">Blue ocean confirmed. One niche competitor, one dead predecessor, and five manufacturers who will never build this.</p>
+
+  <div class="callout callout-green">
+    <strong>Blue ocean thesis: 95% confirmed.</strong> No product exists that does true cross-brand conversion between the Big 5 console families.
+  </div>
+
+  <h3>Direct Competitors</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Name</th><th>Consoles</th><th>Cross-Brand?</th><th>Pricing</th><th>Status</th><th>Threat</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Console Flip</strong></td>
+          <td>A&H dLive, Avantis, SQ</td>
+          <td>No (A&H only)</td>
+          <td>$15/conversion</td>
+          <td><span class="tag tag-green">Active</span></td>
+          <td><span class="tag tag-yellow">Moderate</span></td>
+        </tr>
+        <tr>
+          <td><strong>CueCast (Zeehi)</strong></td>
+          <td>DiGiCo SD, Yamaha PM5D, Avid</td>
+          <td>Yes (3 brands)</td>
+          <td>Free trial + paid</td>
+          <td><span class="tag tag-red">Defunct (2012)</span></td>
+          <td><span class="tag tag-green">None</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Manufacturer Intra-Brand Tools</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Tool</th><th>Scope</th><th>Cost</th><th>Cross-Brand?</th></tr></thead>
+      <tbody>
+        <tr><td>Yamaha Console File Converter</td><td>Yamaha only (6 models)</td><td>Free</td><td>No</td></tr>
+        <tr><td>DiGiCo SD Convert</td><td>DiGiCo only (SD + Quantum)</td><td>Free</td><td>No</td></tr>
+        <tr><td>A&H dLive Director</td><td>A&H only</td><td>Free</td><td>No</td></tr>
+        <tr><td>Midas PRO Offline Editor</td><td>Midas only</td><td>Free</td><td>No</td></tr>
+        <tr><td>SSL SOLSA</td><td>SSL only</td><td>Free</td><td>No</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-accent">
+    <strong>Why manufacturers won't build this:</strong> Cross-brand interoperability reduces switching costs, which hurts hardware sales. Every manufacturer's converter is explicitly intra-brand. A neutral, brand-agnostic third party must build the bridge.
+  </div>
+
+  <h3>Competitive Moat</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Moat Layer</th><th>Strength</th><th>Durability</th></tr></thead>
+      <tbody>
+        <tr><td>Reverse-engineering knowledge</td><td>Strong &mdash; months per format</td><td>High</td></tr>
+        <tr><td>First-mover in cross-brand</td><td>Strong &mdash; no one else</td><td>Moderate</td></tr>
+        <tr><td>Community trust</td><td>Building &mdash; engineer-founder</td><td>High</td></tr>
+        <tr><td>Data network effects</td><td>Growing &mdash; accuracy improves</td><td>High</td></tr>
+        <tr><td>Structural incentives</td><td>Very strong &mdash; manufacturers won't</td><td>Very high</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- BUSINESS MODEL -->
+<section id="business">
+  <h2><span class="num">06</span> Business Model & Pricing</h2>
+  <p class="section-subtitle">Hybrid credits + subscription. Matches irregular usage, avoids subscription fatigue, revenue from day one.</p>
+
+  <h3>Pricing Tiers</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Tier</th><th>Price</th><th>Limit</th><th>Target</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Free</strong></td><td>$0</td><td>1 lifetime translation</td><td>Everyone</td></tr>
+        <tr><td><strong>Single Credit</strong></td><td>$5</td><td>1 translation</td><td>Price-sensitive / trial</td></tr>
+        <tr><td><strong>Credit Pack (5)</strong></td><td>$45</td><td>5 translations, no expiry</td><td>Freelance engineers</td></tr>
+        <tr><td><strong>Credit Pack (10)</strong></td><td>$80</td><td>10 translations, no expiry</td><td>Regular users</td></tr>
+        <tr><td><strong>Pro Monthly</strong></td><td>$19/mo</td><td>30/mo</td><td>Active touring engineers</td></tr>
+        <tr><td><strong>Pro Annual</strong></td><td>$149/yr</td><td>30/mo</td><td>Committed users ($12.42/mo)</td></tr>
+        <tr><td><strong>Team</strong></td><td>$599/yr</td><td>10 seats, 30/seat/mo</td><td>Rental companies</td></tr>
+        <tr><td><strong>Enterprise</strong></td><td>Custom</td><td>Unlimited + API + SLA</td><td>Major rental companies</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Pricing Justified By</h3>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">Console Flip: $15/conv</div>
+      <p>Validates per-translation pricing. Our cross-brand translations are more complex and more valuable.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Smaart: $399/yr</div>
+      <p>Engineers already budget $400+/yr for pro tools. $149/yr is an easy add.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Engineer day rate: $500+</div>
+      <p>Saving 3 hours at $50/hr = $150 value per use. $12/translation is absurd ROI.</p>
+    </div>
+  </div>
+
+  <h3>Infrastructure Cost Per Translation</h3>
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">$0.03</div>
+      <div class="stat-label">Cost / Translation</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">99.6%</div>
+      <div class="stat-label">Gross Margin (Credit)</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">&lt;5</div>
+      <div class="stat-label">Customers to Break Even</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">~$150</div>
+      <div class="stat-label">Monthly Fixed Cost</div>
+    </div>
+  </div>
+</section>
+
+<!-- REVENUE PROJECTIONS -->
+<section id="revenue">
+  <h2><span class="num">07</span> Revenue Projections</h2>
+  <p class="section-subtitle">Three scenarios: Conservative (organic), Moderate (marketing + partnerships), Optimistic (viral + API licensing).</p>
+
+  <div class="chart-legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div> Conservative</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div> Moderate</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> Optimistic</div>
+  </div>
+
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin:20px 0">
+    <h4 style="text-align:center;margin:0 0 12px;color:var(--text-muted);font-size:0.85rem">ARR Projections ($K)</h4>
+    <div class="bar-chart">
+      <div class="bar-group">
+        <div class="bar" style="height:3%;background:var(--accent)"><span class="bar-value">$2K</span></div>
+        <div class="bar" style="height:5%;background:var(--blue)"><span class="bar-value">$6K</span></div>
+        <div class="bar" style="height:8%;background:var(--green)"><span class="bar-value">$34K</span></div>
+        <div class="bar-label">M6</div>
+      </div>
+      <div class="bar-group">
+        <div class="bar" style="height:5%;background:var(--accent)"><span class="bar-value">$7K</span></div>
+        <div class="bar" style="height:12%;background:var(--blue)"><span class="bar-value">$38K</span></div>
+        <div class="bar" style="height:25%;background:var(--green)"><span class="bar-value">$168K</span></div>
+        <div class="bar-label">M12</div>
+      </div>
+      <div class="bar-group">
+        <div class="bar" style="height:12%;background:var(--accent)"><span class="bar-value">$38K</span></div>
+        <div class="bar" style="height:40%;background:var(--blue)"><span class="bar-value">$252K</span></div>
+        <div class="bar" style="height:70%;background:var(--green)"><span class="bar-value">$1.4M</span></div>
+        <div class="bar-label">M24</div>
+      </div>
+      <div class="bar-group">
+        <div class="bar" style="height:18%;background:var(--accent)"><span class="bar-value">$96K</span></div>
+        <div class="bar" style="height:55%;background:var(--blue)"><span class="bar-value">$660K</span></div>
+        <div class="bar" style="height:100%;background:var(--green)"><span class="bar-value">$3.8M</span></div>
+        <div class="bar-label">M36</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Unit Economics</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Tier</th><th>LTV</th><th>CAC</th><th>LTV:CAC</th><th>Assessment</th></tr></thead>
+      <tbody>
+        <tr><td>Credit user</td><td>$60</td><td>$15</td><td>4:1</td><td><span class="tag tag-green">Healthy</span></td></tr>
+        <tr><td>Pro monthly</td><td>$266</td><td>$45</td><td>5.9:1</td><td><span class="tag tag-green">Strong</span></td></tr>
+        <tr><td>Pro annual</td><td>$343</td><td>$45</td><td>7.6:1</td><td><span class="tag tag-green">Excellent</span></td></tr>
+        <tr><td>Team</td><td>$1,197</td><td>$120</td><td>10:1</td><td><span class="tag tag-green">Excellent</span></td></tr>
+        <tr><td>API/white-label</td><td>$12,000+</td><td>$500</td><td>24:1</td><td><span class="tag tag-green">Outstanding</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- GO-TO-MARKET -->
+<section id="gtm">
+  <h2><span class="num">08</span> Go-to-Market Strategy</h2>
+  <p class="section-subtitle">Word-of-mouth in a trust-based industry. Forum seeding. Rental company partnerships. Content marketing.</p>
+
+  <h3>Distribution Channels (Ranked)</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Tier</th><th>Channel</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag tag-green">Tier 1</span></td><td><strong>Word-of-mouth / Referrals</strong></td><td>#1 channel. Engineers recommend tools to each other. "Give a friend 1 free translation, get 1 free."</td></tr>
+        <tr><td><span class="tag tag-green">Tier 1</span></td><td><strong>Forum seeding</strong> (PSW, Reddit)</td><td>Where purchasing decisions start. Be genuine. No astroturfing &mdash; instant blacklist.</td></tr>
+        <tr><td><span class="tag tag-green">Tier 1</span></td><td><strong>Rental company partnerships</strong></td><td>Force multipliers &mdash; hundreds of shows/year, recommend to visiting engineers.</td></tr>
+        <tr><td><span class="tag tag-blue">Tier 2</span></td><td><strong>Content marketing</strong> (YouTube, blog)</td><td>SEO goldmine. "How to transfer Yamaha CL to DiGiCo" &mdash; nobody else has this content.</td></tr>
+        <tr><td><span class="tag tag-blue">Tier 2</span></td><td><strong>Trade show demos</strong></td><td>Guerrilla presence at NAMM, PLASA, InfoComm. Live demo is the "wow moment."</td></tr>
+        <tr><td><span class="tag tag-blue">Tier 2</span></td><td><strong>Social media</strong></td><td>LinkedIn (production managers), Facebook groups (console-specific), Instagram (rig photos).</td></tr>
+        <tr><td><span class="tag tag-yellow">Tier 3</span></td><td><strong>Influencers</strong></td><td>Dave Rat, Robert Scovill, Ken "Pooch" Van Druten. Free access, authentic endorsement.</td></tr>
+        <tr><td><span class="tag tag-yellow">Tier 3</span></td><td><strong>Education partnerships</strong></td><td>SAE Institute, Full Sail, Brazilian audio schools. Free licenses &rarr; future professionals.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Launch Timeline</h3>
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="timeline-label">Months 1&ndash;3</div>
+      <div class="timeline-title">Foundation</div>
+      <div class="timeline-desc">Waitlist + "the problem" content. Seed PSW/Reddit. Identify 15 beta engineers. Create YouTube tutorials on console workflows.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-label">Months 3&ndash;6</div>
+      <div class="timeline-title">Beta Launch</div>
+      <div class="timeline-desc">50&ndash;100 beta engineers. Accuracy feedback. First case studies. Approach 3&ndash;5 regional rental companies.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-label">Months 6&ndash;12</div>
+      <div class="timeline-title">Public Launch</div>
+      <div class="timeline-desc">Freemium + credits live. Referral program. Console Compatibility Matrix (free SEO asset). First trade show.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-label">Year 2</div>
+      <div class="timeline-title">Scale</div>
+      <div class="timeline-desc">A&H + Avid support. Rental company program. API licensing. Manufacturer co-marketing exploration.</div>
+    </div>
+  </div>
+
+  <h3>Geographic Sequence</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Phase</th><th>Markets</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>M1&ndash;6</td><td><strong>US + Brazil</strong></td><td>US: largest market. Brazil: founder's network.</td></tr>
+        <tr><td>M6&ndash;12</td><td><strong>UK + Western Europe</strong></td><td>Second-largest touring market. PLASA, Prolight+Sound.</td></tr>
+        <tr><td>Year 2</td><td><strong>Australia, LATAM, Middle East</strong></td><td>Touring engineers will have seeded these organically.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- PRODUCT ROADMAP -->
+<section id="roadmap">
+  <h2><span class="num">09</span> Product Roadmap</h2>
+  <p class="section-subtitle">Five phases from MVP to platform &mdash; always staying in the show file lane.</p>
+
+  <div class="timeline">
+    <div class="timeline-item" style="border-left-color:var(--green)">
+      <div class="timeline-label" style="color:var(--green)">Phase 1 &mdash; MVP (Complete)</div>
+      <div class="timeline-title">Core Translation</div>
+      <div class="timeline-desc">Yamaha CL/QL &harr; DiGiCo SD. Names, colors, patch, HPF, EQ, dynamics, fader, pan, routing. Translation report. Web upload flow.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-label">Phase 2 &mdash; Months 1&ndash;6</div>
+      <div class="timeline-title">Enhanced Translation + A&H + Avid</div>
+      <div class="timeline-desc">Scene/snapshot translation. Effects rack. Advanced routing. Output patching. A&H dLive + Avid VENUE S6L. Batch mode. Show file diff tool (free). Paddle payments.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-label">Phase 3 &mdash; Months 6&ndash;12</div>
+      <div class="timeline-title">Scene Builder + Version Control</div>
+      <div class="timeline-desc">Create shows from templates. Input list import. RIVAGE PM, DM7, SSL Live. Show file version control ("Git for show files"). API v1.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-label">Phase 4 &mdash; Months 12&ndash;18</div>
+      <div class="timeline-title">Platform Expansion</div>
+      <div class="timeline-desc">Technical rider parser (AI/OCR). Patch sheet manager. X32/M32, Wing, TF. Input list &harr; show file bidirectional sync.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-label">Phase 5 &mdash; Months 18&ndash;30</div>
+      <div class="timeline-title">Ecosystem & Integrations</div>
+      <div class="timeline-desc">Mobile/PWA. Desktop offline app. CLI tool. Webhooks. Community marketplace. Midas PRO, DiGiCo T, Waves LV1.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONSOLE PRIORITY -->
+<section id="consoles">
+  <h2><span class="num">10</span> Console Support Priority</h2>
+  <p class="section-subtitle">Prioritized by market share, user demand, format complexity, and strategic value.</p>
+
+  <div class="console-list">
+    <div class="console-item">
+      <div class="console-rank" style="color:var(--green)">&#10003;</div>
+      <div class="console-info">
+        <div class="console-name">Yamaha CL/QL</div>
+        <div class="console-detail">Done &mdash; Largest installed base, corporate + festival workhorse</div>
+      </div>
+    </div>
+    <div class="console-item">
+      <div class="console-rank" style="color:var(--green)">&#10003;</div>
+      <div class="console-info">
+        <div class="console-name">DiGiCo SD/Quantum</div>
+        <div class="console-detail">Done &mdash; Touring A-list standard</div>
+      </div>
+    </div>
+    <div class="console-item">
+      <div class="console-rank">1</div>
+      <div class="console-info">
+        <div class="console-name">Allen & Heath dLive/Avantis</div>
+        <div class="console-detail">M3&ndash;5 &mdash; Fastest growing brand, completes the "big three"</div>
+      </div>
+    </div>
+    <div class="console-item">
+      <div class="console-rank">2</div>
+      <div class="console-info">
+        <div class="console-name">Avid VENUE S6L</div>
+        <div class="console-detail">M4&ndash;6 &mdash; NA touring dominant, high-value users</div>
+      </div>
+    </div>
+    <div class="console-item">
+      <div class="console-rank">3</div>
+      <div class="console-info">
+        <div class="console-name">Yamaha RIVAGE PM</div>
+        <div class="console-detail">M6&ndash;8 &mdash; High-end, leverages CLF knowledge</div>
+      </div>
+    </div>
+    <div class="console-item">
+      <div class="console-rank">4</div>
+      <div class="console-info">
+        <div class="console-name">Yamaha DM7</div>
+        <div class="console-detail">M7&ndash;9 &mdash; Newest mid-range, CL/QL successor</div>
+      </div>
+    </div>
+    <div class="console-item">
+      <div class="console-rank">5</div>
+      <div class="console-info">
+        <div class="console-name">SSL Live</div>
+        <div class="console-detail">M8&ndash;10 &mdash; Growing premium brand</div>
+      </div>
+    </div>
+    <div class="console-item">
+      <div class="console-rank">6</div>
+      <div class="console-info">
+        <div class="console-name">Behringer X32 / Midas M32</div>
+        <div class="console-detail">M10&ndash;12 &mdash; Massive volume, acquisition funnel</div>
+      </div>
+    </div>
+    <div class="console-item">
+      <div class="console-rank">7</div>
+      <div class="console-info">
+        <div class="console-name">Behringer Wing</div>
+        <div class="console-detail">M12&ndash;14 &mdash; X32 upgrade path</div>
+      </div>
+    </div>
+    <div class="console-item">
+      <div class="console-rank">8</div>
+      <div class="console-info">
+        <div class="console-name">Yamaha TF</div>
+        <div class="console-detail">M13&ndash;15 &mdash; Budget entry point</div>
+      </div>
+    </div>
+    <div class="console-item">
+      <div class="console-rank">9</div>
+      <div class="console-info">
+        <div class="console-name">Midas PRO / HD96</div>
+        <div class="console-detail">M15&ndash;18 &mdash; Full coverage story</div>
+      </div>
+    </div>
+    <div class="console-item">
+      <div class="console-rank">10</div>
+      <div class="console-info">
+        <div class="console-name">DiGiCo T Series</div>
+        <div class="console-detail">M16&ndash;18 &mdash; Theater market, shares SD format</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PLATFORM VISION -->
+<section id="platform">
+  <h2><span class="num">11</span> Future Tools & Platform Vision</h2>
+  <p class="section-subtitle">Stay in the show file lane. Every tool reads, writes, compares, or manages show files.</p>
+
+  <h3>Tool Prioritization (Pain &times; Frequency &times; WTP &times; Synergy)</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Tier</th><th>Tool</th><th>Score</th><th>Key Insight</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="tag tag-green">Build Next</span></td>
+          <td><strong>Show File Diff/Compare</strong></td>
+          <td>20/25</td>
+          <td>Free feature, drives adoption. You already parse the files.</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-green">Build Next</span></td>
+          <td><strong>Show File Version Control</strong></td>
+          <td>21/25</td>
+          <td>"Git for show files." The lock-in play &mdash; once history lives here, switching cost is huge.</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-green">Build Next</span></td>
+          <td><strong>Input List / Patch Manager</strong></td>
+          <td>20/25</td>
+          <td>Bidirectional: extract FROM show files, generate show files FROM input lists.</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-blue">Strong</span></td>
+          <td><strong>Technical Rider Parser</strong></td>
+          <td>16/25</td>
+          <td>AI/OCR extraction of PDF riders. High-value, technically challenging.</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-blue">Strong</span></td>
+          <td><strong>Scene Builder</strong></td>
+          <td>18/25</td>
+          <td>Create shows from templates. Translation engine in reverse.</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-blue">Strong</span></td>
+          <td><strong>Venue Database</strong></td>
+          <td>17/25</td>
+          <td>Crowd-sourced venues + consoles. Network effects.</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-red">Don't Build</span></td>
+          <td>RF Coordination</td>
+          <td>14/25</td>
+          <td>Shure WWB7 is free and excellent. Too far from core.</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-red">Don't Build</span></td>
+          <td>Inventory Management</td>
+          <td>16/25</td>
+          <td>Flex/Rentman exist. Different business entirely.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>The Show File Lifecycle Platform</h3>
+  <div class="diagram">
+    <div class="diagram-core">SHOW FILE (any brand)</div>
+    <div class="diagram-branches">
+      <div class="diagram-node" style="border-color:var(--accent)">Translate<br><small style="color:var(--text-muted)">Any &rarr; Any</small></div>
+      <div class="diagram-node" style="border-color:var(--blue)">Diff / Compare<br><small style="color:var(--text-muted)">See changes</small></div>
+      <div class="diagram-node" style="border-color:var(--green)">Version Control<br><small style="color:var(--text-muted)">History + rollback</small></div>
+      <div class="diagram-node" style="border-color:var(--yellow)">Analyze / Audit<br><small style="color:var(--text-muted)">Insights</small></div>
+      <div class="diagram-node" style="border-color:var(--orange)">Scene Builder<br><small style="color:var(--text-muted)">Create from templates</small></div>
+      <div class="diagram-node" style="border-color:var(--accent2)">Cloud Library<br><small style="color:var(--text-muted)">Backup + share</small></div>
+    </div>
+  </div>
+</section>
+
+<!-- RISKS -->
+<section id="risks">
+  <h2><span class="num">12</span> Risk Matrix & Scenarios</h2>
+  <p class="section-subtitle">Top risks ranked by likelihood &times; impact. Six scenario simulations from slow burn to acquisition.</p>
+
+  <h3>Top 10 Risks</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Risk</th><th>Score</th><th>Category</th><th>Mitigation</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>1</strong></td>
+          <td>Solo founder burnout</td>
+          <td>
+            <div class="risk-bar">
+              <div class="risk-fill" style="width:80%;background:var(--red)"></div>
+              <span style="font-weight:700;color:var(--red)">20</span>
+            </div>
+          </td>
+          <td>Business</td>
+          <td>Hard boundaries, automate, document for bus factor, hire at $200K ARR</td>
+        </tr>
+        <tr>
+          <td><strong>2</strong></td>
+          <td>Cash flow before profitability</td>
+          <td>
+            <div class="risk-bar">
+              <div class="risk-fill" style="width:64%;background:var(--orange)"></div>
+              <span style="font-weight:700;color:var(--orange)">16</span>
+            </div>
+          </td>
+          <td>Business</td>
+          <td>Parallel income 12&ndash;18mo, credits-only first, fixed costs <$300/mo</td>
+        </tr>
+        <tr>
+          <td><strong>3</strong></td>
+          <td>Zero tolerance for bugs</td>
+          <td>
+            <div class="risk-bar">
+              <div class="risk-fill" style="width:64%;background:var(--orange)"></div>
+              <span style="font-weight:700;color:var(--orange)">16</span>
+            </div>
+          </td>
+          <td>Operational</td>
+          <td>Exhaustive test suite, translation report as safety net, verification UX</td>
+        </tr>
+        <tr>
+          <td><strong>4</strong></td>
+          <td>Translation accuracy at live shows</td>
+          <td>
+            <div class="risk-bar">
+              <div class="risk-fill" style="width:60%;background:var(--orange)"></div>
+              <span style="font-weight:700;color:var(--orange)">15</span>
+            </div>
+          </td>
+          <td>Technical</td>
+          <td>Round-trip testing, confidence indicators, E&O insurance, disclaimers</td>
+        </tr>
+        <tr>
+          <td><strong>5</strong></td>
+          <td>Market too small</td>
+          <td>
+            <div class="risk-bar">
+              <div class="risk-fill" style="width:48%;background:var(--yellow)"></div>
+              <span style="font-weight:700;color:var(--yellow)">12</span>
+            </div>
+          </td>
+          <td>Market</td>
+          <td>Platform expansion (Tier A tools) expands TAM 10x</td>
+        </tr>
+        <tr>
+          <td><strong>6</strong></td>
+          <td>Firmware update breaks parser</td>
+          <td>
+            <div class="risk-bar">
+              <div class="risk-fill" style="width:48%;background:var(--yellow)"></div>
+              <span style="font-weight:700;color:var(--yellow)">12</span>
+            </div>
+          </td>
+          <td>Technical</td>
+          <td>Version detection, firmware monitoring, 72hr response target</td>
+        </tr>
+        <tr>
+          <td><strong>7</strong></td>
+          <td>Manufacturer builds cross-brand</td>
+          <td>
+            <div class="risk-bar">
+              <div class="risk-fill" style="width:40%;background:var(--yellow)"></div>
+              <span style="font-weight:700;color:var(--yellow)">10</span>
+            </div>
+          </td>
+          <td>Market</td>
+          <td>Universal coverage &mdash; no manufacturer will build all-to-all</td>
+        </tr>
+        <tr>
+          <td><strong>8</strong></td>
+          <td>Pricing issues</td>
+          <td>
+            <div class="risk-bar">
+              <div class="risk-fill" style="width:36%;background:var(--blue)"></div>
+              <span style="font-weight:700;color:var(--blue)">9</span>
+            </div>
+          </td>
+          <td>Business</td>
+          <td>A/B test at 200+ users, watch conversion and churn as indicators</td>
+        </tr>
+        <tr>
+          <td><strong>9</strong></td>
+          <td>Support burden</td>
+          <td>
+            <div class="risk-bar">
+              <div class="risk-fill" style="width:36%;background:var(--blue)"></div>
+              <span style="font-weight:700;color:var(--blue)">9</span>
+            </div>
+          </td>
+          <td>Business</td>
+          <td>Self-service UX, auto-detect common issues, community forum at 500+ users</td>
+        </tr>
+        <tr>
+          <td><strong>10</strong></td>
+          <td>GDPR/LGPD compliance</td>
+          <td>
+            <div class="risk-bar">
+              <div class="risk-fill" style="width:36%;background:var(--blue)"></div>
+              <span style="font-weight:700;color:var(--blue)">9</span>
+            </div>
+          </td>
+          <td>Operational</td>
+          <td>Minimal data collection, Paddle handles payment compliance, 30-day retention</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Scenario Simulations</h3>
+
+  <div class="scenario">
+    <div class="scenario-header">
+      <div class="scenario-icon" style="background:var(--blue-dim)">&#128293;</div>
+      <div>
+        <strong style="color:#fff">Scenario A: "Slow Burn"</strong>
+        <div style="font-size:0.8rem;color:var(--text-muted)">Organic growth only, no marketing budget</div>
+      </div>
+    </div>
+    <p>50 users at M6, 200 at M12, 500 at M24. MRR reaches $4,400 by month 24. ARR ~$53K.</p>
+    <p><strong>Verdict:</strong> Viable as a side project with parallel income. Not viable as sole income. Break-even on infrastructure at month 3&ndash;4.</p>
+  </div>
+
+  <div class="scenario">
+    <div class="scenario-header">
+      <div class="scenario-icon" style="background:var(--green-dim)">&#128640;</div>
+      <div>
+        <strong style="color:#fff">Scenario B: "Viral Hit"</strong>
+        <div style="font-size:0.8rem;color:var(--text-muted)">Major engineer tweets, PSW thread goes viral</div>
+      </div>
+    </div>
+    <p>500 users month 1, 2,000 by month 6. MRR hits $18K. Infrastructure handles fine. Support burden: 50 tickets/week at 500 users = 12.5 hrs/week solo &mdash; unsustainable at 2,000.</p>
+    <p><strong>Verdict:</strong> Revenue is real ($216K ARR). Support will bury you before you enjoy it. Pre-build FAQ and hire part-time support at month 2&ndash;3.</p>
+  </div>
+
+  <div class="scenario">
+    <div class="scenario-header">
+      <div class="scenario-icon" style="background:var(--yellow-dim)">&#9888;&#65039;</div>
+      <div>
+        <strong style="color:#fff">Scenario C: "Manufacturer Threat"</strong>
+        <div style="font-size:0.8rem;color:var(--text-muted)">Yamaha adds DiGiCo import in firmware</div>
+      </div>
+    </div>
+    <p>Removes ~10&ndash;15% of use cases (one pair of N&times;(N-1)). Only import FROM, never export TO competitors. Limited parameters. Only new firmware.</p>
+    <p><strong>Verdict:</strong> Not existential unless ALL manufacturers cooperate (economically irrational). Single-pair translations validate the market.</p>
+  </div>
+
+  <div class="scenario">
+    <div class="scenario-header">
+      <div class="scenario-icon" style="background:var(--red-dim)">&#128680;</div>
+      <div>
+        <strong style="color:#fff">Scenario D: "Translation Error at a Major Show"</strong>
+        <div style="font-size:0.8rem;color:var(--text-muted)">Swapped mix bus sends cause IEM issues at showtime</div>
+      </div>
+    </div>
+    <p>Not "if" but "when." Required: verification UX (side-by-side + acknowledgment), prominent disclaimers, E&O insurance ($1.1K/yr), rapid response plan, audit trail.</p>
+    <p><strong>Verdict:</strong> Survivable with proper protections. The product must make users feel responsible for verification.</p>
+  </div>
+
+  <div class="scenario">
+    <div class="scenario-header">
+      <div class="scenario-icon" style="background:rgba(108,92,231,0.15)">&#128176;</div>
+      <div>
+        <strong style="color:#fff">Scenario E: "Acquisition Offer"</strong>
+        <div style="font-size:0.8rem;color:var(--text-muted)">Console manufacturer or audio company makes an offer</div>
+      </div>
+    </div>
+    <p>Realistic interest starts at $300&ndash;500K ARR. At $100K ARR: $300K&ndash;$600K (acqui-hire). At $1M ARR: $3M&ndash;$6M. Strategic premium with bidding: $8M&ndash;$16M.</p>
+    <p><strong>Likely acquirers:</strong> Audiotonix (DiGiCo parent), Focusrite Group (A&H parent), Audinate (Dante).</p>
+  </div>
+
+  <div class="scenario">
+    <div class="scenario-header">
+      <div class="scenario-icon" style="background:rgba(0,206,201,0.15)">&#127758;</div>
+      <div>
+        <strong style="color:#fff">Scenario F: "Platform Play"</strong>
+        <div style="font-size:0.8rem;color:var(--text-muted)">Expand beyond translation into full engineer toolkit</div>
+      </div>
+    </div>
+    <p>TAM expansion: Translation alone $0.5&ndash;2M &rarr; Show file management $5&ndash;10M &rarr; Full toolkit $20&ndash;50M.</p>
+    <p><strong>Verdict:</strong> Right long-term vision, wrong short-term focus. Nail translation, build trust, then expand. Premature platform ambition kills solo founders.</p>
+  </div>
+</section>
+
+<!-- LEGAL -->
+<section id="legal">
+  <h2><span class="num">13</span> Legal & IP Analysis</h2>
+  <p class="section-subtitle">Reverse engineering for interoperability is legal in the US and EU. Get E&O insurance before launch.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Jurisdiction</th><th>Legal?</th><th>Basis</th></tr></thead>
+      <tbody>
+        <tr><td><strong>United States</strong></td><td><span class="tag tag-green">Yes</span></td><td>DMCA Section 1201(f) &mdash; interoperability exemption</td></tr>
+        <tr><td><strong>European Union</strong></td><td><span class="tag tag-green">Yes</span></td><td>EU Software Directive Article 6</td></tr>
+        <tr><td><strong>Brazil</strong></td><td><span class="tag tag-yellow">Likely Yes</span></td><td>Fair use provisions in Copyright Law (Lei 9.610/1998), sparse case law</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-accent">
+    <strong>Legal analogy:</strong> This is the same as LibreOffice reading .docx files or GIMP reading .psd files &mdash; established, unchallenged practices. You are NOT circumventing encryption, NOT distributing original software.
+  </div>
+
+  <h3>Required Before Launch</h3>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">E&O Insurance</div>
+      <p>$1M/occurrence, ~$1,100&ndash;$1,500/year. Covers professional negligence and software errors. Non-negotiable.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Legal Entity</div>
+      <p>Delaware LLC for legal clarity. Even if physically in Brazil, US jurisdiction simplifies IP protection.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">ToS + Disclaimers</div>
+      <p>"As-is" warranty, liability cap at 12mo fees, mandatory verification acknowledgment, indemnification.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">EULA Review</div>
+      <p>Check each manufacturer's license for anti-RE clauses. Consult lawyer on any restrictive terms.</p>
+    </div>
+  </div>
+</section>
+
+<!-- POLICIES -->
+<section id="policies">
+  <h2><span class="num">14</span> Policies & Compliance</h2>
+  <p class="section-subtitle">Essential policies for a professional tool used in high-stress live environments.</p>
+
+  <div class="callout callout-red">
+    <strong>Critical disclaimer (must appear in ToS, before download, and in every PDF report):</strong><br><br>
+    <em>"Showfier translations are automated approximations. They are NOT guaranteed to be accurate and may contain errors. You MUST verify all translated parameters on the target console before any live performance. Showfier accepts no responsibility for any loss, damage, or disruption arising from the use of translated show files."</em>
+  </div>
+
+  <h3>Data Retention</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Data</th><th>Retention</th><th>Deletion</th></tr></thead>
+      <tbody>
+        <tr><td>Show files (uploaded)</td><td>30 days</td><td>Auto-purge</td></tr>
+        <tr><td>Translated outputs</td><td>30 days</td><td>Auto-purge</td></tr>
+        <tr><td>Translation reports</td><td>1 year</td><td>User-deletable</td></tr>
+        <tr><td>Account data</td><td>Duration + 30 days</td><td>On deletion request</td></tr>
+        <tr><td>Payment records</td><td>7 years</td><td>Handled by Paddle</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>SLA</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Tier</th><th>SLA</th><th>Remedy</th></tr></thead>
+      <tbody>
+        <tr><td>Free / Credits / Pro</td><td>No SLA &mdash; "best effort"</td><td>N/A</td></tr>
+        <tr><td>Team / Enterprise</td><td>99.5% uptime</td><td>Service credits</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- METRICS -->
+<section id="metrics">
+  <h2><span class="num">15</span> Key Metrics & KPIs</h2>
+  <p class="section-subtitle">What to measure, what to target, and what data to collect.</p>
+
+  <h3>North Star Metrics</h3>
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">200&ndash;500</div>
+      <div class="stat-label">Monthly Active Translators (Y1)</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">&gt;95%</div>
+      <div class="stat-label">Translation Accuracy</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">&gt;60</div>
+      <div class="stat-label">NPS Score</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">&gt;10%</div>
+      <div class="stat-label">Free-to-Paid Conversion</div>
+    </div>
+  </div>
+
+  <h3>Interesting Data to Gather</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Data Point</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>Most common translation pairs (which A&rarr;B?)</td><td>Prioritize next console format development</td></tr>
+        <tr><td>Parameters most frequently approximated/dropped</td><td>Guide deeper format research</td></tr>
+        <tr><td>Time of day / day of week peaks</td><td>Support staffing and infra scaling</td></tr>
+        <tr><td>Geographic distribution</td><td>Localization and payment method priorities</td></tr>
+        <tr><td>Show file complexity (channel count, scenes)</td><td>Product limits and pricing tiers</td></tr>
+        <tr><td>Free &rarr; credit &rarr; subscription journey time</td><td>Optimize funnel timing</td></tr>
+        <tr><td>Firmware version distribution</td><td>Which versions to prioritize testing</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- STRATEGY -->
+<section id="strategy">
+  <h2><span class="num">16</span> Strategic Recommendations</h2>
+  <p class="section-subtitle">The five things that matter most &mdash; and the sequence to execute them.</p>
+
+  <div class="callout callout-green">
+    <strong>1. Nail translation quality before everything else.</strong><br>
+    Nothing else matters if the output can't be trusted. A single bad translation at a major show can destroy the brand.
+  </div>
+  <div class="callout callout-accent">
+    <strong>2. A&H dLive is the #1 development priority.</strong><br>
+    Completing the "big three" (Yamaha, DiGiCo, A&H) covers the majority of touring/festival consoles. Each pair added creates exponential value (N&sup2; combinations).
+  </div>
+  <div class="callout callout-green">
+    <strong>3. The founder's identity as a working engineer is the greatest marketing asset.</strong><br>
+    In an industry built on trust, an engineer-founder who understands the problem viscerally will always outperform polished marketing.
+  </div>
+  <div class="callout callout-accent">
+    <strong>4. API licensing to rental companies is the long-term revenue engine.</strong><br>
+    Individual subs build the brand; API licensing builds the revenue. One mid-tier rental company = 50 individual Pro subscribers.
+  </div>
+  <div class="callout callout-green">
+    <strong>5. Stay in the show file lane.</strong><br>
+    Every tool should read, write, compare, or manage show files. Diff tool = trojan horse. Version control = lock-in play.
+  </div>
+
+  <h3>The Execution Sequence</h3>
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="timeline-label">Month 1&ndash;3</div>
+      <div class="timeline-title">Payments + Beta + Forum Seeding</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-label">Month 3&ndash;5</div>
+      <div class="timeline-title">A&H dLive + Referral Program + First Rental Partnerships</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-label">Month 5&ndash;7</div>
+      <div class="timeline-title">Avid VENUE + Show File Diff (free) + Content Marketing</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-label">Month 7&ndash;9</div>
+      <div class="timeline-title">Version Control + Scene Translation + Input List Manager</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-label">Month 9&ndash;12</div>
+      <div class="timeline-title">Team Plans + API v1 + SSL Live + Trade Show Presence</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-label">Month 12&ndash;18</div>
+      <div class="timeline-title">X32/M32 + Technical Rider Parser + Marketplace Seed</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-label">Month 18&ndash;24</div>
+      <div class="timeline-title">Desktop/Offline App + Platform Expansion</div>
+    </div>
+  </div>
+
+  <div style="background:linear-gradient(135deg, var(--surface2), var(--surface));border:1px solid var(--border);border-radius:16px;padding:32px;margin-top:40px;text-align:center">
+    <h3 style="color:#fff;margin:0 0 16px">The Bottom Line</h3>
+    <p style="font-size:1.05rem;max-width:800px;margin:0 auto;color:var(--text)">
+      Showfier sits in a genuine blue ocean &mdash; a real, recurring problem affecting tens of thousands of professionals, with no cross-brand solution. 96%+ gross margins, break-even with &lt;5 customers, and a deep competitive moat. The biggest risk isn't the market, the competition, or the technology &mdash; it's building sustainably as a solo founder. Every engineer who avoids a 4-hour rebuild will tell three friends. <strong style="color:var(--accent2)">That's the growth engine.</strong>
+    </p>
+  </div>
+</section>
+
+</div>
+
+<div class="footer">
+  <p>SHOWFIER &mdash; Deep Project Overview & Market Analysis &mdash; April 2026</p>
+  <p style="margin-top:8px">Research compiled from Mordor Intelligence, Future Market Insights, U.S. BLS, JamBase, Statista, ProSoundWeb, Rational Acoustics, Console Flip, EFF, DMCA &sect;1201(f), EU Software Directive, SaaS Capital, and various pro audio trade publications.</p>
+  <p style="margin-top:8px;color:var(--accent)">AudioSolutions &middot; Gregorio Guirado</p>
+</div>
+
+</body>
+</html>

@@ -31,12 +31,15 @@ export default function HeroDropZone() {
           ★ Showfier
         </p>
         <h1 className="mt-3 text-3xl font-extrabold uppercase leading-none tracking-tight md:text-4xl">
-          Stop rebuilding
+          Switch console brands
           <br />
-          your shows.
+          in 30 seconds, not 8 hours.
         </h1>
         <p className="mt-3 text-sm text-muted">
-          30 seconds. First one free.
+          Upload your show file from one mixing console, download it ready for another. First translation free.
+        </p>
+        <p className="mt-2 text-xs text-muted">
+          Showfier converts show files between Yamaha, DiGiCo, and soon Allen &amp; Heath consoles — so you don&apos;t rebuild from scratch when the venue has the wrong brand.
         </p>
         <button
           type="button"
@@ -46,9 +49,9 @@ export default function HeroDropZone() {
           className="mt-6 flex flex-1 cursor-pointer flex-col items-center justify-center border-2 border-dashed border-accent bg-surface p-6 text-center transition-colors hover:bg-accent/10"
         >
           <span className="text-sm font-extrabold uppercase tracking-wider text-accent">
-            Drop .CLE here
+            Drop a show file here
           </span>
-          <span className="mt-1 text-xs text-muted">or click to browse</span>
+          <span className="mt-1 text-xs text-muted">.CLF, .CLE, or .show — or click to browse</span>
         </button>
       </div>
 

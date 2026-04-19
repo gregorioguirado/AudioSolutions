@@ -26,9 +26,9 @@ describe("WhatTranslates", () => {
 describe("PricingTeaser", () => {
   it("renders three tiers", () => {
     render(<PricingTeaser />);
-    expect(screen.getByText(/free/i)).toBeInTheDocument();
-    expect(screen.getByText(/credits/i)).toBeInTheDocument();
-    expect(screen.getByText(/pro/i)).toBeInTheDocument();
+    expect(screen.getByText(/^Free$/)).toBeInTheDocument();
+    expect(screen.getByText(/^Pro$/)).toBeInTheDocument();
+    expect(screen.getByText(/^Team$/)).toBeInTheDocument();
   });
 });
 

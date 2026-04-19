@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { JetBrains_Mono } from "next/font/google";
 import Nav from "@/components/Nav";
+import Footer from "@/components/Footer";
 import "./globals.css";
 
 const jetbrains = JetBrains_Mono({
@@ -9,9 +10,9 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Showfier — Stop Rebuilding Your Shows",
+  title: "Showfier — Switch console brands in 30 seconds, not 8 hours",
   description:
-    "Upload a Yamaha CL/QL show file, download a DiGiCo SD/Quantum translation. 30 seconds.",
+    "Upload your show file from one mixing console, download it ready for another. First translation free.",
 };
 
 export default function RootLayout({
@@ -21,9 +22,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={jetbrains.variable}>
-      <body>
+      <body className="flex min-h-screen flex-col">
         <Nav />
-        {children}
+        <div className="flex-1">{children}</div>
+        <Footer />
       </body>
     </html>
   );

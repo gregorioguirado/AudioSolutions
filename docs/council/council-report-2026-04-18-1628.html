@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Council Verdict — Showfier Strategy Pressure-Test</title>
+<style>
+  :root {
+    --bg: #f7f7f5;
+    --fg: #1c1c1c;
+    --muted: #666;
+    --line: #e0e0dc;
+    --card: #ffffff;
+    --accent: #1a3a5c;
+    --agree: #2d7a3e;
+    --clash: #c5561b;
+    --blind: #7c3aed;
+    --verdict: #0a2540;
+    --next: #b8860b;
+    --contrarian: #b8292f;
+    --first: #2d7a3e;
+    --expansionist: #7c3aed;
+    --outsider: #0f766e;
+    --executor: #b8860b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    margin: 0;
+    padding: 0;
+    line-height: 1.55;
+  }
+  .container {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+  header {
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 24px;
+    margin-bottom: 32px;
+  }
+  .eyebrow {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  h1 {
+    font-size: 28px;
+    margin: 0 0 8px 0;
+    line-height: 1.25;
+    color: var(--verdict);
+  }
+  .meta {
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .question-block {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--accent);
+    padding: 20px 24px;
+    margin: 24px 0 40px;
+    border-radius: 3px;
+    font-size: 15px;
+  }
+  .question-block h2 {
+    margin-top: 0;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--muted);
+  }
+  section {
+    margin-bottom: 36px;
+  }
+  section h2 {
+    font-size: 20px;
+    margin: 0 0 16px 0;
+    color: var(--verdict);
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 8px;
+  }
+  .verdict-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  @media (min-width: 720px) {
+    .verdict-grid { grid-template-columns: 1fr 1fr; }
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 20px;
+  }
+  .card.agree { border-left: 4px solid var(--agree); }
+  .card.clash { border-left: 4px solid var(--clash); }
+  .card.blind { border-left: 4px solid var(--blind); }
+  .card.verdict { border-left: 4px solid var(--verdict); }
+  .card.next {
+    border-left: 4px solid var(--next);
+    background: #fffbef;
+  }
+  .card h3 {
+    margin: 0 0 12px 0;
+    font-size: 15px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+  }
+  .card p, .card li {
+    font-size: 14px;
+  }
+  .card ul { padding-left: 20px; }
+  .card strong { color: var(--fg); }
+
+  /* Alignment grid */
+  .alignment-matrix {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 24px;
+    margin: 12px 0 24px;
+  }
+  .alignment-matrix h3 {
+    margin: 0 0 16px 0;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+  }
+  .advisor-row {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 12px;
+    align-items: start;
+    padding: 10px 0;
+    border-top: 1px solid var(--line);
+    font-size: 14px;
+  }
+  .advisor-row:first-of-type { border-top: none; }
+  .advisor-name {
+    font-weight: 600;
+    font-size: 13px;
+  }
+  .advisor-name .pill {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 2px;
+    margin-left: 6px;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .pill.contrarian { background: var(--contrarian); }
+  .pill.first { background: var(--first); }
+  .pill.expansionist { background: var(--expansionist); }
+  .pill.outsider { background: var(--outsider); }
+  .pill.executor { background: var(--executor); }
+  .stance { color: var(--muted); }
+
+  /* Tally */
+  .tally {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin: 16px 0 24px;
+  }
+  .tally-item {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 14px 16px;
+    font-size: 13px;
+  }
+  .tally-item .number {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--accent);
+    display: block;
+    line-height: 1.2;
+  }
+  .tally-item .label {
+    color: var(--muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-top: 4px;
+  }
+
+  /* Details / collapsibles */
+  details {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 0;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  details summary {
+    padding: 14px 18px;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    list-style: none;
+  }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::before {
+    content: "▸";
+    font-size: 12px;
+    color: var(--muted);
+    transition: transform 0.15s;
+  }
+  details[open] summary::before { transform: rotate(90deg); }
+  details .content {
+    padding: 0 18px 18px 18px;
+    font-size: 14px;
+    border-top: 1px solid var(--line);
+    padding-top: 14px;
+  }
+  details.advisor-contrarian { border-left: 4px solid var(--contrarian); }
+  details.advisor-first      { border-left: 4px solid var(--first); }
+  details.advisor-expansionist { border-left: 4px solid var(--expansionist); }
+  details.advisor-outsider   { border-left: 4px solid var(--outsider); }
+  details.advisor-executor   { border-left: 4px solid var(--executor); }
+
+  .big-callout {
+    background: #fffbef;
+    border: 1px solid #ead89a;
+    border-left: 4px solid var(--next);
+    border-radius: 3px;
+    padding: 28px 32px;
+    margin: 24px 0;
+  }
+  .big-callout .eyebrow { color: #8a6d00; }
+  .big-callout .do-this {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--verdict);
+    line-height: 1.4;
+    margin: 8px 0 0 0;
+  }
+  footer {
+    margin-top: 60px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .emphasis {
+    background: #fff8e1;
+    padding: 1px 4px;
+    border-radius: 2px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <div class="eyebrow">LLM Council · Strategy Review</div>
+  <h1>Showfier: Pressure-Test of Overall Strategy</h1>
+  <div class="meta">2026-04-18 · AudioSolutions · 5 advisors + 5 peer reviews + chairman synthesis</div>
+</header>
+
+<div class="question-block">
+  <h2>The Question</h2>
+  <p>Pressure-test the overall strategy, product direction, market positioning, technical approach, and go-to-market plan for <strong>Showfier</strong> — a solo-founder cloud SaaS that translates mixing console show files between brands. MVP deployed (Yamaha CL/QL ↔ DiGiCo SD). DiGiCo writer never validated on a real console. Paddle not yet integrated. One narrow competitor. Finite runway. Is the current plan right, or are key assumptions wrong?</p>
+</div>
+
+<!-- CHAIRMAN VERDICT - TOP -->
+<section>
+  <h2>Council Verdict</h2>
+
+  <div class="verdict-grid">
+    <div class="card agree">
+      <h3>Where the Council Agrees</h3>
+      <ul>
+        <li><strong>DiGiCo writer is untested on a real console</strong> — existential. No validated product until a translated file loads cleanly on an SD12.</li>
+        <li><strong>Trust is the whole business.</strong> This is a tiny, brutal, word-of-mouth community. One failure ends it.</li>
+        <li><strong>The 7-tier pricing is broken</strong> (5-pack costs more per credit than singles).</li>
+        <li><strong>Roadmap is too ambitious</strong> for a solo founder — API, team plans, scene builder, marketplace are distractions until a paying funnel exists.</li>
+        <li><strong>Rental companies are higher-leverage</strong> than individual engineers as a buyer — even where advisors disagree on strategy, they converged here.</li>
+      </ul>
+    </div>
+
+    <div class="card clash">
+      <h3>Where the Council Clashes</h3>
+      <ul>
+        <li><strong>TAM.</strong> Contrarian: realistic ceiling ~$30–60K ARR. Expansionist: $30M ARR + $200M exit. Honest midpoint: $150K–$500K micro-SaaS is plausible; anything more requires B2B channels that don't exist yet.</li>
+        <li><strong>Pricing model.</strong> Transactional (credits) vs. subscription vs. rental-seat — right answer depends on who the real buyer turns out to be.</li>
+        <li><strong>Founder allocation.</strong> Executor says code Monday. First Principles says be at 20 shows in person. Both are right; they compete for the same calendar.</li>
+        <li><strong>Framing.</strong> First Principles says "wrong unit — build a portable show." Executor says "prove the product you have before redesigning it." D is right about the end state; C is right that D's reframe is premature.</li>
+      </ul>
+    </div>
+
+    <div class="card blind" style="grid-column: 1 / -1;">
+      <h3>Blind Spots the Council Caught (in Peer Review)</h3>
+      <p>All five peer reviewers independently flagged the same gap — something <strong>no advisor</strong> raised:</p>
+      <ul>
+        <li><strong>Liability and the show-day failure mode.</strong> What happens when a translated file causes a cancelled show in front of 5,000 people? Refunds don't cover a $250K cancelled gig. The reputational blast radius is the product-ending risk. <em>ToS + liability cap + E&O insurance + explicit "verify before doors" UX must exist <strong>before</strong> the first Paddle charge.</em></li>
+        <li><strong>IP / reverse-engineering posture.</strong> DMCA §1201(f) and EU Software Directive Art. 6 protect interop, but a 30-minute Delaware tech-lawyer call to confirm ToS drafts is cheap insurance against cease-and-desist.</li>
+        <li><strong>Verification harness.</strong> Round-trip testing every output against each manufacturer's own offline editor as continuous CI. Makes the liability caps defensible and neutralizes the firmware-update treadmill.</li>
+      </ul>
+      <p><em>Gregorio's existing project doc actually mentions E&O at ~$1,100/yr and has disclaimer copy drafted — so this is a planning-to-execution gap, not an awareness gap. Close it <strong>before</strong> Paddle, not after.</em></p>
+    </div>
+
+    <div class="card verdict" style="grid-column: 1 / -1;">
+      <h3>The Recommendation</h3>
+      <p><strong>Follow the Executor's 14-day plan, with three amendments:</strong></p>
+      <ol>
+        <li><strong>Before Paddle:</strong> ship the ToS + liability cap + show-day disclaimer + E&O insurance quote. A lawyer call + $1,100/yr premium is not a distraction — it's the enabling condition for taking money.</li>
+        <li><strong>Before A&H, before any new console:</strong> build a round-trip verification harness. Every output auto-reimported to the target console's offline editor, diffed against the source. Technical moat and trust artifact at the same time.</li>
+        <li><strong>Keep the First Principles reframe on the shelf, not in the build queue.</strong> Don't chase "portable show" or "Universal Show File Model as MIDI" before 50 engineers have paid $19. But let the reframe guide <em>who</em> you interview this spring: rental companies and artist management are the B2B channel the council agrees on.</li>
+      </ol>
+      <p><strong>Reject:</strong> The Expansionist's $200M exit narrative (fantasy at current stage). The Outsider's demand to rebrand immediately (expensive, already built) — but <strong>fix the pricing table today</strong>: the 5-pack costing more per credit than singles is an unforced trust-destroying bug. Cut to three tiers: $5 single, $19/mo unlimited, Team on request.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ONE THING -->
+<div class="big-callout">
+  <div class="eyebrow">The One Thing to Do First</div>
+  <p class="do-this">Validate the DiGiCo writer on a real console before anything else.</p>
+  <p style="margin: 14px 0 0 0; font-size: 14px;">
+    Find one DiGiCo SD owner (DM in r/livesound, any touring engineer in the São Paulo network, or at minimum DiGiCo Offline Software on a laptop). Generate a translation from an existing CL5 sample and try to open it. <strong>Loads cleanly:</strong> Paddle goes in this week and C's entire plan cascades. <strong>Doesn't load:</strong> there is no Showfier yet, and the next 14 days are about making it load — not marketing, not A&H, not the roadmap, not pricing. Just this one binary yes/no. Everything downstream in the entire plan is conditional on that single test. <span class="emphasis">Run it Monday.</span>
+  </p>
+</div>
+
+<!-- ALIGNMENT MATRIX -->
+<section>
+  <h2>Advisor Alignment at a Glance</h2>
+  <div class="alignment-matrix">
+    <h3>Five Stances, Five Angles</h3>
+
+    <div class="advisor-row">
+      <div class="advisor-name">Contrarian <span class="pill contrarian">Downside</span></div>
+      <div class="stance">"TAM is fiction — realistic ceiling is $30-60K ARR, not $660K. Zero-bug tolerance in a trust-based community is the product killing itself. Reverse-engineered parsers are an unsustainable firmware-update treadmill. Side-income dressed as a SaaS."</div>
+    </div>
+
+    <div class="advisor-row">
+      <div class="advisor-name">First Principles <span class="pill first">Reframe</span></div>
+      <div class="stance">"You're solving the wrong problem. Real pain isn't translation — it's confidence under time pressure. A file you can't trust is worse than no file. Build a portable console-agnostic show document, monetize via rental companies. The wrong wedge was chosen."</div>
+    </div>
+
+    <div class="advisor-row">
+      <div class="advisor-name">Expansionist <span class="pill expansionist">Upside</span></div>
+      <div class="stance">"Gregorio is sitting on infrastructure priced like a Chrome extension. The Universal Model IS the asset — this is the 'MIDI moment' for consoles. Target: $30M ARR + $200M Audiotonix acquisition buying the standard."</div>
+    </div>
+
+    <div class="advisor-row">
+      <div class="advisor-name">Outsider <span class="pill outsider">Fresh eyes</span></div>
+      <div class="stance">"Landing in three seconds: no idea what '.CLE' is or what this does for me. Brutalist aesthetic undermines trust for a professional tool. 7-tier pricing is a maze where 5-pack costs more per credit than singles. Can't tell if I'm the customer — that's the whole problem."</div>
+    </div>
+
+    <div class="advisor-row">
+      <div class="advisor-name">Executor <span class="pill executor">Ship it</span></div>
+      <div class="stance">"Paddle isn't integrated — no way to take money. 14-day plan: Paddle Monday, validate DiGiCo on a real SD console this week, Loom demo, DM commenters, 10 paying customers by June. Kill Phase 5, API, team plans, trade shows, A&H month 3. Three-line roadmap."</div>
+    </div>
+  </div>
+
+  <!-- TALLY -->
+  <div class="tally">
+    <div class="tally-item">
+      <span class="number">5/5</span>
+      <div class="label">Voted Executor strongest</div>
+    </div>
+    <div class="tally-item">
+      <span class="number">5/5</span>
+      <div class="label">Called Expansionist the biggest blind spot</div>
+    </div>
+    <div class="tally-item">
+      <span class="number">4/5</span>
+      <div class="label">Said all advisors missed liability / show-day failure</div>
+    </div>
+  </div>
+</section>
+
+<!-- FULL ADVISOR RESPONSES (collapsed) -->
+<section>
+  <h2>Full Advisor Responses</h2>
+
+  <details class="advisor-contrarian">
+    <summary>The Contrarian — Four fatal flaws you're not confronting</summary>
+    <div class="content">
+      <p><strong>1. Your TAM math is fiction.</strong> 20K-40K "touring-level engineers" is a fantasy. The real paying market — engineers who hit the problem frequently, don't have a workaround, and trust a cloud tool 2 hours before doors — is 2K-4K globally. At $149/yr ARPU with realistic 5–10% conversion, $30K-$60K ARR ceiling, not $660K. ConsoleFlip being a solo dev isn't opportunity — it's a tell.</p>
+      <p><strong>2. "Zero tolerance for bugs" isn't a risk — it's the product killing itself.</strong> One botched translation at a festival, and "Stop rebuilding your shows" becomes "Showfier cost me my gig." You cannot ship a file-integrity product as a solo non-developer founder on Claude-generated code.</p>
+      <p><strong>3. Reverse-engineered binary parsers are a treadmill you can't stay on solo.</strong> Five console families × firmware updates 2-4x/year = silent mis-mappings. Yamaha pushes CL5 firmware in month 8, HPF frequency mis-maps, and you don't catch it because you're doing a gig in Brazil. Who's on call?</p>
+      <p><strong>4. The GTM contradicts the product.</strong> Forum seeding burns after post #2. Rental companies won't partner with a solo founder with no SLA. API licensing requires enterprise sales muscle you don't have.</p>
+      <p><strong>The real question:</strong> Is this a business, or a $3K/mo side-income tool dressed as a SaaS?</p>
+    </div>
+  </details>
+
+  <details class="advisor-first">
+    <summary>The First Principles Thinker — You're solving the wrong problem</summary>
+    <div class="content">
+      <p>The real problem isn't "my show file is in the wrong format." It's "I just lost 4 hours of prep time and I'm about to mix a show with settings I can't trust." Translation is a symptom. The actual pain is <strong>confidence under time pressure.</strong> A translated file you can't trust is worse than no file — now you're debugging someone else's output at line check. This is why ConsoleFlip hasn't runaway-won: a $15 file you have to audit anyway is a lottery ticket, not a product.</p>
+      <p><strong>1. "Show file" is the wrong unit.</strong> The unit is the engineer's mental model — a cloud-native, console-agnostic representation of channel intent, not channel bytes. Translation becomes a side effect, not the product. This is PatchPilot, not Showfier. Wrong wedge.</p>
+      <p><strong>2. SaaS-per-translation is wrong model.</strong> Engineers hit this 2–12x/year. Transactional pain, not subscription pain. $19/mo will churn brutally. Real ARR: rental companies (50x/week) or artist/production management.</p>
+      <p><strong>3. Solo-founder-with-Claude is fine for code, wrong for trust.</strong> In live audio, trust is a human name at FOH. Your job isn't "build parsers," it's "be visibly at 20 shows fixing translations in person." Code commoditizes; credibility doesn't.</p>
+      <p><strong>Build instead:</strong> a cloud-hosted, console-agnostic show document ("your show, not your file") monetized via rental-company seats, translation as loss-leader. You're building a file converter. The market wants a portable show.</p>
+    </div>
+  </details>
+
+  <details class="advisor-expansionist">
+    <summary>The Expansionist — Priced like a Chrome extension, actually infrastructure</summary>
+    <div class="content">
+      <p>Gregorio is the only person on Earth with a working Universal Show File Model. That's not a product — that's infrastructure, and he's pricing it like a Chrome extension. The Universal Model IS the asset; translation is just the wedge. Once the model covers the top 6 consoles, he owns the canonical data layer for live audio. This is the <strong>"MIDI moment" for mixing consoles</strong> — and MIDI became a 40-year standard owned by nobody. Showfier could own it.</p>
+      <ol>
+        <li><strong>iCloud for show files.</strong> Every engineer's career in one versioned cloud library, portable across any console forever. $49/mo and lifetime lock-in moat.</li>
+        <li><strong>The AI audio layer runs on his schema.</strong> When someone builds "ChatGPT for mixing" (within 18 months), they need structured show file data. Gregorio is quietly building the only labeled dataset. License it — or become the AI audio company.</li>
+        <li><strong>Rental companies are distribution, not customers.</strong> Clair, Solotech, PRG move 10,000+ files a week. One Clair deal = category dominance. Pursue <em>before</em> SaaS flywheel, not after.</li>
+        <li><strong>Manufacturer co-option.</strong> Sell white-label "import from competitor" to Yamaha/DiGiCo/A&H — they pay to cannibalize each other.</li>
+      </ol>
+      <p><strong>The bet:</strong> Stop thinking $3.8M ARR. Think $30M ARR + $200M Audiotonix acquisition in year 4 — they buy the standard, not the revenue. Build the schema like it's the standard. Because it is.</p>
+    </div>
+  </details>
+
+  <details class="advisor-outsider">
+    <summary>The Outsider — Three seconds in and I can't tell if I'm the customer</summary>
+    <div class="content">
+      <p><strong>"DROP .CLE HERE"</strong> — what is a .CLE? An extension I've never seen, into a box, with no explanation. The right-side "preview" is words I don't recognize flowing into other words I don't recognize.</p>
+      <p><strong>"Stop rebuilding your shows."</strong> — Rebuilding what? A show sounds like an event that already happened. Compare: "Switch sound boards in 30 seconds, not 8 hours." I get that instantly.</p>
+      <p><strong>The brutalist terminal aesthetic fights the trust signal.</strong> Yellow-on-black monospace says "hacker side project," not "reliable tool I bet my gig on." The aesthetic is for the founder, not the customer.</p>
+      <p><strong>Pricing is a maze.</strong> The 5-pack is <em>more expensive per credit than buying singles</em>. That's a bug or a trap. Kill three tiers. "One-off $5. Unlimited $19/mo. Team on request." Done.</p>
+      <p><strong>"First one free" + "1 lifetime"</strong> feels stingy — one shot to judge if this works on <em>my</em> files before I'm locked out forever. That's not generous, that's a tripwire.</p>
+      <p><strong>Market claim is unverified.</strong> 20K–40K is a range wide enough to drive a truck through. $400–$2,000/day is the engineer's rate, not the value of hours saved — conflating those is how founders fool themselves.</p>
+      <p><strong>Would I buy it?</strong> I can't tell if I'm the customer. That's the whole problem.</p>
+    </div>
+  </details>
+
+  <details class="advisor-executor">
+    <summary>The Executor — Paddle isn't integrated. 14-day plan.</summary>
+    <div class="content">
+      <p><strong>Single dumbest bottleneck:</strong> Paddle isn't integrated. 80% complete product, working parser, signup wall, literally no way to take money. <strong>Fix this Monday.</strong></p>
+      <p><strong>14-day plan:</strong></p>
+      <ul>
+        <li><strong>Day 1 (Mon):</strong> Integrate Paddle. One checkout link, one webhook, one upgrade button. 6-8 hours. Ship by EOD.</li>
+        <li><strong>Day 2:</strong> Price wall on 2nd conversion. Test with two accounts.</li>
+        <li><strong>Day 3-4:</strong> Validate DiGiCo output on a real SD console. Synthetic XML may not load on an actual SD12 — existential, you've been avoiding it. "Need 10 min on an SD console, will buy beers."</li>
+        <li><strong>Day 5-7:</strong> Record ONE 4-min Loom. CL file in, DiGiCo file out, loaded on real console. Post to r/livesound, ProSoundWeb, Brazilian WhatsApp groups. Demo, not launch.</li>
+        <li><strong>Day 8-14:</strong> DM every commenter. Offer Pro free 3 months for testimonial + referral. Convert one into $19.</li>
+      </ul>
+      <p><strong>Strip ruthlessly:</strong> Kill Phase 5. Kill API v1, team plans, version control, scene builder, template library, input list manager, rider parser. Kill trade shows (NAMM costs time you don't have; Brazilian WhatsApp is free and warmer). Kill A&H month 3 until DiGiCo validates.</p>
+      <p><strong>Missing:</strong> Refund policy for bad translation at 4pm on show day.</p>
+      <p><strong>Real roadmap:</strong> Paddle this week. DiGiCo validation this month. 10 paying customers by June. Everything else is noise.</p>
+    </div>
+  </details>
+</section>
+
+<!-- PEER REVIEW HIGHLIGHTS -->
+<section>
+  <h2>Peer Review Highlights</h2>
+  <details>
+    <summary>What the reviewers said (5 independent reviews, anonymized advisors)</summary>
+    <div class="content">
+      <p><strong>Unanimous winner:</strong> Executor (C) — 5/5. "The only response that converts critique into executable sequence with dates." "The only one that respects the founder's actual state: MVP deployed, no payments, synthetic DiGiCo output." "A diagnoses symptoms, B diagnoses diseases, D and E reframe galaxies — C ships."</p>
+      <p><strong>Unanimous blind spot:</strong> Expansionist (E) — 5/5. "Mistakes ambition for analysis." "Selling Gregorio a hallucination that will keep him building platform abstractions instead of validating one file on one console." "Audiotonix doesn't acquire unvalidated parsers." "The 'MIDI moment' took 40 years and an industry consortium."</p>
+      <p><strong>What all five advisors missed</strong> (4/5 reviewers surfaced this independently):</p>
+      <ul>
+        <li><em>Liability and the show-day failure mode.</em> "Refunds don't cover a $250K cancelled show. One viral 'Showfier killed my show' post on a touring engineer Facebook group ends the company. ToS + liability caps + E&O insurance + explicit 'verify before doors' UX belongs above pricing, above TAM, above schema ambition."</li>
+        <li><em>Legal / IP posture.</em> "A 30-minute call with an IP lawyer about DMCA §1201(f) interoperability defenses. A cease-and-desist is cheaper for Yamaha than an acquisition."</li>
+        <li><em>Verification harness.</em> "Round-trip testing against manufacturer offline editors as continuous CI. Without that, every roadmap is built on trust the product hasn't earned."</li>
+      </ul>
+    </div>
+  </details>
+</section>
+
+<footer>
+  Generated 2026-04-18 · Council methodology adapted from Andrej Karpathy's LLM Council · Full transcript: <code>docs/council/council-transcript-2026-04-18-1628.md</code>
+</footer>
+
+</div>
+</body>
+</html>

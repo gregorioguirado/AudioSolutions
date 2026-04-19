@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -6,7 +7,10 @@ from parsers.yamaha_cl_binary import parse_yamaha_cl_binary
 from parsers.digico_sd import parse_digico_sd
 from writers.digico_sd import write_digico_sd
 from writers.yamaha_cl import write_yamaha_cl
+from writers.yamaha_cl_binary import write_yamaha_cl_binary
 from models.universal import ShowFile
+
+logger = logging.getLogger("engine.verification")
 
 
 class UnsupportedConsolePair(Exception):
@@ -49,6 +53,7 @@ PARSERS = {
 WRITERS = {
     "digico_sd": write_digico_sd,
     "yamaha_cl": write_yamaha_cl,
+    "yamaha_cl_binary": write_yamaha_cl_binary,
 }
 
 
@@ -100,6 +105,33 @@ def translate(
     # DiGiCo format cannot represent channel mute state
     if target_console == "digico_sd" and any(ch.muted for ch in show.channels):
         show.dropped_parameters.append("muted_state")
+
+    # Verification harness hook (non-blocking).
+    # Re-parses the output and diffs it against the source per parameter.
+    # Failures are logged via "engine.verification" but never raised — the
+    # translator must keep working even if the harness is broken.
+    try:
+        from verification.harness import verify_translation
+        harness_result = verify_translation(show, output_bytes, target_console)
+        if harness_result.fatal_error:
+            logger.warning(
+                "translation harness fatal error (%s -> %s): %s",
+                source_console, target_console, harness_result.fatal_error,
+            )
+        elif not harness_result.all_passed:
+            failed = harness_result.failed_checks
+            logger.info(
+                "translation harness reported %d failed check(s) (%s -> %s); first few: %s",
+                len(failed), source_console, target_console,
+                [(c.channel_id, c.parameter, c.note) for c in failed[:5]],
+            )
+        else:
+            logger.debug(
+                "translation harness clean (%s -> %s): %s",
+                source_console, target_console, harness_result.summary(),
+            )
+    except Exception as exc:  # noqa: BLE001 — hook must never block translation
+        logger.warning("translation harness hook crashed (ignored): %s", exc)
 
     approximated = []
     if any(ch.eq_bands for ch in show.channels):
