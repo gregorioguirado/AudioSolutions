@@ -206,12 +206,50 @@ _GATE_TYPES = {"GATE", "EXP.1:2", "EXP.1:4", "DUCKER", "FREQ.DUCK"}
 _COMP_TYPES = {"Classic Comp", "PM Comp", "COMPANDER H", "COMPANDER S", "VCA Comp"}
 
 
+def _gate_from_params(params: list[int], on: bool) -> Gate:
+    """Decode GATE parameters. Calibrated against dm7_dyn_calibration.dm7f.
+
+    P[0]: threshold  ÷100 → dB
+    P[1]: attack     direct ms (integer ms steps)
+    P[2]: range      ÷100 → dB  (dropped, no universal field)
+    P[3]: hold       ÷1000 → ms (stored as µs)
+    P[4]: release    ÷1000 → ms (stored as µs)
+    """
+    return Gate(
+        threshold=params[0] / 100.0,
+        attack=float(params[1]),
+        hold=params[3] / 1000.0,
+        release=params[4] / 1000.0,
+        enabled=on,
+    )
+
+
+def _comp_from_params(params: list[int], on: bool) -> Compressor:
+    """Decode Classic Comp parameters. Calibrated against dm7_dyn_calibration.dm7f.
+
+    P[0]: threshold  ÷100 → dB
+    P[1]: attack     ÷1000 → ms (stored as µs)
+    P[2]: release    ÷10 → ms   (stored in 0.1ms units)
+    P[3]: ratio      ÷100 → e.g. 4.4:1
+    P[4]: knee index (dropped, no universal field)
+    P[5]: output gain ÷100 → dB (mapped to makeup_gain)
+    """
+    return Compressor(
+        threshold=params[0] / 100.0,
+        ratio=params[3] / 100.0,
+        attack=params[1] / 1000.0,
+        release=params[2] / 10.0,
+        makeup_gain=params[5] / 100.0,
+        enabled=on,
+    )
+
+
 def _parse_dynamics(rec: bytes, dropped: list[str], ch_name: str) -> tuple[Optional[Gate], Optional[Compressor]]:
     """Extract gate and compressor from the two Dynamics units.
 
-    Parameter[0] ÷ 100 = threshold dB (verified against defaults and real files).
-    Other parameter scaling is type-dependent and not yet calibrated — time
-    constants and ratio are omitted rather than fabricated.
+    Classic Comp and GATE parameter mappings are fully calibrated.
+    PM Comp and other comp variants: threshold only (param layout differs).
+    DE-ESSER, FREQ.DUCK, and unknown types have no universal equivalent.
     """
     gate: Optional[Gate] = None
     comp: Optional[Compressor] = None
@@ -222,31 +260,29 @@ def _parse_dynamics(rec: bytes, dropped: list[str], ch_name: str) -> tuple[Optio
         bank     = dyn_base + 2 + actor * DYN_BANK_SIZE
         on       = bool(rec[bank + _DB_ON] & 0x01)
         dyn_type = _read_str(rec, bank + _DB_TYPE, 16)
-        threshold_db = struct.unpack_from("<i", rec, bank + _DB_PARAM)[0] / 100.0
+        params   = [struct.unpack_from("<i", rec, bank + _DB_PARAM + i * 4)[0] for i in range(10)]
 
         if dyn_type in _GATE_TYPES and gate is None:
-            gate = Gate(
-                threshold=threshold_db,
-                attack=0.0,    # scaling unverified — needs calibration file
-                hold=0.0,
-                release=0.0,
-                enabled=on,
-            )
+            gate = _gate_from_params(params, on)
+            if on and dyn_type != "GATE":
+                dropped.append(f"{ch_name}: DM7 '{dyn_type}' mapped to Gate (threshold only; expander ratio dropped)")
+        elif dyn_type == "Classic Comp" and comp is None:
+            comp = _comp_from_params(params, on)
             if on:
-                dropped.append(f"{ch_name}: Gate attack/hold/release not calibrated for DM7 — set to 0")
+                dropped.append(f"{ch_name}: DM7 Classic Comp knee setting dropped (no universal field)")
         elif dyn_type in _COMP_TYPES and comp is None:
+            # Other comp variants: threshold only — param layout differs from Classic Comp
             comp = Compressor(
-                threshold=threshold_db,
-                ratio=0.0,     # scaling unverified — needs calibration file
+                threshold=params[0] / 100.0,
+                ratio=0.0,
                 attack=0.0,
                 release=0.0,
                 makeup_gain=0.0,
                 enabled=on,
             )
             if on:
-                dropped.append(f"{ch_name}: Comp ratio/attack/release not calibrated for DM7 — set to 0")
-        elif dyn_type not in {"", "DE-ESSER"}:
-            # DE-ESSER and empty type have no universal equivalent
+                dropped.append(f"{ch_name}: DM7 '{dyn_type}' — only threshold mapped; ratio/attack/release layout uncalibrated")
+        elif dyn_type not in {"", "DE-ESSER", "FREQ.DUCK"}:
             if on:
                 dropped.append(f"{ch_name}: DM7 dynamics type '{dyn_type}' has no universal equivalent — dropped")
 

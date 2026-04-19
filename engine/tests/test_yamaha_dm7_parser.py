@@ -23,6 +23,7 @@ SAMPLES = Path(__file__).parent.parent.parent / "samples"
 EMPTY   = SAMPLES / "dm7_empty.dm7f"
 NAMED   = SAMPLES / "dm7_named.dm7f"
 REAL    = SAMPLES / "Bertoleza Sesi Campinas.dm7f"
+DYN_CAL = SAMPLES / "dm7_dyn_calibration.dm7f"
 
 
 # ---------------------------------------------------------------------------
@@ -42,6 +43,11 @@ def show_named() -> ShowFile:
 @pytest.fixture(scope="module")
 def show_real() -> ShowFile:
     return parse(REAL.read_bytes())
+
+
+@pytest.fixture(scope="module")
+def show_dyn_cal() -> ShowFile:
+    return parse(DYN_CAL.read_bytes())
 
 
 # ---------------------------------------------------------------------------
@@ -207,22 +213,81 @@ def test_real_file_eq_frequencies_in_audio_range(show_real):
 
 def test_empty_file_dynamics_off(show_empty):
     ch = show_empty.channels[0]
-    # Both dynamics units are off by default
     assert ch.gate is None or ch.gate.enabled is False
     assert ch.compressor is None or ch.compressor.enabled is False
 
 
 def test_real_file_ch1_has_compressor(show_real):
-    # LUANA has PM Comp on
     ch = show_real.channels[0]
     assert ch.compressor is not None
     assert ch.compressor.enabled is True
 
 
 def test_real_file_ch1_compressor_threshold(show_real):
-    # PM Comp threshold = -25 dB (Param[0]=-2500, ÷100)
-    ch = show_real.channels[0]
-    assert ch.compressor.threshold == pytest.approx(-25.0, abs=0.01)
+    # PM Comp threshold -25 dB (Param[0]=-2500 ÷100), verified empirically
+    assert show_real.channels[0].compressor.threshold == pytest.approx(-25.0, abs=0.01)
+
+
+# ---------------------------------------------------------------------------
+# Dynamics calibration — dm7_dyn_calibration.dm7f
+# Gate: threshold=-16.5, attack=30ms, hold=6.27ms, decay=696ms
+# Comp (Classic Comp): threshold=-13.6, ratio=4.4:1, attack=1.402ms,
+#   release=362.1ms, out_gain=+3.8dB
+# ---------------------------------------------------------------------------
+
+def test_cal_gate_enabled(show_dyn_cal):
+    assert show_dyn_cal.channels[0].gate is not None
+    assert show_dyn_cal.channels[0].gate.enabled is True
+
+
+def test_cal_gate_threshold(show_dyn_cal):
+    # Raw -1651 ÷ 100 = -16.51 dB; editor displays as -16.5
+    assert show_dyn_cal.channels[0].gate.threshold == pytest.approx(-16.51, abs=0.01)
+
+
+def test_cal_gate_attack(show_dyn_cal):
+    # Param[1] = 30, stored as direct ms
+    assert show_dyn_cal.channels[0].gate.attack == pytest.approx(30.0, abs=0.1)
+
+
+def test_cal_gate_hold(show_dyn_cal):
+    # Param[3] = 6270 µs → 6.270 ms
+    assert show_dyn_cal.channels[0].gate.hold == pytest.approx(6.27, abs=0.01)
+
+
+def test_cal_gate_release(show_dyn_cal):
+    # Param[4] = 696000 µs → 696.0 ms
+    assert show_dyn_cal.channels[0].gate.release == pytest.approx(696.0, abs=0.1)
+
+
+def test_cal_comp_enabled(show_dyn_cal):
+    assert show_dyn_cal.channels[0].compressor is not None
+    assert show_dyn_cal.channels[0].compressor.enabled is True
+
+
+def test_cal_comp_threshold(show_dyn_cal):
+    # Raw -1369 ÷ 100 = -13.69 dB; editor displays as -13.6 (rounding)
+    assert show_dyn_cal.channels[0].compressor.threshold == pytest.approx(-13.69, abs=0.01)
+
+
+def test_cal_comp_ratio(show_dyn_cal):
+    # Param[3] = 440 ÷ 100 = 4.4:1
+    assert show_dyn_cal.channels[0].compressor.ratio == pytest.approx(4.4, abs=0.01)
+
+
+def test_cal_comp_attack(show_dyn_cal):
+    # Param[1] = 1402 µs → 1.402 ms
+    assert show_dyn_cal.channels[0].compressor.attack == pytest.approx(1.402, abs=0.001)
+
+
+def test_cal_comp_release(show_dyn_cal):
+    # Param[2] = 3621 × 0.1ms → 362.1 ms
+    assert show_dyn_cal.channels[0].compressor.release == pytest.approx(362.1, abs=0.1)
+
+
+def test_cal_comp_makeup_gain(show_dyn_cal):
+    # Param[5] = 380 ÷ 100 = 3.8 dB
+    assert show_dyn_cal.channels[0].compressor.makeup_gain == pytest.approx(3.8, abs=0.01)
 
 
 # ---------------------------------------------------------------------------
