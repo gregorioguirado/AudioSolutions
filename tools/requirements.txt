@@ -1,0 +1,5 @@
+# Automation-only dependencies — not needed in the production engine
+# Install with: pip install -r tools/requirements.txt
+pywinauto==0.6.8
+pyautogui==0.9.54
+pywin32==308
