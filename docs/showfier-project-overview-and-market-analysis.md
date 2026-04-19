@@ -270,24 +270,17 @@ No product exists that does true cross-brand conversion between the Big 5 consol
 
 ## 6. Business Model & Pricing
 
-### Recommended Model: Hybrid (Credits + Subscription)
+### Recommended Model: Three-Tier Subscription (Free → Pro → Team)
 
-This aligns with the 2026 trend: 43% of SaaS companies now combine subscriptions with usage-based components, reporting 38% higher revenue growth. It also matches the irregular usage pattern of live audio engineers — heavy during festival season, quiet in off-months.
+> **Pricing collapsed from 8 tiers to 3 (2026-04-18).** Per the 2026-04-18 council Outsider critique, the previous 8-tier table was cut. The 5-pack of credits was priced higher per credit than buying singles (a trust-destroying bug), and 7+ tiers created decision paralysis for engineers who just want to translate one file before doors. Three tiers cover the three real buying modes: try it, use it regularly, buy it for the company.
 
 ### Pricing Tiers
 
 | Tier | Price | Limit | Target Segment |
 |------|-------|-------|---------------|
-| **Free** | $0 | 1 lifetime translation | Everyone — proves value with zero friction |
-| **Single Credit** | $5* | 1 translation | Price-sensitive users, worship, students |
-| **Credit Pack (5)** | $45 | 5 translations, no expiry | Freelance engineers, occasional use |
-| **Credit Pack (10)** | $80 | 10 translations, no expiry | Regular users, small rental companies |
-| **Pro Monthly** | $19/mo | 30 translations/mo | Active touring engineers |
-| **Pro Annual** | $149/yr | 30 translations/mo | Committed users (~$12.42/mo effective) |
-| **Team** | $599/yr* | 10 seats, 30/seat/mo | Rental companies, production houses |
-| **Enterprise** | Custom | Unlimited + API + SLA | Major rental companies, manufacturers |
-
-*Adjusted from original plan: added $5 single-credit entry point (lower barrier), raised Team from $399 to $599 (was underpriced for B2B).
+| **Free** | $0 | 1 lifetime translation | Anyone — try it before doors |
+| **Pro** | $19/mo or $149/yr | Unlimited translations | Active touring engineers |
+| **Team** | Contact for pricing | Multi-seat, custom | Rental companies, production houses |
 
 ### Pricing Justification
 
@@ -300,18 +293,18 @@ This aligns with the 2026 trend: 43% of SaaS companies now combine subscriptions
 | Shure Wireless Workbench | Free | Manufacturer-subsidized — not a revenue comp |
 | Engineer day rate | $400–$2,000 | Showfier saves 2–4 hours = $200–$800 value per use |
 
-**At $12/translation, the ROI is absurd.** An engineer earning $500/day saves 3 hours of manual work. That's ~$187 of time saved for $12. The product sells itself on economics.
+**At $19/mo for unlimited translations, the ROI is absurd.** An engineer earning $500/day saves 3 hours of manual work on a single show. That's ~$187 of time saved on the first translation alone. The product sells itself on economics.
 
 ### Business Model Evolution
 
 | Phase | Timing | Model | Revenue Driver |
 |-------|--------|-------|---------------|
 | 1 | Months 1–3 | Free + waitlist | Validate PMF, collect emails |
-| 2 | Month 3–4 | Credits only | Lowest friction monetization, proves WTP |
-| 3 | Month 5–6 | Credits + Pro subscription | Convert repeat credit buyers to subscription |
+| 2 | Month 3–4 | Free + Pro monthly | Lowest friction monetization, proves WTP |
+| 3 | Month 5–6 | + Pro annual | Lock in committed users, reduce churn |
 | 4 | Month 9–12 | + Team plans | Target rental companies and production houses |
 | 5 | Month 12–18 | + API licensing | Rental companies integrate into workflows |
-| 6 | Month 18–36 | + Enterprise + Marketplace | Custom pricing, community console profiles |
+| 6 | Month 18–36 | + Marketplace | Community console profiles, template revenue |
 
 ### Expansion Revenue Opportunities
 
@@ -335,8 +328,8 @@ This aligns with the 2026 trend: 43% of SaaS companies now combine subscriptions
 | PDF report generation | $0.005 | Trivial compute |
 | **Total per translation** | **~$0.02–$0.05** | |
 
-**Gross margin per $12 credit translation: 99.6%**
-**Gross margin per $19/mo subscription (30 translations used): 96.7%**
+**Gross margin per $19/mo Pro subscription (typical 5–15 translations/mo): 96–98%**
+**Gross margin per $149/yr Pro annual (typical 60–180 translations/yr): 94–98%**
 
 ### Fixed Monthly Overhead
 
@@ -351,7 +344,7 @@ This aligns with the 2026 trend: 43% of SaaS companies now combine subscriptions
 | E&O Insurance | ~$100 |
 | **Total** | **~$150–250** |
 
-**Break-even: fewer than 5 paying customers.** 2 Pro subs + 2 credit sales = ~$62/mo revenue vs. ~$60 minimum overhead.
+**Break-even: fewer than 10 paying customers.** ~10 Pro monthly subs = $190/mo revenue vs. ~$150–250/mo overhead.
 
 ### Customer Acquisition Cost (CAC)
 
@@ -368,11 +361,12 @@ This aligns with the 2026 trend: 43% of SaaS companies now combine subscriptions
 
 | Tier | Monthly Revenue | Avg Lifespan | LTV | LTV:CAC |
 |------|----------------|-------------|-----|---------|
-| Credit user | ~$2.50/mo avg | 24 months | $60 | 4:1 |
 | Pro monthly | $19/mo | 14 months | $266 | 5.9:1 |
 | Pro annual | $12.42/mo eff. | 28 months | $343 | 7.6:1 |
-| Team | $49.92/mo eff. | 36 months | $1,197 | 10:1 |
+| Team (custom) | $49.92/mo eff.* | 36 months | $1,197 | 10:1 |
 | API/white-label | $200–500/mo | 48 months | $12,000+ | 24:1 |
+
+*Team pricing is contact-sales; figure shown is a working assumption for modeling, not a published price.
 
 All tiers exceed the 3:1 LTV:CAC benchmark for healthy SaaS.
 
@@ -721,7 +715,7 @@ Don't build marketplace infrastructure until 1,000+ active users. Before that, c
 | Risk | Mitigation |
 |------|-----------|
 | **Solo founder burnout** | Hard boundaries (no feature work on weekends). Automate everything (CI/CD, monitoring, alerts). Document everything for "bus factor." At $200K+ ARR, hire part-time support. At $500K+, technical contractor. |
-| **Cash flow** | Keep parallel income for 12–18 months. Launch credits-only first (revenue from day one). Fixed costs <$300/mo. Contingency: if savings < 6 months, pause features and focus on revenue. |
+| **Cash flow** | Keep parallel income for 12–18 months. Launch Free + Pro monthly first (revenue from day one). Fixed costs <$300/mo. Contingency: if savings < 6 months, pause features and focus on revenue. |
 | **Zero bug tolerance** | Comprehensive test suite with real show files. Translation report as safety net. Mandatory "Verify on console before showtime" acknowledgment. Error tracking with instant alerts. |
 | **Translation accuracy** | Round-trip testing (A→B→A, compare). Color-coded confidence indicators (green/yellow/red). Never silently drop data. |
 | **Market too small** | Validate conversion rate early. If 5% of 50K engineers pay $149/yr = $373K ARR. Platform play (Tier A tools) expands TAM 10x. |

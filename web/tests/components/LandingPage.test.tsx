@@ -27,8 +27,8 @@ describe("PricingTeaser", () => {
   it("renders three tiers", () => {
     render(<PricingTeaser />);
     expect(screen.getByText(/free/i)).toBeInTheDocument();
-    expect(screen.getByText(/credits/i)).toBeInTheDocument();
     expect(screen.getByText(/pro/i)).toBeInTheDocument();
+    expect(screen.getByText(/team/i)).toBeInTheDocument();
   });
 });
 

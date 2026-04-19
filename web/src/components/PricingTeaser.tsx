@@ -1,7 +1,35 @@
-const TIERS = [
-  { name: "Free", price: "$0", desc: "1 lifetime translation", note: "See what it does", highlighted: false },
-  { name: "Credits", price: "$12–90", desc: "1–10 translations", note: "Pay as you go", highlighted: false },
-  { name: "Pro", price: "$19/mo", desc: "30 translations/month", note: "For working engineers", highlighted: true },
+type Tier = {
+  name: string;
+  price: string;
+  priceSub?: string;
+  desc: string;
+  note: string;
+  highlighted: boolean;
+};
+
+const TIERS: readonly Tier[] = [
+  {
+    name: "Free",
+    price: "$0",
+    desc: "1 lifetime translation",
+    note: "Try it",
+    highlighted: false,
+  },
+  {
+    name: "Pro",
+    price: "$19/mo",
+    priceSub: "or $149/yr",
+    desc: "Unlimited translations",
+    note: "For working engineers",
+    highlighted: true,
+  },
+  {
+    name: "Team",
+    price: "Contact us",
+    desc: "Multi-seat, custom",
+    note: "For rental companies",
+    highlighted: false,
+  },
 ] as const;
 
 export default function PricingTeaser() {
@@ -13,9 +41,15 @@ export default function PricingTeaser() {
 
         <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3">
           {TIERS.map((t) => (
-            <div key={t.name} className={`border p-6 text-center ${t.highlighted ? "border-accent bg-accent/5" : "border-border bg-surface"}`}>
+            <div
+              key={t.name}
+              className={`border p-6 text-center ${t.highlighted ? "border-accent bg-accent/5" : "border-border bg-surface"}`}
+            >
               <p className="text-xs font-bold uppercase tracking-wider text-muted">{t.name}</p>
               <p className="mt-2 text-2xl font-extrabold text-white">{t.price}</p>
+              {t.priceSub && (
+                <p className="mt-1 text-[11px] text-muted">{t.priceSub}</p>
+              )}
               <p className="mt-1 text-xs text-muted">{t.desc}</p>
               <p className="mt-4 text-[10px] uppercase tracking-wider text-muted">{t.note}</p>
             </div>
