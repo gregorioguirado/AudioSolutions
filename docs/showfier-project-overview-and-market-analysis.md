@@ -422,9 +422,10 @@ All tiers exceed the 3:1 LTV:CAC benchmark for healthy SaaS.
 - Touring crews are natural distribution networks — one engineer tells the whole crew.
 - The "save story" loop: Engineer saves a show → posts about it → organic testimonial → signups.
 
-**2. Forum Seeding (ProSoundWeb, Reddit r/livesound)**
+**2. Forum Seeding (ProSoundWeb, Reddit r/livesound, Brazilian WhatsApp groups)**
 - ProSoundWeb is where purchasing decisions start in pro audio.
 - Strategy: Be genuinely helpful. Build reputation first. Mention the product naturally.
+- **Brazilian WhatsApp groups** are explicitly in scope — the founder's home-market network is a high-trust, high-density distribution channel that competitors can't easily replicate. Seed there alongside English-language forums.
 - **Critical warning:** These communities are allergic to marketing. One whiff of astroturfing = banned and blacklisted. Post under real name, be transparent about being the creator.
 
 **3. Rental Company Partnerships**
@@ -432,17 +433,18 @@ All tiers exceed the 3:1 LTV:CAC benchmark for healthy SaaS.
 - If a rental company recommends Showfier to visiting engineers, that's instant credibility and distribution.
 - Start with mid-tier regional companies (more accessible), then approach global-tier.
 
+**4. Friday Discovery Sidecar**
+- 1 hr/week cadence — book one or two 30-minute discovery calls every Friday with a rental-company contact OR a touring engineer OR a production manager.
+- Three questions per call: (a) how often does the wrong-console problem hit you? (b) what would you pay to skip it? (c) what would a rental-company version of Showfier need to look like?
+- Goal: continuous market signal flowing into the roadmap without a separate "research phase." Keeps the founder anchored to live problems while shipping.
+- Reference: `docs/council/council-driven-shifts-2026-04-18.md` ADD section.
+
 #### Tier 2 — Strong Impact
 
-**4. Content Marketing (YouTube, Blog)**
+**5. Content Marketing (YouTube, Blog)**
 - SEO goldmine: "How to transfer Yamaha CL show file to DiGiCo SD" — nobody else has this content.
 - YouTube tutorials showing the workflow will get shared in groups and forums.
 - Console Compatibility Matrix (free resource) becomes the go-to reference, drives SEO.
-
-**5. Trade Show Demos**
-- Guerrilla presence: live demos at industry meetups, hospitality suites, side events.
-- Bring a laptop with two offline editors + Showfier. The "wow moment" sells itself.
-- Leverage Brazilian connections for AES Brasil and Latin American events at low cost.
 
 **6. Social Media (LinkedIn, Facebook Groups, Instagram)**
 - LinkedIn: Target production managers and rental company owners (purchasing decisions).
@@ -465,16 +467,20 @@ All tiers exceed the 3:1 LTV:CAC benchmark for healthy SaaS.
 - Approach carefully. Frame as "we make it easier for engineers to choose your console."
 - Start with Yamaha (more open to third-party ecosystem tools).
 
+#### Deferred (until MRR > $2K)
+
+**Trade Show Demos** — Guerrilla presence at industry meetups, hospitality suites, side events; bring a laptop with two offline editors + Showfier; leverage Brazilian connections for AES Brasil and Latin American events at low cost.
+
+> Not pursued until MRR > $2K. Reason: cost-time-benefit doesn't justify at solo-founder pre-revenue stage (council Executor 2026-04-18).
+
 ### Key Trade Shows
+
+Trade-show presence is deferred per the council 2026-04-18 shift — see the new Deferred subsection above.
 
 | Show | Location | When | Priority |
 |------|----------|------|----------|
-| NAMM Show | Anaheim, CA | January | High — largest music/pro audio trade show |
-| Prolight + Sound | Frankfurt, Germany | March/April | High — Europe's premier pro audio show |
 | InfoComm | Orlando/Las Vegas | June | Medium — AV/integration, growing live sound |
-| PLASA Show | London, UK | September | Medium — UK/European live production |
 | LDI | Las Vegas | November | Medium — live entertainment technology |
-| AES Convention | Various | October | Medium — academic credibility |
 | AES Brasil | São Paulo | Varies | High — founder's home market |
 
 ### Geographic Strategy
@@ -517,7 +523,7 @@ All tiers exceed the 3:1 LTV:CAC benchmark for healthy SaaS.
 - Approach 3–5 regional rental companies for pilot partnerships
 
 **Months 6–12: Public Launch**
-- Open public access with freemium + credits
+- Open public access with Free + Pro tiers (per the 2026-04-18 council, the credits tier was retired)
 - Launch referral program
 - Publish Console Compatibility Matrix
 - First trade show demo presence
@@ -545,67 +551,51 @@ All tiers exceed the 3:1 LTV:CAC benchmark for healthy SaaS.
 - Advanced routing (matrix sends, direct outs, inserts, talkback)
 - Output patching (Dante/OMNI assignments)
 - Recall safe / mute safe flags
-- **Add Allen & Heath dLive and Avid VENUE S6L**
+- **Yamaha QL validation** (near-zero effort, shares CL binary format)
 - Batch mode (multiple files)
 - **Show file diff/comparison tool** (free feature, drives adoption)
 - Paddle payment integration
 
-### Phase 3: Scene Builder + Templates (Months 6–12)
-- Scene builder — create show files from scratch via web UI, export to any format
-- Template library ("40-channel rock band," "orchestra," "corporate panel")
-- Input list import — CSV/Excel → show file with names, colors, routing pre-configured
-- Community templates (share and fork)
-- **Add RIVAGE PM, DM7, SSL Live**
-- Show file version control ("Git for show files")
-- API v1 (REST, API key auth)
+### Phase 2a: Verification Harness (parallel with Phase 2)
+- **Round-trip CI** — every translation auto-verified by parsing the output back through the target parser and diffing against source.
+- **Calibration-file fixtures** — golden expected values per parameter class, checked into `engine/verification/fixtures/`.
+- **Harness hook in `translator.py`** — every production translation logs a per-parameter verification report, non-blocking.
+
+### Phase 3: MBDF Batch Win + A&H dLive (Months 6–12)
+- **Add Yamaha DM7, TF, RIVAGE PM** as a batch — all three share the MBDF container format, so one reverse-engineering project unlocks three consoles.
+- **Add Allen & Heath dLive** (moved from Phase 2 — only after DiGiCo proven on real traffic and MBDF family ships).
+- **DiGiCo real `.show` file parser** — replace synthetic writer with real-format I/O.
 
 ### Phase 4: Platform Expansion (Months 12–18)
-- Technical rider parser (AI/OCR ingestion of PDF riders → structured data)
 - Patch sheet manager (web-based, PDF/CSV export)
-- **Add X32/M32, Wing, TF** (volume play)
 - Input list ↔ show file bidirectional sync
-- Rental company API integrations
 
 ### Phase 5: Ecosystem & Integrations (Months 18–30)
-- Mobile app (iOS/Android) or PWA
-- Desktop/offline app (Electron or Tauri)
-- CLI tool (`showfier translate input.clf --to digico-sd7`)
-- Webhook notifications
 - Integration with console offline editors (deep links)
-- **Add Midas PRO/HD96, DiGiCo T, Waves LV1**
-- Community marketplace (console profiles, templates, presets)
+
+> Items removed per 2026-04-18 council — see `docs/council/council-driven-shifts-2026-04-18.md` for the full kill list and rationale.
 
 ---
 
 ## 10. Console Support Priority
 
-### Prioritized by: market share × user demand × format complexity × strategic value
+### Re-prioritized 2026-04-18 per council Executor — validate one CL↔DiGiCo pair on real paying-customer traffic before adding consoles.
 
-| Priority | Console | Timeframe | Rationale |
-|----------|---------|-----------|-----------|
-| ✅ Done | Yamaha CL/QL | MVP | Largest installed base, corporate + festival workhorse |
-| ✅ Done | DiGiCo SD/Quantum | MVP | Touring A-list standard |
-| **1** | **Allen & Heath dLive/Avantis** | Month 3–5 | Fastest-growing brand, completes the "big three" |
-| **2** | **Avid VENUE S6L** | Month 4–6 | North American touring dominant, high-value users |
-| **3** | Yamaha RIVAGE PM | Month 6–8 | High-end Yamaha, leverages existing CLF knowledge |
-| **4** | Yamaha DM7 | Month 7–9 | Newest Yamaha mid-range, successor to CL/QL |
-| **5** | SSL Live | Month 8–10 | Growing premium brand, credibility signal |
-| **6** | Behringer X32/Midas M32 | Month 10–12 | Massive install base (budget), volume acquisition funnel |
-| **7** | Behringer Wing | Month 12–14 | X32 upgrade path, churches and mid-size venues |
-| **8** | Yamaha TF series | Month 13–15 | Budget Yamaha, entry point users |
-| **9** | Midas PRO/HD96 | Month 15–18 | Completes "full coverage" story |
-| **10** | DiGiCo T series | Month 16–18 | Theater market, shares SD format family |
-| **11** | Waves LV1 | Month 18–20 | Software-defined future of consoles |
-| **12** | Soundcraft Vi | Month 20+ | Only if customer demand justifies it |
-| **13** | Lawo mc² | Month 20+ | Broadcast/theater vertical expansion |
-| **14** | Roland M-5000 | Unlikely | Negligible market share |
+| Priority | Console | Status |
+|----------|---------|--------|
+| ✅ Done | Yamaha CL | MVP |
+| ✅ Done | DiGiCo SD/Quantum | MVP (synthetic writer; real-file parser later) |
+| **1** | Yamaha QL validation | Near-zero effort — shares CL binary format |
+| **2** | Yamaha DM7 (MBDF batch-win start) | Reverse-engineering project unlocks 3 consoles |
+| **3** | Yamaha TF (MBDF adaptation) | Same container family as DM7 |
+| **4** | Yamaha RIVAGE PM (MBDF adaptation) | Same container family |
+| **5** | DiGiCo real .show file parser | Replace synthetic writer with real-format I/O |
+| **6** | Allen & Heath dLive | Demoted from priority #1 — only after DiGiCo proven on real traffic |
+| Deferred | All others (Avid S6L, X32/M32, Wing, SSL Live, Midas PRO, DiGiCo T, Waves LV1, Soundcraft, Lawo, Roland) | Indefinitely deferred until MRR > $5K and a request comes from a paying user |
 
-### Strategic Notes
+### Strategic Rationale
 
-- **A&H dLive is the #1 priority.** Completing the "big three" (Yamaha, DiGiCo, A&H) covers the majority of touring/festival consoles globally. This is the highest-impact addition.
-- **Avid VENUE S6L is the premium play.** Avid users are top-tier touring engineers with high willingness to pay. Pro Tools integration makes this console the choice for virtual soundcheck workflows.
-- **X32/M32 is the volume play, not the revenue play.** Budget console users have lower WTP but massive word-of-mouth potential. Consider offering basic X32 translation on the free tier to seed the funnel.
-- Each additional supported console pair expands TAM and creates a moat that's months of work for any competitor to replicate.
+Per the 2026-04-18 council Executor: validate one CL↔DiGiCo pair on real paying-customer traffic before adding consoles. The MBDF batch-win (DM7 + TF + RIVAGE PM) is prioritized over A&H dLive because all three Yamaha mid/high-range consoles share the MBDF container format — one reverse-engineering project unlocks three consoles. A&H dLive moves to priority #6, only pursued after DiGiCo is proven on real traffic AND the MBDF family ships.
 
 ---
 
@@ -699,21 +689,27 @@ Don't build marketplace infrastructure until 1,000+ active users. Before that, c
 
 | Rank | Risk | L | I | Score | Category |
 |------|------|---|---|-------|----------|
-| **1** | **Solo founder burnout** | 4 | 5 | **20** | Business |
-| **2** | **Cash flow before profitability** | 4 | 4 | **16** | Business |
-| **3** | **Zero tolerance for bugs (high-stress use case)** | 4 | 4 | **16** | Operational |
-| **4** | **Translation accuracy issues at live shows** | 3 | 5 | **15** | Technical |
-| **5** | Market too small to sustain a business | 3 | 4 | 12 | Market |
-| **6** | Firmware update breaks parser | 4 | 3 | 12 | Technical |
-| **7** | Console manufacturer builds cross-brand tools | 2 | 5 | 10 | Market |
-| **8** | Pricing too high or too low | 3 | 3 | 9 | Business |
-| **9** | Customer support burden | 3 | 3 | 9 | Business |
-| **10** | GDPR/LGPD compliance | 3 | 3 | 9 | Operational |
+| **1** | **DiGiCo writer not validated on real console** | 5 | 5 | **25** | Technical |
+| **2** | **Liability / show-day failure mode** | 3 | 5 | **15** | Legal/Operational |
+| **3** | **Solo founder burnout** | 4 | 5 | **20** | Business |
+| **4** | **Cash flow before profitability** | 4 | 4 | **16** | Business |
+| **5** | **Zero tolerance for bugs (high-stress use case)** | 4 | 4 | **16** | Operational |
+| **6** | **Translation accuracy issues at live shows** | 3 | 5 | **15** | Technical |
+| **7** | Market too small to sustain a business | 3 | 4 | 12 | Market |
+| **8** | Firmware update breaks parser | 4 | 3 | 12 | Technical |
+| **9** | Console manufacturer builds cross-brand tools | 2 | 5 | 10 | Market |
+| **10** | Pricing too high or too low | 3 | 3 | 9 | Business |
+| **11** | Customer support burden | 3 | 3 | 9 | Business |
+| **12** | GDPR/LGPD compliance | 3 | 3 | 9 | Operational |
+
+> Risks #1 and #2 elevated by the 2026-04-18 council. The DiGiCo writer has never been validated on real DiGiCo hardware or DiGiCo Offline Software, so every translation is a bet on unvalidated output — peer review unanimously flagged this as the highest-stakes blind spot. Liability was named as the product-ending risk that no advisor explicitly raised.
 
 ### Mitigation Strategies
 
 | Risk | Mitigation |
 |------|-----------|
+| **DiGiCo writer not validated** | Validate on real DiGiCo console or via DiGiCo Offline Software before any further console work. Round-trip verification harness (Phase 2a) turns this from a one-time check into a continuous correctness guarantee. Block downstream roadmap items until green. |
+| **Liability / show-day failure mode** | E&O $1M/occurrence policy + ToS with liability cap (12-mo fees) + verify-before-doors UX acknowledgment + round-trip verification harness. Hard gate: insurance and ToS must be live before Paddle accepts the first charge. |
 | **Solo founder burnout** | Hard boundaries (no feature work on weekends). Automate everything (CI/CD, monitoring, alerts). Document everything for "bus factor." At $200K+ ARR, hire part-time support. At $500K+, technical contractor. |
 | **Cash flow** | Keep parallel income for 12–18 months. Launch Free + Pro monthly first (revenue from day one). Fixed costs <$300/mo. Contingency: if savings < 6 months, pause features and focus on revenue. |
 | **Zero bug tolerance** | Comprehensive test suite with real show files. Translation report as safety net. Mandatory "Verify on console before showtime" acknowledgment. Error tracking with instant alerts. |
@@ -826,6 +822,8 @@ Monitor engineer's translated file has swapped mix bus sends. Lead vocalist's IE
 
 ## 14. Policies & Compliance
 
+> **Hard gate:** E&O insurance premium paid AND ToS with liability cap MUST be live before Paddle accepts the first charge. This sequencing is non-negotiable per the 2026-04-18 council peer-review verdict — liability is the product-ending risk no advisor named.
+
 ### Terms of Service — Key Clauses
 
 1. **"As-is" warranty disclaimer** — No guarantee of accuracy, completeness, or fitness
@@ -835,11 +833,19 @@ Monitor engineer's translated file has swapped mix bus sends. Lead vocalist's IE
 5. **No format guarantee** — Manufacturers may change formats at any time
 6. **Governing law** — Delaware, USA
 
+### Live legal routes
+
+The full ToS and disclaimer source files now ship with the web app:
+
+- `web/public/legal/terms-of-service.md` — full ToS source
+- `web/public/legal/translation-accuracy-disclaimer.md` — verbatim disclaimer source (identical to the §14 quote below)
+- Live URLs: `/legal/terms-of-service` and `/legal/translation-accuracy-disclaimer`
+
 ### Translation Accuracy Disclaimer (Critical Copy)
 
 > *"IMPORTANT: Showfier translations are automated approximations based on reverse-engineered file format analysis. They are NOT guaranteed to be accurate and may contain errors including but not limited to: incorrect parameter values, missing channel data, altered routing, or dropped settings. You MUST verify all translated parameters on the target console before any live performance. Showfier, its creators, and its affiliates accept no responsibility for any loss, damage, or disruption arising from the use of translated show files."*
 
-This must appear: in the ToS, on the translation results page before download, and in every PDF translation report.
+This text is now mirrored verbatim in `web/public/legal/translation-accuracy-disclaimer.md`. It must appear: in the ToS, on the translation results page before download, and in every PDF translation report.
 
 ### Data Retention Policy
 
@@ -856,8 +862,6 @@ This must appear: in the ToS, on the translation results page before download, a
 
 | Tier | Policy |
 |------|--------|
-| Credits (used) | No refund |
-| Credits (unused) | Refundable within 14 days |
 | Pro monthly | Cancel anytime, no partial-month refund |
 | Pro annual | Pro-rated refund within 30 days, none after |
 | Failed translations | Automatic credit — builds trust |
@@ -866,7 +870,7 @@ This must appear: in the ToS, on the translation results page before download, a
 
 | Tier | SLA |
 |------|-----|
-| Free/Credits/Pro | No SLA — "best effort" |
+| Free/Pro | No SLA — "best effort" |
 | Team/Enterprise | 99.5% uptime (allows ~44hr downtime/year), service credits for excess downtime |
 
 **Do NOT offer 99.9% SLA as a solo founder.** You cannot guarantee it.
@@ -933,7 +937,7 @@ This must appear: in the ToS, on the translation results page before download, a
 | Time of day / day of week translations peak | Informs support staffing and infra scaling |
 | Geographic distribution of users | Guides localization and payment method priorities |
 | Show file complexity distribution (channel count, scene count) | Inform product limits and pricing tiers |
-| User journey: free → credit → subscription conversion time | Optimize funnel timing |
+| User journey: free → Pro subscription conversion time | Optimize funnel timing |
 | Firmware version distribution per console | Know which firmware versions to prioritize testing |
 
 ---
@@ -942,20 +946,20 @@ This must appear: in the ToS, on the translation results page before download, a
 
 ### The Five Things That Matter Most
 
-**1. Nail translation quality before everything else.**
-Nothing else matters if the output can't be trusted. A single bad translation at a major show can destroy the brand. Invest in exhaustive testing with real show files, round-trip validation, and transparent accuracy reporting. This is the foundation.
+**1. Validate the DiGiCo writer on a real console or via DiGiCo Offline Software.**
+Without this gate, every downstream investment is a bet on unvalidated output. (Council Executor 2026-04-18.)
 
-**2. A&H dLive is the #1 development priority.**
-Completing the "big three" (Yamaha, DiGiCo, A&H) covers the majority of touring/festival consoles. Every translation pair added creates exponential value (N² combinations).
+**2. Ship legal cover (E&O insurance + ToS with liability cap + verify-before-doors UX) before Paddle accepts the first charge.**
+Liability is the product-ending risk peer review flagged. The hard gate sequencing is non-negotiable.
 
-**3. The founder's identity as a working audio engineer is the greatest marketing asset.**
-In an industry built on trust and relationships, an engineer-founder who understands the problem viscerally will always outperform polished marketing. Lead with authenticity, be transparent about limitations, and let the product's utility create its own stories.
+**3. Build the round-trip verification harness as a continuous trust artifact.**
+Turns "validate DiGiCo" from a one-time check into a continuous correctness guarantee. Every translation auto-verified, every parameter logged.
 
-**4. API licensing to rental companies is the long-term revenue engine.**
-Individual subscriptions build the brand; API licensing to rental companies builds the revenue. A single mid-tier rental company generating 50 translations/month is worth more than 50 individual Pro subscribers.
+**4. MBDF batch-win — DM7 + TF + RIVAGE PM in one reverse-engineering project.**
+All three Yamaha mid/high-range consoles share the MBDF container; one reverse-engineering project unlocks three consoles. This beats sequential per-console work on ROI.
 
-**5. Stay in the show file lane.**
-Every tool should either read, write, compare, or manage show files. The moment you chase RF coordination or inventory management, you lose focus and compete with well-funded incumbents. The show file diff tool is the trojan horse (free, drives adoption). Version control is the lock-in play (once history lives in Showfier, switching cost is enormous).
+**5. A&H dLive only after DiGiCo is proven on real paying-customer traffic.**
+Moved from priority #1 to priority #6 in §10. Real-traffic validation comes first; brand-coverage expansion comes second.
 
 ### What NOT to Do
 
@@ -966,18 +970,11 @@ Every tool should either read, write, compare, or manage show files. The moment 
 - Don't promise SLAs you can't keep as a solo founder
 - Don't hide translation limitations — radical transparency is the trust strategy
 - Don't approach global-tier rental companies before you have proven traction with regional ones
+- Don't pursue the $200M Audiotonix exit / Universal Schema play before hitting 100 paying customers (council Expansionist proposal rejected as near-term driver — peer review unanimously flagged it as the biggest blind spot).
 
 ### The Sequence
 
-```
-Month 1-3:   Payments (Paddle) + Beta program + Forum seeding
-Month 3-5:   A&H dLive support + Referral program + First rental partnerships
-Month 5-7:   Avid VENUE + Show file diff tool (free) + Content marketing
-Month 7-9:   Version control + Scene translation + Input list manager
-Month 9-12:  Team plans + API v1 + SSL Live + Trade show presence
-Month 12-18: X32/M32 + Technical rider parser + Marketplace seed
-Month 18-24: Desktop/offline app + Platform expansion
-```
+For the current execution sequence, see `docs/superpowers/plans/2026-04-18-council-shifts-execution.md`. The 2026-04-18 council shifts deprecate the prior month-by-month roadmap.
 
 ### The Bottom Line
 
