@@ -126,10 +126,7 @@ These rules are absolute. No exceptions.
 
 5. **No fabricating data** — Never make up names, numbers, metrics, or facts. If data is unavailable, say so clearly.
 
-<!-- Add project-specific guardrails below:
-6. [e.g., "Primary sources only — no editorial paraphrases"]
-7. [e.g., "All content must be reviewed before client delivery"]
--->
+6. **No claiming editor compatibility without empirical proof** — NEVER state or imply that a translated file "will open", "should open", "loads", or "is compatible" with a target console's editor (Yamaha Console Editor, TF Editor, RIVAGE PM Editor, DM7 Editor, DiGiCo Offline Software, etc.) unless one of these is true: (a) the user has visually confirmed the editor opened the file and shows the expected show contents, or (b) the pywinauto editor validation harness at `tools/editor_validation/` has run successfully against the exact output bytes. Byte-identity to a template, fidelity scores (even 100%), HTTP 200 responses, parse-gate checks, and internal round-trip tests are **internal integrity metrics only** — they prove nothing about what the real editor will accept. Assumption in this area has been a recurring failure mode; stated guesses have been wrong three separate times as of 2026-04-21. If pressed to make a statement about editor acceptance without proof, say "I don't know — this needs to be validated in the editor" and propose how to validate.
 
 ---
 

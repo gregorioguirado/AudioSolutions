@@ -36,12 +36,21 @@ from __future__ import annotations
 import logging
 import re
 import struct
+import uuid
 import zlib
 from pathlib import Path
 
 from models.universal import Channel, ChannelColor, ShowFile
 
 logger = logging.getLogger(__name__)
+
+# Yamaha MBDF outer header carries a 16-byte session UUID at offset 0x38.
+# Real RIVAGE PM Editor regenerates this on every save; copying the
+# template's value causes "couldn't access file" rejection in Editor.
+# See engine/writers/yamaha_dm7.py for the forensic diff that confirmed
+# this across the Yamaha MBDF family.
+_UUID_OFFSET = 0x38
+_UUID_LENGTH = 16
 
 # ---------------------------------------------------------------------------
 # MBDF container constants (shared with DM7/TF parsers)
@@ -269,8 +278,11 @@ def write_yamaha_rivage(show: ShowFile) -> bytes:
 
     new_zlib = _recompress(bytes(inner))
 
-    # Reassemble: outer header + new compressed block + trailing sections
-    return _OUTER_HEADER + new_zlib + _TRAILING_BYTES
+    # Regenerate the per-save UUID in the outer header so Editor accepts.
+    outer = bytearray(_OUTER_HEADER)
+    outer[_UUID_OFFSET:_UUID_OFFSET + _UUID_LENGTH] = uuid.uuid4().bytes
+
+    return bytes(outer) + new_zlib + _TRAILING_BYTES
 
 
 __all__ = ["write_yamaha_rivage"]

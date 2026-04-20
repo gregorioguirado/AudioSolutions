@@ -42,12 +42,24 @@ from __future__ import annotations
 import logging
 import re
 import struct
+import uuid
 import zlib
 from pathlib import Path
 
 from models.universal import Channel, ChannelColor, ShowFile
 
 logger = logging.getLogger(__name__)
+
+# Yamaha MBDF outer header carries a 16-byte session UUID at offset 0x38.
+# The real DM7 Editor generates a fresh UUID on every save. If we copy the
+# template's UUID into our output, the Editor rejects the file with
+# "couldn't access file — empty show" (the UUID is likely validated against
+# some internal session state or used as a per-file unique key).
+# Empirical: diffing two DM7-Editor-produced empty shows (samples/dm7_empty.dm7f
+# and samples/dm7_empty2.dm7f) shows 16 fully-random bytes at 0x38-0x47 as
+# the only outer-metadata change that doesn't come from recompression shift.
+_UUID_OFFSET = 0x38
+_UUID_LENGTH = 16
 
 # ---------------------------------------------------------------------------
 # Template loading
@@ -401,9 +413,15 @@ def write_yamaha_dm7(show: ShowFile) -> bytes:
     new_blob = zlib.compress(bytes(inner), level=1)
 
     # Step 6: Splice: header | new_blob | original_tail
-    header  = bytes(template[:blob_start])
+    header  = bytearray(template[:blob_start])
     tail    = bytes(template[blob_start + blob_len:])
-    result  = header + new_blob + tail
+
+    # Step 6b: regenerate the per-save UUID at offset 0x38 of the outer header
+    # (see _UUID_OFFSET note near imports). Without this the Editor rejects
+    # the file as if the template's UUID collided with an existing session.
+    header[_UUID_OFFSET:_UUID_OFFSET + _UUID_LENGTH] = uuid.uuid4().bytes
+
+    result = bytes(header) + new_blob + tail
 
     logger.info(
         "write_yamaha_dm7: wrote %d channels; blob %d→%d bytes (%+d)",

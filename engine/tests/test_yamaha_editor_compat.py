@@ -73,9 +73,26 @@ def test_writer_output_preserves_editor_outer_header(
         f"{target_console}: zlib blob starts at offset {z_ours} in output but "
         f"{z_tmpl} in template — outer header shifted"
     )
-    assert ours[:z_tmpl] == tmpl[:z_tmpl], (
+    # Outer-header bytes must match EXCEPT at offset 0x38..0x47 which is a
+    # per-save UUID that the Editor expects to be regenerated fresh every
+    # write. See engine/writers/yamaha_dm7.py for the forensic diff that
+    # confirmed this across the Yamaha MBDF family.
+    _UUID_OFFSET, _UUID_LEN = 0x38, 16
+    ours_masked = ours[:_UUID_OFFSET] + b"\x00" * _UUID_LEN + ours[_UUID_OFFSET + _UUID_LEN:z_tmpl]
+    tmpl_masked = tmpl[:_UUID_OFFSET] + b"\x00" * _UUID_LEN + tmpl[_UUID_OFFSET + _UUID_LEN:z_tmpl]
+    assert ours_masked == tmpl_masked, (
         f"{target_console}: outer header bytes (before compressed blob) "
-        f"differ from template — Editor integrity fields will fail"
+        f"differ from template OUTSIDE the UUID region — Editor integrity "
+        f"fields will fail"
+    )
+    # And the UUID MUST have been regenerated (non-zero and != template).
+    assert ours[_UUID_OFFSET:_UUID_OFFSET + _UUID_LEN] != b"\x00" * _UUID_LEN, (
+        f"{target_console}: UUID slot at 0x38 is all zeros — writer failed to "
+        f"generate a fresh UUID"
+    )
+    assert ours[_UUID_OFFSET:_UUID_OFFSET + _UUID_LEN] != tmpl[_UUID_OFFSET:_UUID_OFFSET + _UUID_LEN], (
+        f"{target_console}: UUID at 0x38 is the template's value — writer did "
+        f"not regenerate it, Editor will reject"
     )
 
 
