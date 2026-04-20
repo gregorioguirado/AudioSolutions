@@ -1,0 +1,29 @@
+# Auto-generated fixture for tf_dynamics_calibration.tff
+source_console: yamaha_tf
+channel_count: 74
+channels:
+  - id: 1
+    name: 'GATETEST'
+    hpf_enabled: false
+    hpf_frequency: 80.0
+    gate_enabled: true
+    gate_threshold: -40.0
+  - id: 2
+    name: 'COMPTEST'
+    hpf_enabled: false
+    hpf_frequency: 80.0
+    compressor_enabled: true
+    compressor_threshold: -20.0
+    compressor_ratio: 4.0
+  - id: 3
+    name: 'NODYN'
+    hpf_enabled: false
+    hpf_frequency: 80.0
+  - id: 4
+    name: 'ch 4'
+    hpf_enabled: false
+    hpf_frequency: 80.0
+  - id: 5
+    name: 'ch 5'
+    hpf_enabled: false
+    hpf_frequency: 80.0

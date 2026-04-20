@@ -1,0 +1,24 @@
+# Auto-generated fixture for rivage_hpf_calib.RIVAGEPM
+source_console: yamaha_rivage_pm
+channel_count: 144
+channels:
+  - id: 1
+    name: 'HPFTEST'
+    hpf_enabled: true
+    hpf_frequency: 200.0
+  - id: 2
+    name: 'NOHPF'
+    hpf_enabled: false
+    hpf_frequency: 80.0
+  - id: 3
+    name: 'ch 3'
+    hpf_enabled: false
+    hpf_frequency: 80.0
+  - id: 4
+    name: 'ch 4'
+    hpf_enabled: false
+    hpf_frequency: 80.0
+  - id: 5
+    name: 'ch 5'
+    hpf_enabled: false
+    hpf_frequency: 80.0

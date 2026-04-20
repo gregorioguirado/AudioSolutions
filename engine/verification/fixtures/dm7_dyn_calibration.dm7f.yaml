@@ -1,0 +1,29 @@
+# Auto-generated fixture for dm7_dyn_calibration.dm7f
+source_console: yamaha_dm7
+channel_count: 120
+channels:
+  - id: 1
+    name: 'ch 1'
+    hpf_enabled: false
+    hpf_frequency: 80.0
+    gate_enabled: true
+    gate_threshold: -16.51
+    compressor_enabled: true
+    compressor_threshold: -13.69
+    compressor_ratio: 4.4
+  - id: 2
+    name: 'ch 2'
+    hpf_enabled: false
+    hpf_frequency: 80.0
+  - id: 3
+    name: 'ch 3'
+    hpf_enabled: false
+    hpf_frequency: 80.0
+  - id: 4
+    name: 'ch 4'
+    hpf_enabled: false
+    hpf_frequency: 80.0
+  - id: 5
+    name: 'ch 5'
+    hpf_enabled: false
+    hpf_frequency: 80.0

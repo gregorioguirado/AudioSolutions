@@ -1,0 +1,39 @@
+# Auto-generated fixture for Bertoleza Sesi Campinas.dm7f
+source_console: yamaha_dm7
+channel_count: 120
+channels:
+  - id: 1
+    name: 'LUANA'
+    hpf_enabled: true
+    hpf_frequency: 200.0
+    compressor_enabled: true
+    compressor_threshold: -25.0
+    compressor_ratio: 0.0
+  - id: 2
+    name: 'PALOM'
+    hpf_enabled: true
+    hpf_frequency: 150.0
+    compressor_enabled: true
+    compressor_threshold: -25.0
+    compressor_ratio: 0.0
+  - id: 3
+    name: 'CAINA'
+    hpf_enabled: true
+    hpf_frequency: 190.0
+    compressor_enabled: true
+    compressor_threshold: -21.0
+    compressor_ratio: 0.0
+  - id: 4
+    name: 'LARI'
+    hpf_enabled: true
+    hpf_frequency: 183.0
+    compressor_enabled: true
+    compressor_threshold: -17.0
+    compressor_ratio: 0.0
+  - id: 5
+    name: 'TACI'
+    hpf_enabled: true
+    hpf_frequency: 212.0
+    compressor_enabled: true
+    compressor_threshold: -25.0
+    compressor_ratio: 0.0

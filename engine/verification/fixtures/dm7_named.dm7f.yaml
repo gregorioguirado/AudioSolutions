@@ -1,0 +1,24 @@
+# Auto-generated fixture for dm7_named.dm7f
+source_console: yamaha_dm7
+channel_count: 120
+channels:
+  - id: 1
+    name: 'KICK'
+    hpf_enabled: false
+    hpf_frequency: 80.0
+  - id: 2
+    name: 'SNARE'
+    hpf_enabled: false
+    hpf_frequency: 80.0
+  - id: 3
+    name: 'HH'
+    hpf_enabled: false
+    hpf_frequency: 80.0
+  - id: 4
+    name: 'OH L'
+    hpf_enabled: false
+    hpf_frequency: 80.0
+  - id: 5
+    name: 'OH R'
+    hpf_enabled: false
+    hpf_frequency: 80.0

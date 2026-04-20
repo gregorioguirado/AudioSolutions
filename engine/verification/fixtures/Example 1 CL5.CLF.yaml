@@ -1,0 +1,49 @@
+# Auto-generated fixture for Example 1 CL5.CLF
+source_console: yamaha_cl
+channel_count: 72
+channels:
+  - id: 1
+    name: '1 anna'
+    hpf_enabled: true
+    hpf_frequency: 1522.1851072034829
+    gate_enabled: true
+    gate_threshold: -30.0
+    compressor_enabled: true
+    compressor_threshold: -4.4
+    compressor_ratio: 6.622026239078485
+  - id: 2
+    name: '2 baco'
+    hpf_enabled: true
+    hpf_frequency: 987.0149282610821
+    gate_enabled: true
+    gate_threshold: -48.6
+    compressor_enabled: true
+    compressor_threshold: -24.0
+    compressor_ratio: 6.622026239078485
+  - id: 3
+    name: '3 breno'
+    hpf_enabled: true
+    hpf_frequency: 1758.6606687463545
+    gate_enabled: true
+    gate_threshold: -27.0
+    compressor_enabled: true
+    compressor_threshold: -22.0
+    compressor_ratio: 6.622026239078485
+  - id: 4
+    name: '4 caylan'
+    hpf_enabled: true
+    hpf_frequency: 1522.1851072034829
+    gate_enabled: true
+    gate_threshold: -26.0
+    compressor_enabled: true
+    compressor_threshold: -24.0
+    compressor_ratio: 6.622026239078485
+  - id: 5
+    name: '5 clara'
+    hpf_enabled: true
+    hpf_frequency: 1522.1851072034829
+    gate_enabled: true
+    gate_threshold: -50.6
+    compressor_enabled: true
+    compressor_threshold: -6.4
+    compressor_ratio: 6.622026239078485

@@ -1,0 +1,24 @@
+# Auto-generated fixture for RIVAGE EMI 21.3.RIVAGEPM
+source_console: yamaha_rivage_pm
+channel_count: 144
+channels:
+  - id: 1
+    name: 'ch1'
+    hpf_enabled: false
+    hpf_frequency: 80.0
+  - id: 2
+    name: 'ch2'
+    hpf_enabled: false
+    hpf_frequency: 80.0
+  - id: 3
+    name: 'ch3'
+    hpf_enabled: false
+    hpf_frequency: 80.0
+  - id: 4
+    name: 'ch4'
+    hpf_enabled: false
+    hpf_frequency: 80.0
+  - id: 5
+    name: 'ch5'
+    hpf_enabled: false
+    hpf_frequency: 80.0

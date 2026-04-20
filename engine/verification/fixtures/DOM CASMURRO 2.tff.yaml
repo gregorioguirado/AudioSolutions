@@ -1,0 +1,24 @@
+# Auto-generated fixture for DOM CASMURRO 2.tff
+source_console: yamaha_tf
+channel_count: 74
+channels:
+  - id: 1
+    name: 'KICK'
+    hpf_enabled: false
+    hpf_frequency: 80.0
+  - id: 2
+    name: 'FX'
+    hpf_enabled: false
+    hpf_frequency: 80.0
+  - id: 3
+    name: 'OV L'
+    hpf_enabled: false
+    hpf_frequency: 80.0
+  - id: 4
+    name: 'OV R'
+    hpf_enabled: false
+    hpf_frequency: 80.0
+  - id: 5
+    name: 'DJEMBE'
+    hpf_enabled: false
+    hpf_frequency: 80.0

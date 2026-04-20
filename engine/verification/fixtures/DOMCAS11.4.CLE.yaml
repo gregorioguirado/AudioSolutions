@@ -1,0 +1,33 @@
+# Auto-generated fixture for DOMCAS11.4.CLE
+source_console: yamaha_cl
+channel_count: 72
+channels:
+  - id: 1
+    name: 'LUANA'
+    hpf_enabled: true
+    hpf_frequency: 73.36032345637369
+    compressor_enabled: true
+    compressor_threshold: -25.0
+    compressor_ratio: 4.128033118936838
+  - id: 2
+    name: 'PALOMA'
+    hpf_enabled: true
+    hpf_frequency: 73.36032345637369
+    compressor_enabled: true
+    compressor_threshold: -24.0
+    compressor_ratio: 4.128033118936838
+  - id: 3
+    name: 'CAINA'
+    hpf_enabled: true
+    hpf_frequency: 97.92428346437245
+    compressor_enabled: true
+    compressor_threshold: -0.4
+    compressor_ratio: 4.128033118936838
+  - id: 4
+    name: 'AGATA'
+    hpf_enabled: false
+    hpf_frequency: 63.49604207872798
+  - id: 5
+    name: 'TACIAN'
+    hpf_enabled: true
+    hpf_frequency: 97.92428346437245

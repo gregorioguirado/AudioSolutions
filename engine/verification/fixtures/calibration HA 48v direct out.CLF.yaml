@@ -1,0 +1,24 @@
+# Auto-generated fixture for calibration HA 48v direct out.CLF
+source_console: yamaha_cl
+channel_count: 72
+channels:
+  - id: 1
+    name: 'ch 1'
+    hpf_enabled: false
+    hpf_frequency: 20.0
+  - id: 2
+    name: 'ch 2'
+    hpf_enabled: false
+    hpf_frequency: 20.0
+  - id: 3
+    name: 'ch 3'
+    hpf_enabled: false
+    hpf_frequency: 20.0
+  - id: 4
+    name: 'ch 4'
+    hpf_enabled: false
+    hpf_frequency: 20.0
+  - id: 5
+    name: 'ch 5'
+    hpf_enabled: false
+    hpf_frequency: 20.0
