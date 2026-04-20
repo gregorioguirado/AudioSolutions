@@ -470,6 +470,60 @@ def verify_against_fixture(show: ShowFile, sample_filename: str) -> HarnessResul
                     passed=expected_name == actual_name,
                 ))
 
+        if "channels" in fixture:
+            ch_by_id = {ch.id: ch for ch in show.channels}
+
+            def _fx_add(ch_id, param, expected, actual_val, passed, note=""):
+                result.checks.append(ParameterCheck(
+                    channel_id=ch_id,
+                    parameter=param,
+                    source_value=expected,
+                    target_value=actual_val,
+                    passed=passed,
+                    note=note,
+                ))
+
+            for fix_ch in fixture["channels"]:
+                ch_id = fix_ch.get("id")
+                actual = ch_by_id.get(ch_id)
+                if actual is None:
+                    result.checks.append(ParameterCheck(
+                        channel_id=ch_id or 0,
+                        parameter="channel_present",
+                        source_value=True, target_value=False, passed=False,
+                        note="channel id missing",
+                    ))
+                    continue
+
+                if "name" in fix_ch:
+                    _fx_add(ch_id, "name", fix_ch["name"], actual.name,
+                            fix_ch["name"] == actual.name)
+                if "hpf_enabled" in fix_ch:
+                    _fx_add(ch_id, "hpf_enabled", fix_ch["hpf_enabled"], actual.hpf_enabled,
+                            fix_ch["hpf_enabled"] == actual.hpf_enabled)
+                if "hpf_frequency" in fix_ch:
+                    _fx_add(ch_id, "hpf_frequency", fix_ch["hpf_frequency"], actual.hpf_frequency,
+                            _floats_equal(fix_ch["hpf_frequency"], actual.hpf_frequency, tol=1.0))
+                if "gate_enabled" in fix_ch:
+                    gate_enabled = actual.gate is not None and actual.gate.enabled
+                    _fx_add(ch_id, "gate_enabled", fix_ch["gate_enabled"], gate_enabled,
+                            fix_ch["gate_enabled"] == gate_enabled)
+                if "gate_threshold" in fix_ch and actual.gate is not None:
+                    _fx_add(ch_id, "gate_threshold", fix_ch["gate_threshold"], actual.gate.threshold,
+                            _floats_equal(fix_ch["gate_threshold"], actual.gate.threshold, tol=0.01))
+                if "compressor_enabled" in fix_ch:
+                    comp_enabled = actual.compressor is not None and actual.compressor.enabled
+                    _fx_add(ch_id, "compressor_enabled", fix_ch["compressor_enabled"], comp_enabled,
+                            fix_ch["compressor_enabled"] == comp_enabled)
+                if "compressor_threshold" in fix_ch and actual.compressor is not None:
+                    _fx_add(ch_id, "compressor_threshold", fix_ch["compressor_threshold"],
+                            actual.compressor.threshold,
+                            _floats_equal(fix_ch["compressor_threshold"], actual.compressor.threshold, tol=0.01))
+                if "compressor_ratio" in fix_ch and actual.compressor is not None:
+                    _fx_add(ch_id, "compressor_ratio", fix_ch["compressor_ratio"],
+                            actual.compressor.ratio,
+                            _floats_equal(fix_ch["compressor_ratio"], actual.compressor.ratio, tol=0.01))
+
     except Exception as exc:  # noqa: BLE001
         result.fatal_error = f"{type(exc).__name__}: {exc}"
         logger.warning("fixture verification fatal error: %s", result.fatal_error)

@@ -19,6 +19,8 @@ import pytest
 from models.universal import Channel, ChannelColor, EQBand, EQBandType, Gate, Compressor, ShowFile
 from parsers.digico_sd import parse_digico_sd
 from parsers.yamaha_cl_binary import parse_yamaha_cl_binary
+from parsers.yamaha_cl import parse_yamaha_cl
+from parsers import yamaha_dm7, yamaha_tf, yamaha_rivage
 from verification.harness import (
     FidelityScore,
     HarnessResult,
@@ -31,6 +33,13 @@ from verification.round_trip import RoundTripResult, round_trip
 from writers.digico_sd import write_digico_sd
 
 SAMPLES_DIR = Path(__file__).parent.parent.parent.parent / "samples"
+FIXTURES_DIR = Path(__file__).parent.parent.parent / "verification" / "fixtures"
+
+
+def _all_fixtures():
+    if not FIXTURES_DIR.exists():
+        return []
+    return sorted(FIXTURES_DIR.glob("*.yaml"))
 
 
 def _make_channel(id=1, eq_bands=None, gate=None, compressor=None):
@@ -357,3 +366,40 @@ def test_fidelity_score_partial_failure():
     assert score.eq == 100.0     # no EQ checks = not a failure
     assert score.compressor == 100.0
     assert score.overall == 80.0  # (50+50+100+100+100)/5
+
+
+# --------------------------------------------------------------------------- #
+# Parametrize fixture suite
+# --------------------------------------------------------------------------- #
+
+
+@pytest.mark.parametrize("fixture_path", _all_fixtures(), ids=lambda p: p.stem)
+def test_fixture_baseline(fixture_path):
+    import yaml
+
+    fixture = yaml.safe_load(fixture_path.read_text(encoding="utf-8"))
+    sample_name = fixture_path.stem  # e.g. "calibration dynamics full.CLF"
+    sample_path = SAMPLES_DIR / sample_name
+    assert sample_path.exists(), f"Sample file not found: {sample_path}"
+
+    source_console = fixture.get("source_console", "yamaha_cl")
+    if source_console == "yamaha_cl":
+        with open(sample_path, "rb") as f:
+            header = f.read(2)
+        show = parse_yamaha_cl(sample_path) if header == b"PK" else parse_yamaha_cl_binary(sample_path)
+    elif source_console == "yamaha_dm7":
+        show = yamaha_dm7.parse(sample_path.read_bytes())
+    elif source_console == "yamaha_tf":
+        show = yamaha_tf.parse(str(sample_path))
+    elif source_console == "yamaha_rivage_pm":
+        show = yamaha_rivage.parse(str(sample_path))
+    else:
+        pytest.skip(f"No parser registered for {source_console}")
+
+    result = verify_against_fixture(show, sample_name)
+    failed = result.failed_checks
+    assert not failed, (
+        f"Fixture regression for {sample_name}:\n"
+        + "\n".join(f"  ch{c.channel_id} {c.parameter}: expected {c.source_value!r}, got {c.target_value!r}"
+                    for c in failed)
+    )
