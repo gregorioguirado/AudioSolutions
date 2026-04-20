@@ -61,11 +61,24 @@ def test_output_starts_with_yamaha_magic() -> None:
 
 
 def test_template_not_mutated_across_calls() -> None:
-    """Two consecutive calls must return identical bytes (no template mutation)."""
+    """Two consecutive calls must produce output that differs ONLY in the
+    16-byte session UUID at offset 0x38. Outside that region the bytes
+    must be identical — that's how we prove the writer isn't mutating
+    the cached template across calls.
+    """
     source = parse(str(SAMPLE_TFF))
     a = write_yamaha_tf(source)
     b = write_yamaha_tf(source)
-    assert a == b, "writer is not deterministic — template was mutated"
+    assert len(a) == len(b), "writer output length differs across calls"
+    a_masked = a[:0x38] + b"\x00" * 16 + a[0x48:]
+    b_masked = b[:0x38] + b"\x00" * 16 + b[0x48:]
+    assert a_masked == b_masked, (
+        "writer is not deterministic outside the UUID region — "
+        "the cached template is being mutated across calls"
+    )
+    assert a[0x38:0x48] != b[0x38:0x48], (
+        "UUID at 0x38 did NOT change between calls — UUID regen is broken"
+    )
 
 
 # ---------------------------------------------------------------------------

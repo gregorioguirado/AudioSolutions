@@ -59,11 +59,22 @@ def test_output_starts_with_mbdf_magic() -> None:
 
 
 def test_template_not_mutated_across_calls() -> None:
-    """Calling the writer twice must not mutate the module-level template cache."""
+    """Two consecutive calls must produce output that differs ONLY in the
+    16-byte session UUID at offset 0x38. Outside that region the bytes
+    must be identical, proving the template cache is not mutated."""
     show = parse(str(RIVAGE_SAMPLE))
     a = write_yamaha_rivage(show)
     b = write_yamaha_rivage(show)
-    assert a == b, "writer is not deterministic — inner template was mutated"
+    assert len(a) == len(b), "writer output length differs across calls"
+    a_masked = a[:0x38] + b"\x00" * 16 + a[0x48:]
+    b_masked = b[:0x38] + b"\x00" * 16 + b[0x48:]
+    assert a_masked == b_masked, (
+        "writer is not deterministic outside the UUID region — "
+        "the cached template is being mutated across calls"
+    )
+    assert a[0x38:0x48] != b[0x38:0x48], (
+        "UUID at 0x38 did NOT change between calls — UUID regen is broken"
+    )
 
 
 # ---------------------------------------------------------------------------
