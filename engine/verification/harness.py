@@ -133,6 +133,9 @@ def _parser_for(target_format: str) -> Callable[[Path], ShowFile]:
     if target_format == "yamaha_cl_binary":
         from parsers.yamaha_cl_binary import parse_yamaha_cl_binary
         return parse_yamaha_cl_binary
+    if target_format == "yamaha_ql":
+        from parsers.yamaha_ql import parse_yamaha_ql
+        return parse_yamaha_ql
     raise ValueError(f"No verification parser registered for target format: {target_format!r}")
 
 

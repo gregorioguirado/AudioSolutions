@@ -5,6 +5,7 @@ from typing import Optional
 
 from parsers.yamaha_cl import parse_yamaha_cl
 from parsers.yamaha_cl_binary import parse_yamaha_cl_binary
+from parsers.yamaha_ql import parse_yamaha_ql
 from parsers.digico_sd import parse_digico_sd
 from parsers import yamaha_dm7 as _dm7_parser
 from writers.digico_sd import write_digico_sd
@@ -55,6 +56,7 @@ def _parse_yamaha_dm7(filepath: Path) -> ShowFile:
 
 PARSERS = {
     "yamaha_cl": _parse_yamaha_auto,
+    "yamaha_ql": parse_yamaha_ql,
     "yamaha_dm7": _parse_yamaha_dm7,
     "digico_sd": parse_digico_sd,
 }
@@ -63,6 +65,7 @@ WRITERS = {
     "digico_sd": write_digico_sd,
     "yamaha_cl": write_yamaha_cl,
     "yamaha_cl_binary": write_yamaha_cl_binary,
+    "yamaha_ql": write_yamaha_cl_binary,
 }
 
 
