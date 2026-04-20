@@ -25,9 +25,15 @@ DIGICO_EQ_TYPE_MAP: dict[EQBandType, str] = {
 }
 
 
+def _sanitize_xml_text(text: str) -> str:
+    """Remove control characters and other invalid XML characters from text."""
+    # Remove null bytes and control characters (except \t, \n, \r which are valid in XML)
+    return "".join(c for c in text if ord(c) >= 32 or c in "\t\n\r")
+
+
 def _sub(parent, tag: str, text: str = "") -> etree._Element:
     el = etree.SubElement(parent, tag)
-    el.text = text
+    el.text = _sanitize_xml_text(text)
     return el
 
 
