@@ -35,7 +35,24 @@ MAX_UPLOAD_BYTES = 50 * 1024 * 1024  # 50 MB
 
 
 def _safe_header(value: str) -> str:
-    """Strip characters that would break HTTP header integrity."""
+    """Make a value safe to send as an HTTP header.
+
+    HTTP/1.1 headers must be Latin-1 (RFC 7230). Parsers that emit sentences
+    with Unicode punctuation (em-dash, smart quotes, ...) would otherwise
+    crash Starlette's header encoder with UnicodeEncodeError.
+    """
+    replacements = str.maketrans({
+        "\u2014": "-",   # em-dash
+        "\u2013": "-",   # en-dash
+        "\u2018": "'",   # left single quote
+        "\u2019": "'",   # right single quote
+        "\u201c": '"',   # left double quote
+        "\u201d": '"',   # right double quote
+        "\u2026": "...", # ellipsis
+    })
+    value = value.translate(replacements)
+    # Drop anything that still isn't Latin-1 representable
+    value = value.encode("latin-1", "ignore").decode("latin-1")
     return value.replace("\r", "").replace("\n", "")
 
 
