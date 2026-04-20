@@ -113,6 +113,12 @@ export default function UploadFlow() {
           setState("error");
           return;
         }
+        if (res.status === 422) {
+          // Parse-gate failure (corrupt output) — show the actual detail message
+          setError(data.error || "Translation produced an unreadable output file.");
+          setState("error");
+          return;
+        }
         throw new Error(data.error || "Translation failed");
       }
 
@@ -287,7 +293,7 @@ export default function UploadFlow() {
       {/* ── State: error ── */}
       {state === "error" && (
         <div className="flex flex-col items-center gap-4 py-20 text-center">
-          <p className="text-sm font-bold text-error">{error}</p>
+          <p className="text-sm font-bold text-error max-w-md leading-relaxed">{error}</p>
           <button
             type="button"
             onClick={handleReset}

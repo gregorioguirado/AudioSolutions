@@ -41,6 +41,13 @@ function FidelityRow({ label, value, bold = false }: { label: string; value: num
 }
 
 export default function TranslationPreview({ channelCount, translatedParams, approximatedParams, droppedParams, channels, fidelityScore }: Props) {
+  const overall = fidelityScore?.overall;
+  const verdict =
+    overall === undefined ? null :
+    overall >= 95 ? { label: "HIGH FIDELITY — all parameters survived", cls: "text-success" } :
+    overall >= 80 ? { label: "MEDIUM FIDELITY — minor loss, review below", cls: "text-warning" } :
+                    { label: "LOW FIDELITY — significant parameter loss", cls: "text-error" };
+
   return (
     <div className="flex flex-col gap-6">
       <div>
@@ -49,9 +56,25 @@ export default function TranslationPreview({ channelCount, translatedParams, app
         </h2>
       </div>
 
+      {overall !== undefined && overall < 80 && (
+        <div className="border border-error/30 bg-error/[0.06] p-4">
+          <p className="text-[10px] font-extrabold uppercase tracking-[3px] text-error">⚠ Low-fidelity translation</p>
+          <p className="mt-2 text-sm text-white leading-relaxed">
+            Not all parameters survived the round-trip. Review the fidelity breakdown below before loading on console.
+          </p>
+        </div>
+      )}
+
       {fidelityScore != null && (
         <div className="border border-border bg-surface p-4">
           <p className="text-[10px] font-bold uppercase tracking-wider text-muted mb-3">Fidelity</p>
+          <div className="flex items-baseline gap-3 mb-3">
+            <span className="text-3xl font-extrabold tabular-nums text-white">{fidelityScore.overall.toFixed(1)}%</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted">Overall</span>
+          </div>
+          {verdict && (
+            <p className={`text-xs font-extrabold uppercase tracking-wider mb-4 ${verdict.cls}`}>{verdict.label}</p>
+          )}
           <div className="flex flex-col gap-2">
             {[
               { label: "Names", value: fidelityScore.names },
@@ -62,9 +85,6 @@ export default function TranslationPreview({ channelCount, translatedParams, app
             ].map(({ label, value }) => (
               <FidelityRow key={label} label={label} value={value} />
             ))}
-            <div className="mt-1 border-t border-border pt-2">
-              <FidelityRow label="Overall" value={fidelityScore.overall} bold />
-            </div>
           </div>
         </div>
       )}
