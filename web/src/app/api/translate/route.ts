@@ -66,6 +66,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: message }, { status });
   }
 
+  if (!result.parseGatePassed) {
+    return NextResponse.json(
+      { error: "Translation produced an unreadable output file. Please try again or contact support." },
+      { status: 422 }
+    );
+  }
+
   const translationId = crypto.randomUUID();
   const ownerId = user?.id ?? crypto.randomUUID();
 
@@ -113,6 +120,7 @@ export async function POST(request: Request) {
       translatedParams: result.translatedParams,
       approximatedParams: result.approximatedParams,
       droppedParams: result.droppedParams,
+      fidelityScore: result.fidelityScore,
       authenticated: true,
     });
   } else {
@@ -147,6 +155,7 @@ export async function POST(request: Request) {
       translatedParams: result.translatedParams,
       approximatedParams: result.approximatedParams,
       droppedParams: result.droppedParams,
+      fidelityScore: result.fidelityScore,
       authenticated: false,
     });
   }
