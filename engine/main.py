@@ -131,6 +131,8 @@ async def translate_file(
         headers["X-Fidelity-EQ"] = str(round(result.fidelity_score.eq, 1))
         headers["X-Fidelity-Gate"] = str(round(result.fidelity_score.gate, 1))
         headers["X-Fidelity-Compressor"] = str(round(result.fidelity_score.compressor, 1))
+        headers["X-Fidelity-MixBuses"] = str(round(result.fidelity_score.mix_buses, 1))
+        headers["X-Fidelity-VCAs"] = str(round(result.fidelity_score.vcas, 1))
         headers["X-Fidelity-Overall"] = str(round(result.fidelity_score.overall, 1))
 
     return Response(

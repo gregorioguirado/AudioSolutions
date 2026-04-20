@@ -17,6 +17,8 @@ export interface FidelityScore {
   eq: number;
   gate: number;
   compressor: number;
+  mixBuses: number;
+  vcas: number;
   overall: number;
 }
 
@@ -91,6 +93,8 @@ export async function callEngine(
         eq: parseFidelityHeader("X-Fidelity-EQ"),
         gate: parseFidelityHeader("X-Fidelity-Gate"),
         compressor: parseFidelityHeader("X-Fidelity-Compressor"),
+        mixBuses: parseFidelityHeader("X-Fidelity-MixBuses"),
+        vcas: parseFidelityHeader("X-Fidelity-VCAs"),
         overall: parseFidelityHeader("X-Fidelity-Overall"),
       }
     : null;

@@ -348,6 +348,8 @@ def test_harness_result_has_fidelity_score():
     assert score.eq == 100.0
     assert score.gate == 100.0
     assert score.compressor == 100.0
+    assert score.mix_buses == 100.0
+    assert score.vcas == 100.0
     assert score.overall == 100.0
 
 
@@ -365,7 +367,10 @@ def test_fidelity_score_partial_failure():
     assert score.hpf == 100.0    # no HPF checks = not a failure
     assert score.eq == 100.0     # no EQ checks = not a failure
     assert score.compressor == 100.0
-    assert score.overall == 80.0  # (50+50+100+100+100)/5
+    assert score.mix_buses == 100.0   # no mix bus checks = not a failure
+    assert score.vcas == 100.0        # no VCA checks = not a failure
+    # (50+50+100+100+100+100+100)/7 = 600/7 ≈ 85.71...
+    assert abs(score.overall - (600 / 7.0)) < 0.01
 
 
 # --------------------------------------------------------------------------- #

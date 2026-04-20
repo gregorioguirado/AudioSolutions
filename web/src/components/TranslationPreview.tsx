@@ -82,6 +82,8 @@ export default function TranslationPreview({ channelCount, translatedParams, app
               { label: "EQ", value: fidelityScore.eq },
               { label: "Gate", value: fidelityScore.gate },
               { label: "Comp", value: fidelityScore.compressor },
+              { label: "Mix buses", value: fidelityScore.mixBuses },
+              { label: "VCAs", value: fidelityScore.vcas },
             ].map(({ label, value }) => (
               <FidelityRow key={label} label={label} value={value} />
             ))}

@@ -81,7 +81,9 @@ class FidelityScore:
     eq: float          # 0–100: % of EQ band parameter checks that passed
     gate: float        # 0–100: % of gate parameter checks that passed
     compressor: float  # 0–100: % of compressor parameter checks that passed
-    overall: float     # 0–100: unweighted average of the five groups
+    mix_buses: float   # 0–100: % of mix bus assignment checks that passed
+    vcas: float        # 0–100: % of VCA assignment checks that passed
+    overall: float     # 0–100: unweighted average of the seven groups
 
 
 def _compute_fidelity(checks: list[ParameterCheck]) -> "FidelityScore":
@@ -110,8 +112,11 @@ def _compute_fidelity(checks: list[ParameterCheck]) -> "FidelityScore":
     eq = _pct(("eq_band",))
     gate = _pct(("gate",))
     compressor = _pct(("compressor",))
-    overall = (names + hpf + eq + gate + compressor) / 5.0
-    return FidelityScore(names=names, hpf=hpf, eq=eq, gate=gate, compressor=compressor, overall=overall)
+    mix_buses = _pct(("mix_bus_assignments",))
+    vcas = _pct(("vca_assignments",))
+    overall = (names + hpf + eq + gate + compressor + mix_buses + vcas) / 7.0
+    return FidelityScore(names=names, hpf=hpf, eq=eq, gate=gate, compressor=compressor,
+                         mix_buses=mix_buses, vcas=vcas, overall=overall)
 
 
 # --------------------------------------------------------------------------- #
@@ -277,6 +282,26 @@ def _compare_channel(
     elif source.compressor is not None and target.compressor is None:
         add("compressor", source.compressor, None, False,
             note="compressor lost in translation")
+
+    # Mix bus sends — presence/absence of each assignment
+    src_mix = set(source.mix_bus_assignments or [])
+    tgt_mix = set(target.mix_bus_assignments or [])
+    missing = src_mix - tgt_mix
+    extra = tgt_mix - src_mix
+    add("mix_bus_assignments.missing", sorted(src_mix), sorted(tgt_mix), not missing,
+        note=f"missing buses: {sorted(missing)}" if missing else "")
+    add("mix_bus_assignments.extra", sorted(src_mix), sorted(tgt_mix), not extra,
+        note=f"extra buses: {sorted(extra)}" if extra else "")
+
+    # VCA assignments — same pattern
+    src_vca = set(source.vca_assignments or [])
+    tgt_vca = set(target.vca_assignments or [])
+    missing_v = src_vca - tgt_vca
+    extra_v = tgt_vca - src_vca
+    add("vca_assignments.missing", sorted(src_vca), sorted(tgt_vca), not missing_v,
+        note=f"missing VCAs: {sorted(missing_v)}" if missing_v else "")
+    add("vca_assignments.extra", sorted(src_vca), sorted(tgt_vca), not extra_v,
+        note=f"extra VCAs: {sorted(extra_v)}" if extra_v else "")
 
     return checks
 
