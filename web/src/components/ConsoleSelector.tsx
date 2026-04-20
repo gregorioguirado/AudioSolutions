@@ -68,6 +68,7 @@ export default function ConsoleSelector({
             onModelClick={onTargetChange}
             disabled={disabled}
             autoDetected={false}
+            writableOnly
           />
         </div>
 
@@ -93,6 +94,7 @@ interface PanelProps {
   disabled: boolean;
   autoDetected: boolean;
   onOverrideClick?: () => void;
+  writableOnly?: boolean;
 }
 
 function Panel({
@@ -103,10 +105,12 @@ function Panel({
   disabled,
   autoDetected,
   onOverrideClick,
+  writableOnly = false,
 }: PanelProps) {
   const [query, setQuery] = useState("");
   const brand = CONSOLE_BRANDS.find((b) => b.name === activeBrand) ?? CONSOLE_BRANDS[0];
   const filtered = brand.models.filter((m) =>
+    (!writableOnly || m.writable) &&
     m.model.toLowerCase().includes(query.toLowerCase()),
   );
 

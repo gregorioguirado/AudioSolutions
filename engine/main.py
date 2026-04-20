@@ -1,7 +1,9 @@
 import io
 import logging
+import struct
 import tempfile
 import zipfile
+import zlib
 from pathlib import Path
 from typing import Optional
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException
@@ -97,6 +99,8 @@ async def translate_file(
         raise
     except UnsupportedConsolePair as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except (ValueError, struct.error, zlib.error) as e:
+        raise HTTPException(status_code=422, detail=f"Could not parse show file: {e}")
     except ReportGenerationError as e:
         logger.exception("Report generation failure")
         raise HTTPException(status_code=500, detail="Report generation failed.")

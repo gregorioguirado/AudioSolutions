@@ -22,6 +22,7 @@ export type ConsoleModel = {
   mixBuses: number;
   fileFormat: string;  // e.g. ".clf"
   supported: boolean;  // whether the engine currently supports it
+  writable: boolean;   // whether a writer exists (can be a translation target)
 };
 
 export type ConsoleBrand = {
@@ -33,31 +34,31 @@ export const CONSOLE_BRANDS: ConsoleBrand[] = [
   {
     name: "Yamaha",
     models: [
-      { id: "yamaha-cl5",   brand: "Yamaha", brandId: "yamaha_cl", series: "CL Series", model: "CL5",         maxChannels: 72,  mixBuses: 24, fileFormat: ".clf", supported: true  },
-      { id: "yamaha-cl3",   brand: "Yamaha", brandId: "yamaha_cl", series: "CL Series", model: "CL3",         maxChannels: 64,  mixBuses: 24, fileFormat: ".clf", supported: true  },
-      { id: "yamaha-cl1",   brand: "Yamaha", brandId: "yamaha_cl", series: "CL Series", model: "CL1",         maxChannels: 48,  mixBuses: 24, fileFormat: ".clf", supported: true  },
-      { id: "yamaha-ql5",   brand: "Yamaha", brandId: "yamaha_ql",     series: "QL Series", model: "QL5",         maxChannels: 64,  mixBuses: 16, fileFormat: ".cle", supported: true  },
-      { id: "yamaha-ql1",   brand: "Yamaha", brandId: "yamaha_ql",     series: "QL Series", model: "QL1",         maxChannels: 32,  mixBuses: 16, fileFormat: ".cle", supported: true  },
-      { id: "yamaha-tf5",   brand: "Yamaha", brandId: "yamaha_tf",     series: "TF Series", model: "TF5",         maxChannels: 32,  mixBuses: 20, fileFormat: ".tff", supported: true  },
-      { id: "yamaha-tf3",   brand: "Yamaha", brandId: "yamaha_tf",     series: "TF Series", model: "TF3",         maxChannels: 32,  mixBuses: 20, fileFormat: ".tff", supported: true  },
-      { id: "yamaha-tf1",   brand: "Yamaha", brandId: "yamaha_tf",     series: "TF Series", model: "TF1",         maxChannels: 32,  mixBuses: 20, fileFormat: ".tff", supported: true  },
-      { id: "yamaha-dm7",   brand: "Yamaha", brandId: "yamaha_dm7",    series: "DM Series", model: "DM7",         maxChannels: 144, mixBuses: 72, fileFormat: ".dm7f", supported: true  },
-      { id: "yamaha-rivage-pm10", brand: "Yamaha", brandId: "yamaha_rivage", series: "RIVAGE", model: "RIVAGE PM10", maxChannels: 216, mixBuses: 72, fileFormat: ".rivagepm", supported: true  },
+      { id: "yamaha-cl5",   brand: "Yamaha", brandId: "yamaha_cl", series: "CL Series", model: "CL5",         maxChannels: 72,  mixBuses: 24, fileFormat: ".clf", supported: true,  writable: true  },
+      { id: "yamaha-cl3",   brand: "Yamaha", brandId: "yamaha_cl", series: "CL Series", model: "CL3",         maxChannels: 64,  mixBuses: 24, fileFormat: ".clf", supported: true,  writable: true  },
+      { id: "yamaha-cl1",   brand: "Yamaha", brandId: "yamaha_cl", series: "CL Series", model: "CL1",         maxChannels: 48,  mixBuses: 24, fileFormat: ".clf", supported: true,  writable: true  },
+      { id: "yamaha-ql5",   brand: "Yamaha", brandId: "yamaha_ql",     series: "QL Series", model: "QL5",         maxChannels: 64,  mixBuses: 16, fileFormat: ".cle", supported: true,  writable: true  },
+      { id: "yamaha-ql1",   brand: "Yamaha", brandId: "yamaha_ql",     series: "QL Series", model: "QL1",         maxChannels: 32,  mixBuses: 16, fileFormat: ".cle", supported: true,  writable: true  },
+      { id: "yamaha-tf5",   brand: "Yamaha", brandId: "yamaha_tf",     series: "TF Series", model: "TF5",         maxChannels: 32,  mixBuses: 20, fileFormat: ".tff", supported: true,  writable: false },
+      { id: "yamaha-tf3",   brand: "Yamaha", brandId: "yamaha_tf",     series: "TF Series", model: "TF3",         maxChannels: 32,  mixBuses: 20, fileFormat: ".tff", supported: true,  writable: false },
+      { id: "yamaha-tf1",   brand: "Yamaha", brandId: "yamaha_tf",     series: "TF Series", model: "TF1",         maxChannels: 32,  mixBuses: 20, fileFormat: ".tff", supported: true,  writable: false },
+      { id: "yamaha-dm7",   brand: "Yamaha", brandId: "yamaha_dm7",    series: "DM Series", model: "DM7",         maxChannels: 144, mixBuses: 72, fileFormat: ".dm7f", supported: true,  writable: false },
+      { id: "yamaha-rivage-pm10", brand: "Yamaha", brandId: "yamaha_rivage", series: "RIVAGE", model: "RIVAGE PM10", maxChannels: 216, mixBuses: 72, fileFormat: ".rivagepm", supported: true, writable: false },
     ],
   },
   {
     name: "DiGiCo",
     models: [
-      { id: "digico-sd5",          brand: "DiGiCo", brandId: "digico_sd", series: "SD Series", model: "SD5",          maxChannels: 168, mixBuses: 56, fileFormat: ".show", supported: true  },
-      { id: "digico-sd7",          brand: "DiGiCo", brandId: "digico_sd", series: "SD Series", model: "SD7",          maxChannels: 144, mixBuses: 56, fileFormat: ".show", supported: true  },
-      { id: "digico-sd9",          brand: "DiGiCo", brandId: "digico_sd", series: "SD Series", model: "SD9",          maxChannels: 48,  mixBuses: 24, fileFormat: ".show", supported: true  },
-      { id: "digico-sd10",         brand: "DiGiCo", brandId: "digico_sd", series: "SD Series", model: "SD10",         maxChannels: 56,  mixBuses: 24, fileFormat: ".show", supported: true  },
-      { id: "digico-sd11",         brand: "DiGiCo", brandId: "digico_sd", series: "SD Series", model: "SD11",         maxChannels: 48,  mixBuses: 24, fileFormat: ".show", supported: true  },
-      { id: "digico-sd12",         brand: "DiGiCo", brandId: "digico_sd", series: "SD Series", model: "SD12",         maxChannels: 96,  mixBuses: 48, fileFormat: ".show", supported: true  },
-      { id: "digico-quantum-338",  brand: "DiGiCo", brandId: "digico_sd", series: "Quantum",   model: "Quantum 338",  maxChannels: 338, mixBuses: 96, fileFormat: ".show", supported: true  },
-      { id: "digico-quantum-7",    brand: "DiGiCo", brandId: "digico_sd", series: "Quantum",   model: "Quantum 7",    maxChannels: 144, mixBuses: 48, fileFormat: ".show", supported: true  },
-      { id: "digico-quantum-225",  brand: "DiGiCo", brandId: "digico_sd", series: "Quantum",   model: "Quantum 225",  maxChannels: 225, mixBuses: 64, fileFormat: ".show", supported: true  },
-      { id: "digico-t-series",     brand: "DiGiCo", brandId: "digico_sd", series: "T-Series",  model: "T-Series",     maxChannels: 48,  mixBuses: 24, fileFormat: ".show", supported: true  },
+      { id: "digico-sd5",          brand: "DiGiCo", brandId: "digico_sd", series: "SD Series", model: "SD5",          maxChannels: 168, mixBuses: 56, fileFormat: ".show", supported: true, writable: true },
+      { id: "digico-sd7",          brand: "DiGiCo", brandId: "digico_sd", series: "SD Series", model: "SD7",          maxChannels: 144, mixBuses: 56, fileFormat: ".show", supported: true, writable: true },
+      { id: "digico-sd9",          brand: "DiGiCo", brandId: "digico_sd", series: "SD Series", model: "SD9",          maxChannels: 48,  mixBuses: 24, fileFormat: ".show", supported: true, writable: true },
+      { id: "digico-sd10",         brand: "DiGiCo", brandId: "digico_sd", series: "SD Series", model: "SD10",         maxChannels: 56,  mixBuses: 24, fileFormat: ".show", supported: true, writable: true },
+      { id: "digico-sd11",         brand: "DiGiCo", brandId: "digico_sd", series: "SD Series", model: "SD11",         maxChannels: 48,  mixBuses: 24, fileFormat: ".show", supported: true, writable: true },
+      { id: "digico-sd12",         brand: "DiGiCo", brandId: "digico_sd", series: "SD Series", model: "SD12",         maxChannels: 96,  mixBuses: 48, fileFormat: ".show", supported: true, writable: true },
+      { id: "digico-quantum-338",  brand: "DiGiCo", brandId: "digico_sd", series: "Quantum",   model: "Quantum 338",  maxChannels: 338, mixBuses: 96, fileFormat: ".show", supported: true, writable: true },
+      { id: "digico-quantum-7",    brand: "DiGiCo", brandId: "digico_sd", series: "Quantum",   model: "Quantum 7",    maxChannels: 144, mixBuses: 48, fileFormat: ".show", supported: true, writable: true },
+      { id: "digico-quantum-225",  brand: "DiGiCo", brandId: "digico_sd", series: "Quantum",   model: "Quantum 225",  maxChannels: 225, mixBuses: 64, fileFormat: ".show", supported: true, writable: true },
+      { id: "digico-t-series",     brand: "DiGiCo", brandId: "digico_sd", series: "T-Series",  model: "T-Series",     maxChannels: 48,  mixBuses: 24, fileFormat: ".show", supported: true, writable: true },
     ],
   },
 ];
