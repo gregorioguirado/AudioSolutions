@@ -356,3 +356,4 @@ def test_fidelity_score_partial_failure():
     assert score.hpf == 100.0    # no HPF checks = not a failure
     assert score.eq == 100.0     # no EQ checks = not a failure
     assert score.compressor == 100.0
+    assert score.overall == 80.0  # (50+50+100+100+100)/5
