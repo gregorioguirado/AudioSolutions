@@ -183,6 +183,53 @@ def _compare_channel(
     # Note: extra bands in target (len(target.eq_bands) > len(source.eq_bands)) are
     # intentionally not flagged — the harness checks source fidelity, not target size.
 
+    # Gate
+    if source.gate is not None and target.gate is not None:
+        add("gate.enabled",
+            source.gate.enabled, target.gate.enabled,
+            source.gate.enabled == target.gate.enabled)
+        add("gate.threshold",
+            source.gate.threshold, target.gate.threshold,
+            _floats_equal(source.gate.threshold, target.gate.threshold, tol=0.01))
+        add("gate.attack",
+            source.gate.attack, target.gate.attack,
+            _floats_equal(source.gate.attack, target.gate.attack, tol=1.0))
+        add("gate.hold",
+            source.gate.hold, target.gate.hold,
+            _floats_equal(source.gate.hold, target.gate.hold, tol=1.0))
+        add("gate.release",
+            source.gate.release, target.gate.release,
+            _floats_equal(source.gate.release, target.gate.release, tol=1.0))
+    elif source.gate is not None and target.gate is None:
+        add("gate", source.gate, None, False,
+            note="gate lost in translation")
+
+    # Compressor
+    if source.compressor is not None and target.compressor is not None:
+        add("compressor.enabled",
+            source.compressor.enabled, target.compressor.enabled,
+            source.compressor.enabled == target.compressor.enabled)
+        add("compressor.threshold",
+            source.compressor.threshold, target.compressor.threshold,
+            _floats_equal(source.compressor.threshold, target.compressor.threshold, tol=0.01))
+        add("compressor.ratio",
+            source.compressor.ratio, target.compressor.ratio,
+            _floats_equal(source.compressor.ratio, target.compressor.ratio, tol=0.01))
+        add("compressor.attack",
+            source.compressor.attack, target.compressor.attack,
+            _floats_equal(source.compressor.attack, target.compressor.attack, tol=1.0))
+        add("compressor.release",
+            source.compressor.release, target.compressor.release,
+            _floats_equal(source.compressor.release, target.compressor.release, tol=1.0))
+        # Skip makeup_gain if source is 0.0 — RIVAGE makeup_gain offset not yet calibrated
+        if source.compressor.makeup_gain != 0.0:
+            add("compressor.makeup_gain",
+                source.compressor.makeup_gain, target.compressor.makeup_gain,
+                _floats_equal(source.compressor.makeup_gain, target.compressor.makeup_gain, tol=0.01))
+    elif source.compressor is not None and target.compressor is None:
+        add("compressor", source.compressor, None, False,
+            note="compressor lost in translation")
+
     return checks
 
 

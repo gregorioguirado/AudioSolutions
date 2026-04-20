@@ -273,3 +273,44 @@ def test_compare_channel_eq_band_missing_on_target_fails():
     checks = _compare_channel(src, tgt, "yamaha_cl_binary")
     present_check = next(c for c in checks if c.parameter == "eq_band_1.present")
     assert not present_check.passed
+
+
+# --------------------------------------------------------------------------- #
+# Gate and compressor checks
+# --------------------------------------------------------------------------- #
+
+
+def test_compare_channel_gate_threshold_passes_within_tolerance():
+    gate = Gate(threshold=-30.0, attack=1.0, hold=50.0, release=200.0, enabled=True)
+    tgt_gate = Gate(threshold=-30.005, attack=1.0, hold=50.0, release=200.0, enabled=True)
+    src = _make_channel(gate=gate)
+    tgt = _make_channel(gate=tgt_gate)
+    checks = _compare_channel(src, tgt, "yamaha_cl_binary")
+    thr = next(c for c in checks if c.parameter == "gate.threshold")
+    assert thr.passed
+
+def test_compare_channel_gate_missing_on_target_fails():
+    gate = Gate(threshold=-30.0, attack=1.0, hold=50.0, release=200.0, enabled=True)
+    src = _make_channel(gate=gate)
+    tgt = _make_channel(gate=None)
+    checks = _compare_channel(src, tgt, "yamaha_cl_binary")
+    gate_check = next(c for c in checks if c.parameter == "gate")
+    assert not gate_check.passed
+
+def test_compare_channel_compressor_ratio_within_tolerance():
+    comp = Compressor(threshold=-18.0, ratio=4.0, attack=10.0, release=200.0, makeup_gain=3.0, enabled=True)
+    tgt_comp = Compressor(threshold=-18.0, ratio=4.005, attack=10.0, release=200.0, makeup_gain=3.0, enabled=True)
+    src = _make_channel(compressor=comp)
+    tgt = _make_channel(compressor=tgt_comp)
+    checks = _compare_channel(src, tgt, "yamaha_cl_binary")
+    ratio_check = next(c for c in checks if c.parameter == "compressor.ratio")
+    assert ratio_check.passed
+
+def test_compare_channel_compressor_makeup_gain_skipped_when_source_is_zero():
+    comp = Compressor(threshold=-18.0, ratio=4.0, attack=10.0, release=200.0, makeup_gain=0.0, enabled=True)
+    tgt_comp = Compressor(threshold=-18.0, ratio=4.0, attack=10.0, release=200.0, makeup_gain=5.0, enabled=True)
+    src = _make_channel(compressor=comp)
+    tgt = _make_channel(compressor=tgt_comp)
+    checks = _compare_channel(src, tgt, "yamaha_cl_binary")
+    # makeup_gain skipped when source is 0.0 (RIVAGE calibration gap)
+    assert not any(c.parameter == "compressor.makeup_gain" for c in checks)
