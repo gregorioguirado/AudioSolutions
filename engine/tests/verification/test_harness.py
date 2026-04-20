@@ -218,3 +218,51 @@ def test_translator_hook_logs_but_does_not_block(
     assert result.output_bytes  # translation itself succeeded
     # We don't assert specific log lines (the harness may pass cleanly),
     # only that nothing raised and the call returned normally.
+
+
+# --------------------------------------------------------------------------- #
+# EQ band checks
+# --------------------------------------------------------------------------- #
+
+
+from models.universal import Channel, ChannelColor, EQBand, EQBandType, Gate, Compressor, ShowFile
+from verification.harness import _compare_channel
+
+
+def _make_channel(id=1, eq_bands=None, gate=None, compressor=None):
+    return Channel(
+        id=id, name="TEST", color=ChannelColor.RED, input_patch=1,
+        hpf_frequency=80.0, hpf_enabled=True,
+        eq_bands=eq_bands or [], gate=gate, compressor=compressor,
+    )
+
+
+def test_compare_channel_eq_frequency_within_tolerance():
+    band = EQBand(frequency=1000.0, gain=3.0, q=0.707, band_type=EQBandType.PEAK)
+    tgt_band = EQBand(frequency=1000.5, gain=3.0, q=0.707, band_type=EQBandType.PEAK)
+    src = _make_channel(eq_bands=[band])
+    tgt = _make_channel(eq_bands=[tgt_band])
+    checks = _compare_channel(src, tgt, "yamaha_cl_binary")
+    freq_check = next(c for c in checks if c.parameter == "eq_band_1.frequency")
+    assert freq_check.passed  # 0.5 Hz is within 1.0 Hz tolerance
+
+
+def test_compare_channel_eq_frequency_outside_tolerance():
+    band = EQBand(frequency=1000.0, gain=3.0, q=0.707, band_type=EQBandType.PEAK)
+    tgt_band = EQBand(frequency=1005.0, gain=3.0, q=0.707, band_type=EQBandType.PEAK)
+    src = _make_channel(eq_bands=[band])
+    tgt = _make_channel(eq_bands=[tgt_band])
+    checks = _compare_channel(src, tgt, "yamaha_cl_binary")
+    freq_check = next(c for c in checks if c.parameter == "eq_band_1.frequency")
+    assert not freq_check.passed
+
+
+def test_compare_channel_eq_band_type_mismatch_is_not_failure():
+    band = EQBand(frequency=100.0, gain=0.0, q=0.707, band_type=EQBandType.LOW_SHELF)
+    tgt_band = EQBand(frequency=100.0, gain=0.0, q=0.707, band_type=EQBandType.PEAK)
+    src = _make_channel(eq_bands=[band])
+    tgt = _make_channel(eq_bands=[tgt_band])
+    checks = _compare_channel(src, tgt, "yamaha_cl_binary")
+    type_check = next(c for c in checks if c.parameter == "eq_band_1.band_type")
+    assert type_check.passed  # approximation: not a hard failure
+    assert "approximated" in type_check.note

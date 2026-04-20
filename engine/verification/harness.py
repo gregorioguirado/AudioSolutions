@@ -153,6 +153,33 @@ def _compare_channel(
     else:
         add("muted", source.muted, target.muted, source.muted == target.muted)
 
+    # EQ bands — pair by index; source and target should have the same count
+    for i, src_band in enumerate(source.eq_bands):
+        if i >= len(target.eq_bands):
+            add(f"eq_band_{i+1}.present", True, False, False,
+                note=f"eq band {i+1} missing after round-trip")
+            continue
+        tgt_band = target.eq_bands[i]
+        prefix = f"eq_band_{i+1}"
+        add(f"{prefix}.enabled",
+            src_band.enabled, tgt_band.enabled,
+            src_band.enabled == tgt_band.enabled)
+        add(f"{prefix}.frequency",
+            src_band.frequency, tgt_band.frequency,
+            _floats_equal(src_band.frequency, tgt_band.frequency, tol=1.0))
+        add(f"{prefix}.gain",
+            src_band.gain, tgt_band.gain,
+            _floats_equal(src_band.gain, tgt_band.gain, tol=0.01))
+        add(f"{prefix}.q",
+            src_band.q, tgt_band.q,
+            _floats_equal(src_band.q, tgt_band.q, tol=0.001))
+        # band_type mismatches are expected approximations — never a hard failure
+        type_match = src_band.band_type == tgt_band.band_type
+        add(f"{prefix}.band_type",
+            src_band.band_type.value, tgt_band.band_type.value,
+            passed=True,
+            note="approximated" if not type_match else "")
+
     return checks
 
 
