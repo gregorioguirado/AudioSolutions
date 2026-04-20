@@ -26,6 +26,9 @@ OUTPUT_FILENAMES = {
     "yamaha_cl": "translated.cle",
     "yamaha_cl_binary": "translated.clf",
     "yamaha_ql": "translated.clf",
+    "yamaha_tf": "translated.tff",
+    "yamaha_rivage": "translated.RIVAGEPM",
+    "yamaha_dm7": "translated.dm7f",
 }
 
 MAX_UPLOAD_BYTES = 50 * 1024 * 1024  # 50 MB

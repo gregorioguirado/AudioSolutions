@@ -14,7 +14,10 @@ from parsers import yamaha_rivage as _rivage_parser
 from writers.digico_sd import write_digico_sd
 from writers.yamaha_cl import write_yamaha_cl
 from writers.yamaha_cl_binary import write_yamaha_cl_binary
+from writers.yamaha_tf import write_yamaha_tf
 from writers.ah_dlive import write_ah_dlive
+from writers.yamaha_rivage import write_yamaha_rivage
+from writers.yamaha_dm7 import write_yamaha_dm7
 from models.universal import ShowFile
 
 logger = logging.getLogger("engine.verification")
@@ -81,7 +84,10 @@ WRITERS = {
     "yamaha_cl": write_yamaha_cl,
     "yamaha_cl_binary": write_yamaha_cl_binary,
     "yamaha_ql": write_yamaha_cl_binary,
+    "yamaha_tf": write_yamaha_tf,
     "ah_dlive": write_ah_dlive,
+    "yamaha_rivage": write_yamaha_rivage,
+    "yamaha_dm7": write_yamaha_dm7,
 }
 
 

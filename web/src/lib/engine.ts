@@ -2,13 +2,15 @@ import type { ConsoleId } from "./constants";
 
 export const MAX_UPLOAD_BYTES = 50 * 1024 * 1024; // 50 MB
 
-// TF, DM7, and RIVAGE are source-only for now — no writer exists yet.
 export const OUTPUT_FILENAMES: Record<string, string> = {
   digico_sd: "translated.show",
   yamaha_cl: "translated.cle",
   yamaha_cl_binary: "translated.clf",
   yamaha_ql: "translated.clf",
+  yamaha_tf: "translated.tff",
   ah_dlive: "translated.AHsession",
+  yamaha_rivage: "translated.RIVAGEPM",
+  yamaha_dm7: "translated.dm7f",
 };
 
 export interface FidelityScore {

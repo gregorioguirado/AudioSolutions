@@ -141,6 +141,18 @@ def _parser_for(target_format: str) -> Callable[[Path], ShowFile]:
     if target_format == "yamaha_ql":
         from parsers.yamaha_ql import parse_yamaha_ql
         return parse_yamaha_ql
+    if target_format == "yamaha_rivage":
+        from parsers.yamaha_rivage import parse as _parse_rivage
+        # _parse_rivage takes a str; the harness passes a Path — wrap it.
+        return lambda p: _parse_rivage(str(p))
+    if target_format == "yamaha_dm7":
+        from parsers.yamaha_dm7 import parse as _parse_dm7
+        # _parse_dm7 takes bytes; wrap to accept a Path.
+        return lambda p: _parse_dm7(Path(p).read_bytes())
+    if target_format == "yamaha_tf":
+        from parsers.yamaha_tf import parse as _parse_tf
+        # _parse_tf takes a str path.
+        return lambda p: _parse_tf(str(p))
     raise ValueError(f"No verification parser registered for target format: {target_format!r}")
 
 
@@ -356,6 +368,12 @@ def verify_translation(
                 suffix = ".show"
             elif target_format == "yamaha_cl_binary":
                 suffix = ".CLF"
+            elif target_format == "yamaha_rivage":
+                suffix = ".RIVAGEPM"
+            elif target_format == "yamaha_dm7":
+                suffix = ".dm7f"
+            elif target_format == "yamaha_tf":
+                suffix = ".tff"
             else:
                 suffix = ".cle"
             fd, name = tempfile.mkstemp(suffix=suffix, prefix="verify_")
