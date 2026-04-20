@@ -68,6 +68,51 @@ class HarnessResult:
         total = len(self.checks)
         return f"verification {passed}/{total} checks passed"
 
+    @property
+    def fidelity_score(self) -> "FidelityScore":
+        return _compute_fidelity(self.checks)
+
+
+@dataclass
+class FidelityScore:
+    """Per-field-group fidelity percentage after a round-trip translation."""
+    names: float       # 0–100: % of channel name checks that passed
+    hpf: float         # 0–100: % of HPF checks (enabled + frequency) that passed
+    eq: float          # 0–100: % of EQ band parameter checks that passed
+    gate: float        # 0–100: % of gate parameter checks that passed
+    compressor: float  # 0–100: % of compressor parameter checks that passed
+    overall: float     # 0–100: unweighted average of the five groups
+
+
+def _compute_fidelity(checks: list[ParameterCheck]) -> "FidelityScore":
+    """Compute per-group fidelity from a list of ParameterChecks.
+
+    Channel-level checks (channel_id == 0) are excluded from all groups.
+    A group with no relevant checks scores 100.0 — absence of data is not failure.
+    """
+    def _pct(prefixes: tuple[str, ...]) -> float:
+        relevant = [
+            c for c in checks
+            if c.channel_id != 0
+            and any(
+                c.parameter == p
+                or c.parameter.startswith(p + ".")
+                or c.parameter.startswith(p + "_")
+                for p in prefixes
+            )
+        ]
+        if not relevant:
+            return 100.0
+        return 100.0 * sum(1 for c in relevant if c.passed) / len(relevant)
+
+    names = _pct(("name",))
+    hpf = _pct(("hpf_enabled", "hpf_frequency"))
+    eq = _pct(("eq_band",))
+    gate = _pct(("gate",))
+    compressor = _pct(("compressor",))
+    overall = (names + hpf + eq + gate + compressor) / 5.0
+    return FidelityScore(names=names, hpf=hpf, eq=eq, gate=gate, compressor=compressor, overall=overall)
+
 
 # --------------------------------------------------------------------------- #
 # Parser registry — kept here (rather than importing translator.PARSERS) to

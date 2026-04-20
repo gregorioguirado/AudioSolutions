@@ -1,6 +1,7 @@
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Optional
 
 from parsers.yamaha_cl import parse_yamaha_cl
 from parsers.yamaha_cl_binary import parse_yamaha_cl_binary
@@ -26,6 +27,8 @@ class TranslationResult:
     approximated_parameters: list[str] = field(default_factory=list)
     dropped_parameters: list[str] = field(default_factory=list)
     channels: list = field(default_factory=list)  # list[Channel] for report generation
+    parse_gate_passed: bool = True
+    fidelity_score: Optional[object] = None  # FidelityScore at runtime
 
 
 def _parse_yamaha_auto(filepath: Path) -> ShowFile:
@@ -116,9 +119,13 @@ def translate(
     # Re-parses the output and diffs it against the source per parameter.
     # Failures are logged via "engine.verification" but never raised — the
     # translator must keep working even if the harness is broken.
+    parse_gate_passed = True
+    fidelity_score = None
     try:
         from verification.harness import verify_translation
         harness_result = verify_translation(show, output_bytes, target_console)
+        parse_gate_passed = harness_result.fatal_error is None
+        fidelity_score = harness_result.fidelity_score
         if harness_result.fatal_error:
             logger.warning(
                 "translation harness fatal error (%s -> %s): %s",
@@ -152,4 +159,6 @@ def translate(
         approximated_parameters=approximated,
         dropped_parameters=show.dropped_parameters,
         channels=show.channels,
+        parse_gate_passed=parse_gate_passed,
+        fidelity_score=fidelity_score,
     )

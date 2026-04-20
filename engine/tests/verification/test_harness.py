@@ -20,6 +20,7 @@ from models.universal import Channel, ChannelColor, EQBand, EQBandType, Gate, Co
 from parsers.digico_sd import parse_digico_sd
 from parsers.yamaha_cl_binary import parse_yamaha_cl_binary
 from verification.harness import (
+    FidelityScore,
     HarnessResult,
     ParameterCheck,
     _compare_channel,
@@ -314,3 +315,44 @@ def test_compare_channel_compressor_makeup_gain_skipped_when_source_is_zero():
     checks = _compare_channel(src, tgt, "yamaha_cl_binary")
     # makeup_gain skipped when source is 0.0 (RIVAGE calibration gap)
     assert not any(c.parameter == "compressor.makeup_gain" for c in checks)
+
+
+# --------------------------------------------------------------------------- #
+# FidelityScore
+# --------------------------------------------------------------------------- #
+
+
+def test_harness_result_has_fidelity_score():
+    result = HarnessResult(target_format="yamaha_cl_binary")
+    result.checks = [
+        ParameterCheck(channel_id=1, parameter="name", source_value="A", target_value="A", passed=True),
+        ParameterCheck(channel_id=1, parameter="hpf_enabled", source_value=True, target_value=True, passed=True),
+        ParameterCheck(channel_id=1, parameter="hpf_frequency", source_value=80.0, target_value=80.0, passed=True),
+        ParameterCheck(channel_id=1, parameter="eq_band_1.frequency", source_value=1000.0, target_value=999.0, passed=True),
+        ParameterCheck(channel_id=1, parameter="gate.threshold", source_value=-30.0, target_value=-30.0, passed=True),
+        ParameterCheck(channel_id=1, parameter="compressor.ratio", source_value=4.0, target_value=4.0, passed=True),
+    ]
+    score = result.fidelity_score
+    assert isinstance(score, FidelityScore)
+    assert score.names == 100.0
+    assert score.hpf == 100.0
+    assert score.eq == 100.0
+    assert score.gate == 100.0
+    assert score.compressor == 100.0
+    assert score.overall == 100.0
+
+
+def test_fidelity_score_partial_failure():
+    result = HarnessResult(target_format="yamaha_cl_binary")
+    result.checks = [
+        ParameterCheck(channel_id=1, parameter="name", source_value="A", target_value="B", passed=False),
+        ParameterCheck(channel_id=2, parameter="name", source_value="C", target_value="C", passed=True),
+        ParameterCheck(channel_id=1, parameter="gate.threshold", source_value=-30.0, target_value=-35.0, passed=False),
+        ParameterCheck(channel_id=1, parameter="gate.attack", source_value=1.0, target_value=1.0, passed=True),
+    ]
+    score = result.fidelity_score
+    assert score.names == 50.0   # 1/2 passed
+    assert score.gate == 50.0    # 1/2 passed
+    assert score.hpf == 100.0    # no HPF checks = not a failure
+    assert score.eq == 100.0     # no EQ checks = not a failure
+    assert score.compressor == 100.0
