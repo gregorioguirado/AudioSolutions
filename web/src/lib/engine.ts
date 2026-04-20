@@ -2,10 +2,23 @@ import type { ConsoleId } from "./constants";
 
 export const MAX_UPLOAD_BYTES = 50 * 1024 * 1024; // 50 MB
 
-export const OUTPUT_FILENAMES: Record<ConsoleId, string> = {
+// TF, DM7, and RIVAGE are source-only for now — no writer exists yet.
+export const OUTPUT_FILENAMES: Record<string, string> = {
   digico_sd: "translated.show",
   yamaha_cl: "translated.cle",
+  yamaha_cl_binary: "translated.clf",
+  yamaha_ql: "translated.clf",
+  ah_dlive: "translated.AHsession",
 };
+
+export interface FidelityScore {
+  names: number;
+  hpf: number;
+  eq: number;
+  gate: number;
+  compressor: number;
+  overall: number;
+}
 
 export interface TranslationResult {
   outputBytes: Buffer;
@@ -14,6 +27,8 @@ export interface TranslationResult {
   translatedParams: string[];
   approximatedParams: string[];
   droppedParams: string[];
+  parseGatePassed: boolean;
+  fidelityScore: FidelityScore | null;
 }
 
 export async function callEngine(
@@ -47,7 +62,7 @@ export async function callEngine(
   const JSZip = (await import("jszip")).default;
   const zip = await JSZip.loadAsync(zipBuffer);
 
-  const outputName = OUTPUT_FILENAMES[targetConsole];
+  const outputName = OUTPUT_FILENAMES[targetConsole] ?? "translated.bin";
   const outputEntry = zip.file(outputName);
   const reportEntry = zip.file("translation_report.pdf");
 
@@ -63,6 +78,23 @@ export async function callEngine(
   const approximatedParams: string[] = [];
   const droppedParams = (res.headers.get("X-Dropped") ?? "").split(",").filter(Boolean);
 
+  const parseGatePassed = (res.headers.get("X-Parse-Gate-Passed") ?? "true") !== "false";
+
+  const parseFidelityHeader = (name: string): number =>
+    parseFloat(res.headers.get(name) ?? "100");
+
+  const hasFidelity = res.headers.has("X-Fidelity-Overall");
+  const fidelityScore: FidelityScore | null = hasFidelity
+    ? {
+        names: parseFidelityHeader("X-Fidelity-Names"),
+        hpf: parseFidelityHeader("X-Fidelity-HPF"),
+        eq: parseFidelityHeader("X-Fidelity-EQ"),
+        gate: parseFidelityHeader("X-Fidelity-Gate"),
+        compressor: parseFidelityHeader("X-Fidelity-Compressor"),
+        overall: parseFidelityHeader("X-Fidelity-Overall"),
+      }
+    : null;
+
   return {
     outputBytes,
     reportBytes,
@@ -70,5 +102,7 @@ export async function callEngine(
     translatedParams,
     approximatedParams,
     droppedParams,
+    parseGatePassed,
+    fidelityScore,
   };
 }

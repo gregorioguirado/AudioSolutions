@@ -1,7 +1,12 @@
 // Legacy engine-brand IDs — the translation engine still understands only these.
 export const CONSOLES = [
-  { id: "yamaha_cl", label: "Yamaha CL/QL" },
-  { id: "digico_sd", label: "DiGiCo SD/Quantum" },
+  { id: "yamaha_cl",        label: "Yamaha CL Series" },
+  { id: "yamaha_cl_binary", label: "Yamaha CL/QL (binary)" },
+  { id: "yamaha_ql",        label: "Yamaha QL Series" },
+  { id: "yamaha_tf",        label: "Yamaha TF Series" },
+  { id: "yamaha_dm7",       label: "Yamaha DM7" },
+  { id: "yamaha_rivage",    label: "Yamaha RIVAGE PM" },
+  { id: "digico_sd",        label: "DiGiCo SD/Quantum" },
 ] as const;
 
 export type ConsoleId = (typeof CONSOLES)[number]["id"];
@@ -31,13 +36,13 @@ export const CONSOLE_BRANDS: ConsoleBrand[] = [
       { id: "yamaha-cl5",   brand: "Yamaha", brandId: "yamaha_cl", series: "CL Series", model: "CL5",         maxChannels: 72,  mixBuses: 24, fileFormat: ".clf", supported: true  },
       { id: "yamaha-cl3",   brand: "Yamaha", brandId: "yamaha_cl", series: "CL Series", model: "CL3",         maxChannels: 64,  mixBuses: 24, fileFormat: ".clf", supported: true  },
       { id: "yamaha-cl1",   brand: "Yamaha", brandId: "yamaha_cl", series: "CL Series", model: "CL1",         maxChannels: 48,  mixBuses: 24, fileFormat: ".clf", supported: true  },
-      { id: "yamaha-ql5",   brand: "Yamaha", brandId: "yamaha_cl", series: "QL Series", model: "QL5",         maxChannels: 64,  mixBuses: 16, fileFormat: ".cle", supported: true  },
-      { id: "yamaha-ql1",   brand: "Yamaha", brandId: "yamaha_cl", series: "QL Series", model: "QL1",         maxChannels: 32,  mixBuses: 16, fileFormat: ".cle", supported: true  },
-      { id: "yamaha-tf5",   brand: "Yamaha", brandId: "yamaha_cl", series: "TF Series", model: "TF5",         maxChannels: 32,  mixBuses: 20, fileFormat: ".cle", supported: false },
-      { id: "yamaha-tf3",   brand: "Yamaha", brandId: "yamaha_cl", series: "TF Series", model: "TF3",         maxChannels: 32,  mixBuses: 20, fileFormat: ".cle", supported: false },
-      { id: "yamaha-tf1",   brand: "Yamaha", brandId: "yamaha_cl", series: "TF Series", model: "TF1",         maxChannels: 32,  mixBuses: 20, fileFormat: ".cle", supported: false },
-      { id: "yamaha-dm7",   brand: "Yamaha", brandId: "yamaha_cl", series: "DM Series", model: "DM7",         maxChannels: 144, mixBuses: 72, fileFormat: ".cle", supported: false },
-      { id: "yamaha-rivage-pm10", brand: "Yamaha", brandId: "yamaha_cl", series: "RIVAGE", model: "RIVAGE PM10", maxChannels: 216, mixBuses: 72, fileFormat: ".cle", supported: false },
+      { id: "yamaha-ql5",   brand: "Yamaha", brandId: "yamaha_ql",     series: "QL Series", model: "QL5",         maxChannels: 64,  mixBuses: 16, fileFormat: ".cle", supported: true  },
+      { id: "yamaha-ql1",   brand: "Yamaha", brandId: "yamaha_ql",     series: "QL Series", model: "QL1",         maxChannels: 32,  mixBuses: 16, fileFormat: ".cle", supported: true  },
+      { id: "yamaha-tf5",   brand: "Yamaha", brandId: "yamaha_tf",     series: "TF Series", model: "TF5",         maxChannels: 32,  mixBuses: 20, fileFormat: ".tff", supported: true  },
+      { id: "yamaha-tf3",   brand: "Yamaha", brandId: "yamaha_tf",     series: "TF Series", model: "TF3",         maxChannels: 32,  mixBuses: 20, fileFormat: ".tff", supported: true  },
+      { id: "yamaha-tf1",   brand: "Yamaha", brandId: "yamaha_tf",     series: "TF Series", model: "TF1",         maxChannels: 32,  mixBuses: 20, fileFormat: ".tff", supported: true  },
+      { id: "yamaha-dm7",   brand: "Yamaha", brandId: "yamaha_dm7",    series: "DM Series", model: "DM7",         maxChannels: 144, mixBuses: 72, fileFormat: ".dm7f", supported: true  },
+      { id: "yamaha-rivage-pm10", brand: "Yamaha", brandId: "yamaha_rivage", series: "RIVAGE", model: "RIVAGE PM10", maxChannels: 216, mixBuses: 72, fileFormat: ".rivagepm", supported: true  },
     ],
   },
   {
@@ -83,6 +88,9 @@ const EXTENSION_DEFAULT_MODEL: Record<string, string> = {
   ".cle": "yamaha-cl5",
   ".clf": "yamaha-cl5",
   ".show": "digico-sd12",
+  ".tff": "yamaha-tf5",
+  ".dm7f": "yamaha-dm7",
+  ".rivagepm": "yamaha-rivage-pm10",
 };
 
 export function detectModelFromFilename(filename: string): ConsoleModel | null {
