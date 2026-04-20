@@ -8,9 +8,11 @@ from parsers.yamaha_cl_binary import parse_yamaha_cl_binary
 from parsers.yamaha_ql import parse_yamaha_ql
 from parsers.digico_sd import parse_digico_sd
 from parsers import yamaha_dm7 as _dm7_parser
+from parsers.ah_dlive import parse_ah_dlive
 from writers.digico_sd import write_digico_sd
 from writers.yamaha_cl import write_yamaha_cl
 from writers.yamaha_cl_binary import write_yamaha_cl_binary
+from writers.ah_dlive import write_ah_dlive
 from models.universal import ShowFile
 
 logger = logging.getLogger("engine.verification")
@@ -59,6 +61,7 @@ PARSERS = {
     "yamaha_ql": parse_yamaha_ql,
     "yamaha_dm7": _parse_yamaha_dm7,
     "digico_sd": parse_digico_sd,
+    "ah_dlive": parse_ah_dlive,
 }
 
 WRITERS = {
@@ -66,6 +69,7 @@ WRITERS = {
     "yamaha_cl": write_yamaha_cl,
     "yamaha_cl_binary": write_yamaha_cl_binary,
     "yamaha_ql": write_yamaha_cl_binary,
+    "ah_dlive": write_ah_dlive,
 }
 
 
