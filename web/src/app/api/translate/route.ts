@@ -76,8 +76,9 @@ export async function POST(request: Request) {
   const translationId = crypto.randomUUID();
   const ownerId = user?.id ?? crypto.randomUUID();
 
+  const outputFilename = OUTPUT_FILENAMES[targetConsole as ConsoleId] ?? "translated.bin";
   const sourceKey = buildR2Key(ownerId, translationId, file.name);
-  const outputKey = buildR2Key(ownerId, translationId, OUTPUT_FILENAMES[targetConsole as ConsoleId]);
+  const outputKey = buildR2Key(ownerId, translationId, outputFilename);
   const reportKey = buildR2Key(ownerId, translationId, "translation_report.pdf");
 
   try {

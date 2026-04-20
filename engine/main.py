@@ -24,7 +24,6 @@ OUTPUT_FILENAMES = {
     "yamaha_cl": "translated.cle",
     "yamaha_cl_binary": "translated.clf",
     "yamaha_ql": "translated.clf",
-    "ah_dlive": "translated.AHsession",
 }
 
 MAX_UPLOAD_BYTES = 50 * 1024 * 1024  # 50 MB
@@ -94,6 +93,8 @@ async def translate_file(
             source_filename=source_filename,
             user_email=user_email or "",
         )
+    except HTTPException:
+        raise
     except UnsupportedConsolePair as e:
         raise HTTPException(status_code=400, detail=str(e))
     except ReportGenerationError as e:
