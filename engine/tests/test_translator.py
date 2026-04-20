@@ -53,3 +53,81 @@ def test_same_console_raises(yamaha_cl5_fixture):
             source_console="yamaha_cl",
             target_console="yamaha_cl",
         )
+
+def test_tf_to_yamaha_cl_binary():
+    samples_dir = Path(__file__).parent.parent.parent / "samples"
+    result = translate(
+        source_file=samples_dir / "DOM CASMURRO 2.tff",
+        source_console="yamaha_tf",
+        target_console="yamaha_cl_binary",
+    )
+    assert isinstance(result, TranslationResult)
+    assert result.output_bytes is not None
+    assert len(result.output_bytes) > 0
+    assert result.channel_count > 0
+    assert result.parse_gate_passed is True
+
+def test_tf_to_digico():
+    samples_dir = Path(__file__).parent.parent.parent / "samples"
+    result = translate(
+        source_file=samples_dir / "DOM CASMURRO 2.tff",
+        source_console="yamaha_tf",
+        target_console="digico_sd",
+    )
+    assert isinstance(result, TranslationResult)
+    assert result.output_bytes is not None
+    assert len(result.output_bytes) > 0
+    assert result.channel_count > 0
+    assert result.parse_gate_passed is True
+
+def test_dm7_to_yamaha_cl_binary():
+    samples_dir = Path(__file__).parent.parent.parent / "samples"
+    result = translate(
+        source_file=samples_dir / "dm7_named.dm7f",
+        source_console="yamaha_dm7",
+        target_console="yamaha_cl_binary",
+    )
+    assert isinstance(result, TranslationResult)
+    assert result.output_bytes is not None
+    assert len(result.output_bytes) > 0
+    assert result.channel_count > 0
+    assert result.parse_gate_passed is True
+
+def test_dm7_to_digico():
+    samples_dir = Path(__file__).parent.parent.parent / "samples"
+    result = translate(
+        source_file=samples_dir / "dm7_named.dm7f",
+        source_console="yamaha_dm7",
+        target_console="digico_sd",
+    )
+    assert isinstance(result, TranslationResult)
+    assert result.output_bytes is not None
+    assert len(result.output_bytes) > 0
+    assert result.channel_count > 0
+    assert result.parse_gate_passed is True
+
+def test_rivage_to_yamaha_cl_binary():
+    samples_dir = Path(__file__).parent.parent.parent / "samples"
+    result = translate(
+        source_file=samples_dir / "RIVAGE EMI 21.3.RIVAGEPM",
+        source_console="yamaha_rivage",
+        target_console="yamaha_cl_binary",
+    )
+    assert isinstance(result, TranslationResult)
+    assert result.output_bytes is not None
+    assert len(result.output_bytes) > 0
+    assert result.channel_count > 0
+    assert result.parse_gate_passed is True
+
+def test_rivage_to_digico():
+    samples_dir = Path(__file__).parent.parent.parent / "samples"
+    result = translate(
+        source_file=samples_dir / "RIVAGE EMI 21.3.RIVAGEPM",
+        source_console="yamaha_rivage",
+        target_console="digico_sd",
+    )
+    assert isinstance(result, TranslationResult)
+    assert result.output_bytes is not None
+    assert len(result.output_bytes) > 0
+    assert result.channel_count > 0
+    assert result.parse_gate_passed is True

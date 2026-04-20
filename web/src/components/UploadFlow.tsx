@@ -13,6 +13,7 @@ import {
   brandIdForModel,
   type ConsoleModel,
 } from "@/lib/constants";
+import type { FidelityScore } from "@/lib/engine";
 
 type FlowState = "idle" | "configuring" | "uploading" | "preview" | "error";
 
@@ -22,6 +23,7 @@ interface PreviewData {
   translatedParams: string[];
   approximatedParams: string[];
   droppedParams: string[];
+  fidelityScore: FidelityScore | null;
   authenticated: boolean;
 }
 
@@ -159,13 +161,13 @@ export default function UploadFlow() {
             Drop your show file here
           </p>
           <p className="mt-1 text-xs text-muted">We&apos;ll detect your console automatically</p>
-          <p className="mt-3 text-[10px] text-muted">.clf · .cle · .show</p>
+          <p className="mt-3 text-[10px] text-muted">.clf · .cle · .show · .tff · .dm7f · .rivagepm</p>
           <div className="mt-4 inline-block bg-accent px-5 py-2 text-xs font-extrabold uppercase tracking-wider text-black">
             Choose File
           </div>
           <input
             type="file"
-            accept=".cle,.clf,.show"
+            accept=".cle,.clf,.show,.tff,.dm7f,.rivagepm,.RIVAGEPM"
             onChange={handleFileInput}
             className="absolute inset-0 cursor-pointer opacity-0"
           />
@@ -241,6 +243,7 @@ export default function UploadFlow() {
             approximatedParams={preview.approximatedParams}
             droppedParams={preview.droppedParams}
             channels={[]}
+            fidelityScore={preview.fidelityScore}
           />
           {preview.authenticated ? (
             <div className="flex flex-col gap-3">

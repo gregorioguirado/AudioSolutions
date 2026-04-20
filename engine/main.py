@@ -13,11 +13,17 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Show File Translator Engine", version="1.0.0")
 
-SUPPORTED_CONSOLES = ["yamaha_cl", "digico_sd"]
+SUPPORTED_CONSOLES = [
+    "yamaha_cl", "yamaha_cl_binary", "yamaha_ql",
+    "yamaha_tf", "yamaha_dm7", "yamaha_rivage",
+    "digico_sd",
+]
 
 OUTPUT_FILENAMES = {
     "digico_sd": "translated.show",
     "yamaha_cl": "translated.cle",
+    "yamaha_cl_binary": "translated.clf",
+    "yamaha_ql": "translated.clf",
 }
 
 MAX_UPLOAD_BYTES = 50 * 1024 * 1024  # 50 MB
@@ -74,6 +80,11 @@ async def translate_file(
             source_console=source_console,
             target_console=target_console,
         )
+        if not result.parse_gate_passed:
+            raise HTTPException(
+                status_code=422,
+                detail="Translation produced an unreadable output file. The file cannot be safely downloaded."
+            )
         source_filename = file.filename or "unknown"
         report_pdf = generate_report(
             result=result,
@@ -82,6 +93,8 @@ async def translate_file(
             source_filename=source_filename,
             user_email=user_email or "",
         )
+    except HTTPException:
+        raise
     except UnsupportedConsolePair as e:
         raise HTTPException(status_code=400, detail=str(e))
     except ReportGenerationError as e:
@@ -95,18 +108,29 @@ async def translate_file(
             tmp_path.unlink(missing_ok=True)
 
     # Return output file + report as a ZIP bundle
+    output_filename = OUTPUT_FILENAMES.get(target_console, "translated.bin")
     bundle = io.BytesIO()
     with zipfile.ZipFile(bundle, "w", zipfile.ZIP_DEFLATED) as zf:
-        zf.writestr(OUTPUT_FILENAMES[target_console], result.output_bytes)
+        zf.writestr(output_filename, result.output_bytes)
         zf.writestr("translation_report.pdf", report_pdf)
+
+    headers = {
+        "Content-Disposition": "attachment; filename=translation_bundle.zip",
+        "X-Channel-Count": str(result.channel_count),
+        "X-Translated": _safe_header(",".join(result.translated_parameters)),
+        "X-Dropped": _safe_header(",".join(result.dropped_parameters)),
+        "X-Parse-Gate-Passed": str(result.parse_gate_passed).lower(),
+    }
+    if result.fidelity_score is not None:
+        headers["X-Fidelity-Names"] = str(round(result.fidelity_score.names, 1))
+        headers["X-Fidelity-HPF"] = str(round(result.fidelity_score.hpf, 1))
+        headers["X-Fidelity-EQ"] = str(round(result.fidelity_score.eq, 1))
+        headers["X-Fidelity-Gate"] = str(round(result.fidelity_score.gate, 1))
+        headers["X-Fidelity-Compressor"] = str(round(result.fidelity_score.compressor, 1))
+        headers["X-Fidelity-Overall"] = str(round(result.fidelity_score.overall, 1))
 
     return Response(
         content=bundle.getvalue(),
         media_type="application/zip",
-        headers={
-            "Content-Disposition": "attachment; filename=translation_bundle.zip",
-            "X-Channel-Count": str(result.channel_count),
-            "X-Translated": _safe_header(",".join(result.translated_parameters)),
-            "X-Dropped": _safe_header(",".join(result.dropped_parameters)),
-        },
+        headers=headers,
     )

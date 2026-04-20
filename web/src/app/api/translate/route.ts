@@ -66,11 +66,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: message }, { status });
   }
 
+  if (!result.parseGatePassed) {
+    return NextResponse.json(
+      { error: "Translation produced an unreadable output file. Please try again or contact support." },
+      { status: 422 }
+    );
+  }
+
   const translationId = crypto.randomUUID();
   const ownerId = user?.id ?? crypto.randomUUID();
 
+  const outputFilename = OUTPUT_FILENAMES[targetConsole as ConsoleId] ?? "translated.bin";
   const sourceKey = buildR2Key(ownerId, translationId, file.name);
-  const outputKey = buildR2Key(ownerId, translationId, OUTPUT_FILENAMES[targetConsole as ConsoleId]);
+  const outputKey = buildR2Key(ownerId, translationId, outputFilename);
   const reportKey = buildR2Key(ownerId, translationId, "translation_report.pdf");
 
   try {
@@ -113,6 +121,7 @@ export async function POST(request: Request) {
       translatedParams: result.translatedParams,
       approximatedParams: result.approximatedParams,
       droppedParams: result.droppedParams,
+      fidelityScore: result.fidelityScore,
       authenticated: true,
     });
   } else {
@@ -147,6 +156,7 @@ export async function POST(request: Request) {
       translatedParams: result.translatedParams,
       approximatedParams: result.approximatedParams,
       droppedParams: result.droppedParams,
+      fidelityScore: result.fidelityScore,
       authenticated: false,
     });
   }

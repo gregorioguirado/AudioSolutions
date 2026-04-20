@@ -9,6 +9,8 @@ from parsers.yamaha_ql import parse_yamaha_ql
 from parsers.digico_sd import parse_digico_sd
 from parsers import yamaha_dm7 as _dm7_parser
 from parsers.ah_dlive import parse_ah_dlive
+from parsers import yamaha_tf as _tf_parser
+from parsers import yamaha_rivage as _rivage_parser
 from writers.digico_sd import write_digico_sd
 from writers.yamaha_cl import write_yamaha_cl
 from writers.yamaha_cl_binary import write_yamaha_cl_binary
@@ -56,10 +58,20 @@ def _parse_yamaha_dm7(filepath: Path) -> ShowFile:
     return _dm7_parser.parse(filepath.read_bytes())
 
 
+def _parse_yamaha_tf(filepath: Path) -> ShowFile:
+    return _tf_parser.parse(str(filepath))
+
+
+def _parse_yamaha_rivage(filepath: Path) -> ShowFile:
+    return _rivage_parser.parse(str(filepath))
+
+
 PARSERS = {
     "yamaha_cl": _parse_yamaha_auto,
     "yamaha_ql": parse_yamaha_ql,
     "yamaha_dm7": _parse_yamaha_dm7,
+    "yamaha_tf": _parse_yamaha_tf,
+    "yamaha_rivage": _parse_yamaha_rivage,
     "digico_sd": parse_digico_sd,
     "ah_dlive": parse_ah_dlive,
 }
