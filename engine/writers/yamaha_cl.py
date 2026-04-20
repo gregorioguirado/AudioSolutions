@@ -25,9 +25,17 @@ YAMAHA_EQ_TYPE_MAP: dict[EQBandType, str] = {
 }
 
 
+def _sanitize_xml_text(text: str) -> str:
+    """Strip C0 control characters that lxml rejects (nulls etc.) while keeping
+    printable characters and the three whitespace control chars valid in XML."""
+    if not text:
+        return text
+    return "".join(c for c in text if ord(c) >= 32 or c in "\t\n\r")
+
+
 def _sub(parent, tag: str, text: str = "") -> etree._Element:
     el = etree.SubElement(parent, tag)
-    el.text = text
+    el.text = _sanitize_xml_text(text)
     return el
 
 
