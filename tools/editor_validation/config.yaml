@@ -1,0 +1,53 @@
+# Editor executable paths — EDIT THESE to match your install locations.
+# Find them with:
+#   Get-ChildItem -Path "C:\Program Files","C:\Program Files (x86)" -Recurse -Include *.exe -ErrorAction SilentlyContinue | Where-Object { $_.Name -match 'DM7|TF|RIVAGE|Console|DiGiCo|Offline' }
+
+editors:
+  yamaha_dm7:
+    exe: 'C:\Program Files\Yamaha\Yamaha DM7 Editor\Yamaha DM7 Editor.exe'
+    window_title_prefix: 'Yamaha DM7 Editor'
+    open_shortcut: 'ctrl+o'
+    success_title_contains_filename: true
+    launch_timeout_s: 30
+    open_timeout_s: 15
+
+  yamaha_tf:
+    exe: 'C:\Program Files\YAMAHA\TF Editor\TFEditor.exe'
+    window_title_prefix: 'TF Editor'
+    open_shortcut: 'ctrl+o'
+    success_title_contains_filename: true
+    launch_timeout_s: 30
+    open_timeout_s: 15
+
+  yamaha_rivage:
+    exe: 'C:\Program Files\Yamaha\RIVAGE PM Editor\RIVAGE PM Editor.exe'
+    window_title_prefix: 'RIVAGE PM Editor'
+    open_shortcut: 'ctrl+o'
+    success_title_contains_filename: true
+    launch_timeout_s: 45
+    open_timeout_s: 20
+
+  yamaha_cl:
+    # Yamaha Console Editor handles CL/QL/binary .CLF files
+    exe: 'C:\Program Files\YAMAHA\Console Editor\ConsoleEditor.exe'
+    window_title_prefix: 'Console Editor'
+    open_shortcut: 'ctrl+o'
+    success_title_contains_filename: true
+    launch_timeout_s: 30
+    open_timeout_s: 15
+
+  digico_sd:
+    # DiGiCo Offline Software or Quantum Offline Software
+    exe: 'C:\Program Files\DiGiCo\SD_Offline_Software.exe'
+    window_title_prefix: 'DiGiCo'
+    open_shortcut: 'ctrl+o'
+    success_title_contains_filename: true
+    launch_timeout_s: 30
+    open_timeout_s: 15
+
+# If an editor isn't installed, just remove the entry or set exe: null.
+# The harness will skip it and report SKIPPED.
+
+output:
+  screenshot_dir: '.tmp/editor_validation'
+  log_dir: '.tmp/editor_validation/logs'
