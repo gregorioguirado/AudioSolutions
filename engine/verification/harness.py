@@ -180,6 +180,9 @@ def _compare_channel(
             passed=True,
             note="approximated" if not type_match else "")
 
+    # Note: extra bands in target (len(target.eq_bands) > len(source.eq_bands)) are
+    # intentionally not flagged — the harness checks source fidelity, not target size.
+
     return checks
 
 

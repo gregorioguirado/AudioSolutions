@@ -16,11 +16,13 @@ from pathlib import Path
 
 import pytest
 
+from models.universal import Channel, ChannelColor, EQBand, EQBandType, Gate, Compressor, ShowFile
 from parsers.digico_sd import parse_digico_sd
 from parsers.yamaha_cl_binary import parse_yamaha_cl_binary
 from verification.harness import (
     HarnessResult,
     ParameterCheck,
+    _compare_channel,
     verify_against_fixture,
     verify_translation,
 )
@@ -28,6 +30,14 @@ from verification.round_trip import RoundTripResult, round_trip
 from writers.digico_sd import write_digico_sd
 
 SAMPLES_DIR = Path(__file__).parent.parent.parent.parent / "samples"
+
+
+def _make_channel(id=1, eq_bands=None, gate=None, compressor=None):
+    return Channel(
+        id=id, name="TEST", color=ChannelColor.RED, input_patch=1,
+        hpf_frequency=80.0, hpf_enabled=True,
+        eq_bands=eq_bands or [], gate=gate, compressor=compressor,
+    )
 
 
 @pytest.fixture
@@ -225,18 +235,6 @@ def test_translator_hook_logs_but_does_not_block(
 # --------------------------------------------------------------------------- #
 
 
-from models.universal import Channel, ChannelColor, EQBand, EQBandType, Gate, Compressor, ShowFile
-from verification.harness import _compare_channel
-
-
-def _make_channel(id=1, eq_bands=None, gate=None, compressor=None):
-    return Channel(
-        id=id, name="TEST", color=ChannelColor.RED, input_patch=1,
-        hpf_frequency=80.0, hpf_enabled=True,
-        eq_bands=eq_bands or [], gate=gate, compressor=compressor,
-    )
-
-
 def test_compare_channel_eq_frequency_within_tolerance():
     band = EQBand(frequency=1000.0, gain=3.0, q=0.707, band_type=EQBandType.PEAK)
     tgt_band = EQBand(frequency=1000.5, gain=3.0, q=0.707, band_type=EQBandType.PEAK)
@@ -266,3 +264,12 @@ def test_compare_channel_eq_band_type_mismatch_is_not_failure():
     type_check = next(c for c in checks if c.parameter == "eq_band_1.band_type")
     assert type_check.passed  # approximation: not a hard failure
     assert "approximated" in type_check.note
+
+
+def test_compare_channel_eq_band_missing_on_target_fails():
+    band = EQBand(frequency=1000.0, gain=3.0, q=0.707, band_type=EQBandType.PEAK)
+    src = _make_channel(eq_bands=[band])
+    tgt = _make_channel(eq_bands=[])
+    checks = _compare_channel(src, tgt, "yamaha_cl_binary")
+    present_check = next(c for c in checks if c.parameter == "eq_band_1.present")
+    assert not present_check.passed
