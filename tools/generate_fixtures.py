@@ -4,9 +4,8 @@
 Run from the repo root:
     python tools/generate_fixtures.py
 
-Prints YAML to stdout for each sample file. Redirect to fixture files:
-    python tools/generate_fixtures.py > /dev/null  # just validate
-    python tools/generate_fixtures.py 2>&1         # see per-file output
+Writes YAML fixture files directly to engine/verification/fixtures/.
+Progress is logged to stderr. Already-existing fixtures are skipped.
 
 Each fixture captures: channel_count, first 5 channels with name, hpf,
 gate threshold, compressor threshold/ratio (when present). These become
