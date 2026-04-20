@@ -1,3 +1,5 @@
+import type { FidelityScore } from "@/lib/engine";
+
 interface Channel {
   name: string;
   status: "translated" | "approximated" | "dropped";
@@ -9,6 +11,7 @@ interface Props {
   approximatedParams: string[];
   droppedParams: string[];
   channels: Channel[];
+  fidelityScore?: FidelityScore | null;
 }
 
 const STATUS_STYLES = {
@@ -21,7 +24,23 @@ function formatParam(s: string): string {
   return s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-export default function TranslationPreview({ channelCount, translatedParams, approximatedParams, droppedParams, channels }: Props) {
+function FidelityRow({ label, value, bold = false }: { label: string; value: number; bold?: boolean }) {
+  const color = value >= 95 ? "bg-success" : value >= 80 ? "bg-warning" : "bg-error";
+  const textColor = value >= 95 ? "text-success" : value >= 80 ? "text-warning" : "text-error";
+  return (
+    <div className="flex items-center gap-3">
+      <span className={`w-14 text-[11px] ${bold ? "font-extrabold text-white" : "text-muted"}`}>{label}</span>
+      <div className="flex-1 h-1.5 bg-border rounded-full overflow-hidden">
+        <div className={`h-full ${color} rounded-full`} style={{ width: `${value}%` }} />
+      </div>
+      <span className={`w-12 text-right text-[11px] tabular-nums ${bold ? "font-extrabold " + textColor : textColor}`}>
+        {value.toFixed(1)}%
+      </span>
+    </div>
+  );
+}
+
+export default function TranslationPreview({ channelCount, translatedParams, approximatedParams, droppedParams, channels, fidelityScore }: Props) {
   return (
     <div className="flex flex-col gap-6">
       <div>
@@ -29,6 +48,26 @@ export default function TranslationPreview({ channelCount, translatedParams, app
           {channelCount} channels translated
         </h2>
       </div>
+
+      {fidelityScore != null && (
+        <div className="border border-border bg-surface p-4">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-muted mb-3">Fidelity</p>
+          <div className="flex flex-col gap-2">
+            {[
+              { label: "Names", value: fidelityScore.names },
+              { label: "HPF", value: fidelityScore.hpf },
+              { label: "EQ", value: fidelityScore.eq },
+              { label: "Gate", value: fidelityScore.gate },
+              { label: "Comp", value: fidelityScore.compressor },
+            ].map(({ label, value }) => (
+              <FidelityRow key={label} label={label} value={value} />
+            ))}
+            <div className="mt-1 border-t border-border pt-2">
+              <FidelityRow label="Overall" value={fidelityScore.overall} bold />
+            </div>
+          </div>
+        </div>
+      )}
 
       {channels.length > 0 && (
         <div className="border border-border bg-surface p-4">

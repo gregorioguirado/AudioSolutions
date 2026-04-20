@@ -13,6 +13,7 @@ import {
   brandIdForModel,
   type ConsoleModel,
 } from "@/lib/constants";
+import type { FidelityScore } from "@/lib/engine";
 
 type FlowState = "idle" | "configuring" | "uploading" | "preview" | "error";
 
@@ -22,6 +23,7 @@ interface PreviewData {
   translatedParams: string[];
   approximatedParams: string[];
   droppedParams: string[];
+  fidelityScore: FidelityScore | null;
   authenticated: boolean;
 }
 
@@ -241,6 +243,7 @@ export default function UploadFlow() {
             approximatedParams={preview.approximatedParams}
             droppedParams={preview.droppedParams}
             channels={[]}
+            fidelityScore={preview.fidelityScore}
           />
           {preview.authenticated ? (
             <div className="flex flex-col gap-3">
