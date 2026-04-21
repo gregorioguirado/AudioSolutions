@@ -394,8 +394,11 @@ def write_yamaha_dm7(show: ShowFile) -> bytes:
         _patch_compressor(inner, rec_base, channel)
         written += 1
 
-    # Step 5: Re-compress with the same default level
-    new_blob = zlib.compress(bytes(inner), level=6)
+    # Step 5: Re-compress matching the template's compression level (1).
+    # Yamaha Editor apps appear to tie acceptance to the exact compressed
+    # byte stream; mismatched levels produce valid zlib output that our own
+    # parser accepts but the Editor rejects. See yamaha_tf.py for details.
+    new_blob = zlib.compress(bytes(inner), level=1)
 
     # Step 6: Splice: header | new_blob | original_tail
     header  = bytes(template[:blob_start])

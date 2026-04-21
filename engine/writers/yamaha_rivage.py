@@ -139,8 +139,10 @@ def _find_data_start(inner: bytes) -> int:
 
 
 def _recompress(inner: bytes) -> bytes:
-    """Re-compress a modified inner blob with zlib (level 6, default strategy)."""
-    return zlib.compress(inner, level=6)
+    # Match the real Yamaha RIVAGE PM Editor output: the template's zlib
+    # header is 0x78 0x01 (level 1). See yamaha_tf.py for details on why
+    # recompression level matters for Editor acceptance.
+    return zlib.compress(inner, level=1)
 
 
 # ---------------------------------------------------------------------------

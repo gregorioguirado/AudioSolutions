@@ -6,6 +6,11 @@ import path from "path";
 const TARGET_EXT: Record<string, string> = {
   digico_sd: ".show",
   yamaha_cl: ".cle",
+  yamaha_cl_binary: ".CLF",
+  yamaha_ql: ".CLF",
+  yamaha_tf: ".tff",
+  yamaha_dm7: ".dm7f",
+  yamaha_rivage: ".RIVAGEPM",
 };
 
 function deriveFilename(

@@ -136,8 +136,12 @@ def _find_data_start(inner: bytes) -> int:
 
 
 def _recompress(inner: bytes) -> bytes:
-    """Re-compress a modified inner blob with zlib (level 6, default strategy)."""
-    return zlib.compress(inner, level=6)
+    # Yamaha TF Editor compresses with zlib level 1 (observed header byte
+    # 0x01 after the 0x78). Re-compressing at any other level produces a
+    # valid zlib blob that our own parser accepts but the real TF Editor
+    # rejects — likely because an integrity field (or fixed offset layout)
+    # ties to the exact compressed byte stream. Match the Editor exactly.
+    return zlib.compress(inner, level=1)
 
 
 # ---------------------------------------------------------------------------
