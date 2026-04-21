@@ -53,7 +53,12 @@ SCHEMA_SIZE_OFFSET  = 80
 # ---------------------------------------------------------------------------
 
 RECORD_SIZE = 515
-N_CHANNELS  = 129   # floor(66540 / 515) — determined from template
+# Real input channel count is 40 (slots 0-39). The parser's earlier estimate
+# of 129 was wrong — it came from dividing the data region size by record
+# size, but channels 41+ aren't actually InputChannel records. Bytes past
+# slot 40 belong to other file sections (scene data, matrices, etc.) and
+# MUST NOT be overwritten, or the TF Editor rejects the file.
+N_CHANNELS  = 40
 
 NAME_OFFSET,  NAME_LEN  = 16, 64
 COLOR_OFFSET, COLOR_LEN = 80,  8

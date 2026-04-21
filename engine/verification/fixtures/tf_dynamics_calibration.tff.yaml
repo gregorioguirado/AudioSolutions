@@ -1,6 +1,6 @@
 # Auto-generated fixture for tf_dynamics_calibration.tff
 source_console: yamaha_tf
-channel_count: 74
+channel_count: 40
 channels:
   - id: 1
     name: 'GATETEST'

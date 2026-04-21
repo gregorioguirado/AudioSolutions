@@ -1,6 +1,6 @@
 # Auto-generated fixture for DOM CASMURRO 2.tff
 source_console: yamaha_tf
-channel_count: 74
+channel_count: 40
 channels:
   - id: 1
     name: 'KICK'

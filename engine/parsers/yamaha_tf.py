@@ -57,7 +57,12 @@ SCHEMA_SIZE_OFFSET  = 80
 # ---------------------------------------------------------------------------
 
 RECORD_SIZE  = 515
-MAX_CHANNELS = 74   # floor(38324 / 515) — Mixing section boundary
+# Only the first 40 slots are real InputChannel records. Slots 41+ land in
+# unrelated file sections (scene data, matrices, etc.) and parse as garbage
+# (e.g. HPF frequencies of 100 MHz, EQ gains of -174 dB). Empirically confirmed
+# from tf_empty.tff, DOM CASMURRO 2.tff, and the writer's byte-identity
+# round-trip test. The prior 74 came from a naive divide-by-RECORD_SIZE.
+MAX_CHANNELS = 40
 
 NAME_OFFSET, NAME_LEN   = 16, 64
 COLOR_OFFSET, COLOR_LEN = 80, 8
