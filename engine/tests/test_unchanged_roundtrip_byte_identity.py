@@ -53,9 +53,9 @@ def _all_blobs(data: bytes) -> list[tuple[int, bytes]]:
 @pytest.mark.parametrize(
     ("template_name", "parser_import", "writer_import", "parser_takes_bytes"),
     [
-        ("tf_empty.tff",           "parsers.yamaha_tf:parse",     "writers.yamaha_tf:write_yamaha_tf",       False),
-        ("rivage_empty.RIVAGEPM",  "parsers.yamaha_rivage:parse", "writers.yamaha_rivage:write_yamaha_rivage", False),
-        ("dm7_empty.dm7f",         "parsers.yamaha_dm7:parse",    "writers.yamaha_dm7:write_yamaha_dm7",     True),
+        ("tf_empty.tff",           "parsers.yamaha_tf:parse",         "writers.yamaha_tf:write_yamaha_tf",           False),
+        ("rivage_empty.RIVAGEPM",  "parsers.yamaha_rivage:parse",     "writers.yamaha_rivage:write_yamaha_rivage",   False),
+        ("dm7_empty.dm7f",         "parsers.yamaha_dm7:parse",        "writers.yamaha_dm7:write_yamaha_dm7",         True),
     ],
 )
 def test_unchanged_roundtrip_preserves_all_template_blobs(
@@ -94,4 +94,40 @@ def test_unchanged_roundtrip_preserves_all_template_blobs(
             f"(template={len(dec_t)} bytes, output={len(dec_o)} bytes). "
             f"Writer is overwriting template bytes it shouldn't touch — "
             f"the Yamaha Editor will reject this file."
+        )
+
+
+def test_cl_binary_unchanged_roundtrip_is_byte_identical():
+    """CL binary (.CLF) is a flat, uncompressed binary.
+
+    Unlike TF/RIVAGE/DM7 which wrap their data in zlib blobs, the CL binary
+    format is laid out as raw bytes. The writer must produce a file that is
+    EXACTLY the template bytes when given an unchanged ShowFile, otherwise
+    the real Yamaha Console Editor rejects with errors like
+    "different kinds of data! (-7)" because packed flag bytes and non-channel
+    regions get corrupted.
+
+    The correction_map inside writers/yamaha_cl_binary.py is what makes this
+    pass. If you change the writer, this test must still pass.
+    """
+    from parsers.yamaha_cl_binary import parse_yamaha_cl_binary
+    from writers.yamaha_cl_binary import write_yamaha_cl_binary
+
+    tmpl_path = ENGINE_DIR / "writers" / "templates" / "cl5_empty.CLF"
+    tmpl_bytes = tmpl_path.read_bytes()
+
+    sh = parse_yamaha_cl_binary(tmpl_path)
+    out_bytes = write_yamaha_cl_binary(sh)
+
+    assert len(out_bytes) == len(tmpl_bytes), (
+        f"output length changed: template={len(tmpl_bytes)} output={len(out_bytes)}"
+    )
+    if tmpl_bytes != out_bytes:
+        diffs = [i for i in range(len(tmpl_bytes)) if tmpl_bytes[i] != out_bytes[i]]
+        sample = diffs[:10]
+        raise AssertionError(
+            f"CL binary unchanged round-trip is not byte-identical. "
+            f"{len(diffs)} bytes differ, first 10 offsets: {sample}. "
+            f"The writer's correction map is missing or broken; "
+            f"the real CL editor will reject this file."
         )

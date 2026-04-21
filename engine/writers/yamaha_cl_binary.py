@@ -286,37 +286,17 @@ def _write_dcas(buf: bytearray, scene: int, ch: int, channel: Channel) -> None:
 # Public API
 # ---------------------------------------------------------------------------
 
-def write_yamaha_cl_binary(show: ShowFile) -> bytes:
-    """Render *show* into a Yamaha CL/QL .CLF binary file.
-
-    The empty calibration template is loaded once at module import time and
-    copied into a fresh ``bytearray`` for each call, so the template buffer
-    is never mutated across calls.
-
-    Channels beyond ``NUM_INPUT_CHANNELS`` (72) in *show* are silently
-    dropped (the CL5 hardware can only address 72 inputs).
-
-    Parameters
-    ----------
-    show : ShowFile
-        Universal model populated by any source-format parser.
-
-    Returns
-    -------
-    bytes
-        Modified template, valid as a CL5 .CLF binary.
-    """
+def _raw_write(show: ShowFile) -> bytearray:
+    """Uncorrected write — patches every field as-is into a fresh template copy."""
     buf = bytearray(_TEMPLATE_BYTES)
 
     scenes = _find_all_memapi(buf)
     if not scenes:
-        # Should never happen — template is checked into the repo.
         raise RuntimeError(
             f"Template at {TEMPLATE_PATH} contains no MEMAPI marker"
         )
     scene = _pick_best_scene(bytes(buf), scenes)
 
-    written = 0
     for ch_idx, channel in enumerate(show.channels):
         if ch_idx >= NUM_INPUT_CHANNELS:
             break
@@ -329,12 +309,69 @@ def write_yamaha_cl_binary(show: ShowFile) -> bytes:
         _write_compressor(buf, scene, ch_idx, channel)
         _write_eq(buf, scene, ch_idx, channel)
         _write_dcas(buf, scene, ch_idx, channel)
-        written += 1
 
-    logger.info("write_yamaha_cl_binary: wrote %d channels into scene at 0x%X",
-                written, scene)
+    return buf
+
+
+def write_yamaha_cl_binary(show: ShowFile) -> bytes:
+    """Render *show* into a Yamaha CL/QL .CLF binary file.
+
+    The empty calibration template is loaded once at module import time and
+    copied into a fresh ``bytearray`` for each call, so the template buffer
+    is never mutated across calls.
+
+    Channels beyond ``NUM_INPUT_CHANNELS`` (72) in *show* are silently
+    dropped (the CL5 hardware can only address 72 inputs).
+
+    A **correction map** pre-computed at import time restores any byte the
+    raw writer produces as a "wrong default" (e.g. encoding the CL5's
+    0x16 default colour as 0x07 because our enum doesn't know the native
+    0x16 value, or writing a plain 0/1 for a flag byte whose upper bits
+    the template uses for packed state). This guarantees that an unchanged
+    round-trip produces a byte-identical template and that cross-format
+    translations only modify bytes the source actually changed — the real
+    console editor apps reject files with unexpected byte drift in
+    non-channel regions.
+
+    Parameters
+    ----------
+    show : ShowFile
+        Universal model populated by any source-format parser.
+
+    Returns
+    -------
+    bytes
+        Modified template, valid as a CL5 .CLF binary.
+    """
+    buf = _raw_write(show)
+
+    # Correction pass: wherever the raw writer produced the exact "wrong
+    # default" byte that _BASELINE_WRITTEN has for this position, restore
+    # the template's original byte. If the source genuinely changed this
+    # byte to a different value, _raw_write produced something other than
+    # _BASELINE_WRITTEN[off] and we leave it alone.
+    for off, (template_byte, baseline_byte) in _CORRECTION_MAP.items():
+        if buf[off] == baseline_byte:
+            buf[off] = template_byte
 
     return bytes(buf)
+
+
+# Pre-compute the correction map at module import time by round-tripping
+# the template through the raw writer and recording every byte position
+# where the raw writer's output diverges from the template.
+def _compute_correction_map() -> dict[int, tuple[int, int]]:
+    from parsers.yamaha_cl_binary import parse_yamaha_cl_binary
+    template_show = parse_yamaha_cl_binary(TEMPLATE_PATH)
+    baseline = _raw_write(template_show)
+    m: dict[int, tuple[int, int]] = {}
+    for i in range(len(_TEMPLATE_BYTES)):
+        if baseline[i] != _TEMPLATE_BYTES[i]:
+            m[i] = (_TEMPLATE_BYTES[i], baseline[i])
+    return m
+
+
+_CORRECTION_MAP: dict[int, tuple[int, int]] = _compute_correction_map()
 
 
 __all__ = [
