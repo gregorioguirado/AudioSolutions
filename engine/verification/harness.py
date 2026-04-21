@@ -198,11 +198,17 @@ def _compare_channel(
         target.hpf_enabled,
         source.hpf_enabled == target.hpf_enabled,
     )
+    # Only meaningful to check HPF frequency when HPF is actually enabled.
+    # A disabled filter's cutoff frequency is ignored by the console.
+    hpf_freq_passed = (
+        True if not source.hpf_enabled
+        else _audibly_close(source.hpf_frequency, target.hpf_frequency)
+    )
     add(
         "hpf_frequency",
         source.hpf_frequency,
         target.hpf_frequency,
-        _audibly_close(source.hpf_frequency, target.hpf_frequency),
+        hpf_freq_passed,
     )
 
     # Mute state is known to be dropped by DiGiCo — flag as informational
@@ -229,15 +235,27 @@ def _compare_channel(
         add(f"{prefix}.enabled",
             src_band.enabled, tgt_band.enabled,
             src_band.enabled == tgt_band.enabled)
-        add(f"{prefix}.frequency",
-            src_band.frequency, tgt_band.frequency,
-            _audibly_close(src_band.frequency, tgt_band.frequency))
-        add(f"{prefix}.gain",
-            src_band.gain, tgt_band.gain,
-            _floats_equal(src_band.gain, tgt_band.gain, tol=0.01))
-        add(f"{prefix}.q",
-            src_band.q, tgt_band.q,
-            _floats_equal(src_band.q, tgt_band.q, tol=0.001))
+        # Frequency/gain/Q only matter if the band is enabled. A disabled band's
+        # stored values are console-dependent defaults the engineer never hears.
+        if src_band.enabled:
+            add(f"{prefix}.frequency",
+                src_band.frequency, tgt_band.frequency,
+                _audibly_close(src_band.frequency, tgt_band.frequency))
+            add(f"{prefix}.gain",
+                src_band.gain, tgt_band.gain,
+                _floats_equal(src_band.gain, tgt_band.gain, tol=0.01))
+            add(f"{prefix}.q",
+                src_band.q, tgt_band.q,
+                _floats_equal(src_band.q, tgt_band.q, tol=0.001))
+        else:
+            # Pass them as informational so the summary shows the values but
+            # they don't penalise fidelity when the band is off.
+            add(f"{prefix}.frequency", src_band.frequency, tgt_band.frequency, True,
+                note="band disabled, freq comparison skipped")
+            add(f"{prefix}.gain", src_band.gain, tgt_band.gain, True,
+                note="band disabled, gain comparison skipped")
+            add(f"{prefix}.q", src_band.q, tgt_band.q, True,
+                note="band disabled, Q comparison skipped")
         # band_type mismatches are expected approximations — never a hard failure
         type_match = src_band.band_type == tgt_band.band_type
         add(f"{prefix}.band_type",
@@ -253,18 +271,26 @@ def _compare_channel(
         add("gate.enabled",
             source.gate.enabled, target.gate.enabled,
             source.gate.enabled == target.gate.enabled)
-        add("gate.threshold",
-            source.gate.threshold, target.gate.threshold,
-            _floats_equal(source.gate.threshold, target.gate.threshold, tol=0.01))
-        add("gate.attack",
-            source.gate.attack, target.gate.attack,
-            _floats_equal(source.gate.attack, target.gate.attack, tol=1.0))
-        add("gate.hold",
-            source.gate.hold, target.gate.hold,
-            _floats_equal(source.gate.hold, target.gate.hold, tol=1.0))
-        add("gate.release",
-            source.gate.release, target.gate.release,
-            _floats_equal(source.gate.release, target.gate.release, tol=1.0))
+        # Gate parameters only matter when the gate is on. An "off" gate's
+        # threshold/attack/hold/release are inaudible — template defaults fine.
+        if source.gate.enabled:
+            add("gate.threshold", source.gate.threshold, target.gate.threshold,
+                _floats_equal(source.gate.threshold, target.gate.threshold, tol=0.01))
+            add("gate.attack", source.gate.attack, target.gate.attack,
+                _floats_equal(source.gate.attack, target.gate.attack, tol=1.0))
+            add("gate.hold", source.gate.hold, target.gate.hold,
+                _floats_equal(source.gate.hold, target.gate.hold, tol=1.0))
+            add("gate.release", source.gate.release, target.gate.release,
+                _floats_equal(source.gate.release, target.gate.release, tol=1.0))
+        else:
+            add("gate.threshold", source.gate.threshold, target.gate.threshold, True,
+                note="gate disabled, threshold skipped")
+            add("gate.attack", source.gate.attack, target.gate.attack, True,
+                note="gate disabled, attack skipped")
+            add("gate.hold", source.gate.hold, target.gate.hold, True,
+                note="gate disabled, hold skipped")
+            add("gate.release", source.gate.release, target.gate.release, True,
+                note="gate disabled, release skipped")
     elif source.gate is not None and target.gate is None:
         add("gate", source.gate, None, False,
             note="gate lost in translation")
@@ -274,18 +300,29 @@ def _compare_channel(
         add("compressor.enabled",
             source.compressor.enabled, target.compressor.enabled,
             source.compressor.enabled == target.compressor.enabled)
-        add("compressor.threshold",
-            source.compressor.threshold, target.compressor.threshold,
-            _floats_equal(source.compressor.threshold, target.compressor.threshold, tol=0.01))
-        add("compressor.ratio",
-            source.compressor.ratio, target.compressor.ratio,
-            _audibly_close(source.compressor.ratio, target.compressor.ratio, rel_tol=0.05, abs_min=0.1))
-        add("compressor.attack",
-            source.compressor.attack, target.compressor.attack,
-            _floats_equal(source.compressor.attack, target.compressor.attack, tol=1.0))
-        add("compressor.release",
-            source.compressor.release, target.compressor.release,
-            _floats_equal(source.compressor.release, target.compressor.release, tol=1.0))
+        # Same "only count when on" logic as gate.
+        if source.compressor.enabled:
+            add("compressor.threshold",
+                source.compressor.threshold, target.compressor.threshold,
+                _floats_equal(source.compressor.threshold, target.compressor.threshold, tol=0.01))
+            add("compressor.ratio",
+                source.compressor.ratio, target.compressor.ratio,
+                _audibly_close(source.compressor.ratio, target.compressor.ratio, rel_tol=0.05, abs_min=0.1))
+            add("compressor.attack",
+                source.compressor.attack, target.compressor.attack,
+                _floats_equal(source.compressor.attack, target.compressor.attack, tol=1.0))
+            add("compressor.release",
+                source.compressor.release, target.compressor.release,
+                _floats_equal(source.compressor.release, target.compressor.release, tol=1.0))
+        else:
+            add("compressor.threshold", source.compressor.threshold, target.compressor.threshold,
+                True, note="comp disabled, threshold skipped")
+            add("compressor.ratio", source.compressor.ratio, target.compressor.ratio,
+                True, note="comp disabled, ratio skipped")
+            add("compressor.attack", source.compressor.attack, target.compressor.attack,
+                True, note="comp disabled, attack skipped")
+            add("compressor.release", source.compressor.release, target.compressor.release,
+                True, note="comp disabled, release skipped")
         # Skip makeup_gain if source is 0.0 — RIVAGE makeup_gain offset not yet calibrated
         if source.compressor.makeup_gain != 0.0:
             add("compressor.makeup_gain",
