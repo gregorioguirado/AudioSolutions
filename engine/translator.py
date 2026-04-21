@@ -182,8 +182,33 @@ def translate(
         channel_count=len(show.channels),
         translated_parameters=_collect_translated_parameters(show),
         approximated_parameters=approximated,
-        dropped_parameters=show.dropped_parameters,
+        dropped_parameters=_dedupe_dropped(show.dropped_parameters),
         channels=show.channels,
         parse_gate_passed=parse_gate_passed,
         fidelity_score=fidelity_score,
     )
+
+
+def _dedupe_dropped(raw: list[str]) -> list[str]:
+    """Group per-channel drops that share the same root cause.
+
+    DM7's PM-Comp gap, for example, fires once per affected channel and
+    produces 37 near-identical messages on a real show. Collapse them into
+    one line annotated with the count so the UI can display a tidy summary.
+    """
+    from collections import Counter
+    roots: Counter[str] = Counter()
+    for item in raw:
+        if ": " in item:
+            # Strip the "ch_name: " prefix so duplicates merge.
+            _, rest = item.split(": ", 1)
+            roots[rest] += 1
+        else:
+            roots[item] += 1
+    out: list[str] = []
+    for root, count in roots.items():
+        if count > 1:
+            out.append(f"{root} (x{count} channels)")
+        else:
+            out.append(root)
+    return out
