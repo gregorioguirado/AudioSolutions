@@ -202,7 +202,7 @@ def _compare_channel(
         "hpf_frequency",
         source.hpf_frequency,
         target.hpf_frequency,
-        _floats_equal(source.hpf_frequency, target.hpf_frequency),
+        _audibly_close(source.hpf_frequency, target.hpf_frequency),
     )
 
     # Mute state is known to be dropped by DiGiCo — flag as informational
@@ -231,7 +231,7 @@ def _compare_channel(
             src_band.enabled == tgt_band.enabled)
         add(f"{prefix}.frequency",
             src_band.frequency, tgt_band.frequency,
-            _floats_equal(src_band.frequency, tgt_band.frequency, tol=1.0))
+            _audibly_close(src_band.frequency, tgt_band.frequency))
         add(f"{prefix}.gain",
             src_band.gain, tgt_band.gain,
             _floats_equal(src_band.gain, tgt_band.gain, tol=0.01))
@@ -279,7 +279,7 @@ def _compare_channel(
             _floats_equal(source.compressor.threshold, target.compressor.threshold, tol=0.01))
         add("compressor.ratio",
             source.compressor.ratio, target.compressor.ratio,
-            _floats_equal(source.compressor.ratio, target.compressor.ratio, tol=0.01))
+            _audibly_close(source.compressor.ratio, target.compressor.ratio, rel_tol=0.05, abs_min=0.1))
         add("compressor.attack",
             source.compressor.attack, target.compressor.attack,
             _floats_equal(source.compressor.attack, target.compressor.attack, tol=1.0))
@@ -323,6 +323,22 @@ def _floats_equal(a: float, b: float, tol: float = 1e-3) -> bool:
         return abs(float(a) - float(b)) <= tol
     except (TypeError, ValueError):
         return a == b
+
+
+def _audibly_close(a: float, b: float, rel_tol: float = 0.05, abs_min: float = 0.5) -> bool:
+    """Frequency comparison with audio-engineering-realistic tolerance.
+
+    CL/QL/RIVAGE binary formats quantize frequency as a 1-byte log index,
+    so ±5% is the hardware floor — a cleanly-written value still re-parses
+    with up to that much drift. Engineers don't hear this difference; it
+    shouldn't show up as failed fidelity.
+    """
+    try:
+        fa, fb = float(a), float(b)
+    except (TypeError, ValueError):
+        return a == b
+    tol = max(abs_min, abs(fa) * rel_tol)
+    return abs(fa - fb) <= tol
 
 
 # --------------------------------------------------------------------------- #

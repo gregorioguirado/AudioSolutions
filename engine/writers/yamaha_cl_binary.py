@@ -64,7 +64,9 @@ from parsers.yamaha_cl_binary import (
     EQ_PREFIX_BYTES,
     FADER_REL,
     GATE_ATTACK_REL,
+    GATE_DECAY_REL,
     GATE_ENABLE_REL,
+    GATE_HOLD_REL,
     GATE_THRESHOLD_REL,
     HPF_ENABLE_REL,
     HPF_FREQ_REL,
@@ -233,6 +235,10 @@ def _write_gate(buf: bytearray, scene: int, ch: int, channel: Channel) -> None:
         return
     buf[scene + GATE_ENABLE_REL + ch] = 1 if gate.enabled else 0
     buf[scene + GATE_ATTACK_REL + ch] = _clamp_byte(round(gate.attack))
+    # Hold: inverse of parser's _gate_hold log scale.
+    buf[scene + GATE_HOLD_REL + ch] = _gate_hold_to_byte(gate.hold)
+    # Decay (parser maps raw byte directly to Gate.release in ms).
+    buf[scene + GATE_DECAY_REL + ch] = _clamp_byte(round(gate.release))
     # Threshold: 2-byte stride [val][0xFE].
     th_off = scene + GATE_THRESHOLD_REL + ch * 2
     buf[th_off] = _encode_threshold(gate.threshold, 0xFE)
