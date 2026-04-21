@@ -256,8 +256,10 @@ def test_compare_channel_eq_frequency_within_tolerance():
 
 
 def test_compare_channel_eq_frequency_outside_tolerance():
-    band = EQBand(frequency=1000.0, gain=3.0, q=0.707, band_type=EQBandType.PEAK)
-    tgt_band = EQBand(frequency=1005.0, gain=3.0, q=0.707, band_type=EQBandType.PEAK)
+    # EQ frequency tolerance is now 5% relative (hardware quantization floor).
+    # At 100 Hz that's ±5 Hz — so a 10 Hz drift is a real failure.
+    band = EQBand(frequency=100.0, gain=3.0, q=0.707, band_type=EQBandType.PEAK)
+    tgt_band = EQBand(frequency=110.0, gain=3.0, q=0.707, band_type=EQBandType.PEAK)
     src = _make_channel(eq_bands=[band])
     tgt = _make_channel(eq_bands=[tgt_band])
     checks = _compare_channel(src, tgt, "yamaha_cl_binary")
