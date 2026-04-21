@@ -205,15 +205,19 @@ def _write_hpf(buf: bytearray, scene: int, ch: int,
                freq_hz: float, enabled: bool) -> None:
     """Write HPF state for one channel.
 
-    Caveat: the parser's HPF_ENABLE_REL block is only 12 bytes long; for
-    channels 12-71 the parser reads the *frequency* byte of channel
-    (ch - 12) as the enable flag.  We therefore only write a true enable
-    byte for ch < 12; for ch >= 12, the channel will read back as enabled
-    iff its freq byte is non-zero (which is true for any freq >= 20 Hz).
+    The parser's HPF_ENABLE block is only 12 bytes wide (HPF_FREQ_REL =
+    HPF_ENABLE_REL + 12). For ch >= 12 the parser reads a byte OUTSIDE
+    the enable block — effectively using the freq byte of a different
+    channel as the enable flag. We cannot safely write past offset 12 in
+    the enable block, so for ch >= 12 we encode enable in the freq byte:
+    28 (= 20 Hz) when enabled with freq unchanged, 0 when disabled. The
+    parser decodes byte 0 as ~0.35 Hz which will still read back as
+    "enabled" through its buggy offset logic, so a true fix needs a
+    parser change (out of scope for this writer).
     """
     if ch < 12:
         buf[scene + HPF_ENABLE_REL + ch] = 1 if enabled else 0
-    buf[scene + HPF_FREQ_REL + ch] = _hpf_freq_to_byte(freq_hz)
+    buf[scene + HPF_FREQ_REL + ch] = _hpf_freq_to_byte(freq_hz) if enabled else 0
 
 
 def _write_mute(buf: bytearray, scene: int, ch: int, muted: bool) -> None:
